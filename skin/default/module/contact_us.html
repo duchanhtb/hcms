@@ -1,0 +1,153 @@
+<!-- BEGIN: main -->
+<script type="text/javascript" src="{skin_path}js/jquery.validate.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form").validate({
+            messages: {
+                fulname: {
+                    required: "Bạn chưa nhập Họ và Tên"
+                },
+                address: {
+                    required: "Bạn chưa nhập địa chỉ"
+                },
+                title: {
+                    required: "Bạn chưa nhập tiêu đề"
+                },
+                contact_code: {
+                    required: "Bạn chưa nhập mã bảo vệ"
+                },
+                email: {
+                    required: "Bạn chưa nhập Email",
+                    email: "Email bạn nhập không đúng"
+                },
+                phone: {
+                    required: "Bạn chưa nhập số điện thoại",
+                    number: "Số điện thoại không đúng",
+                    minlength: jQuery.format("Số điện thoại phải có ít nhất {0} ký tự!"),
+                },
+                content: {
+                    required: "Bạn chưa nhập nội dung"
+                }
+            },
+            submitHandler: function () {
+                $.ajax({
+                    url: base_url + "ajax.php?cmd=contact",
+                    type: "POST",
+                    data: {
+                        fullname: $("#fulname").val(),
+                        email: $("#email").val(),
+                        phone: $("#phone").val(),
+                        title: $("#title").val(),
+                        code: $("#contact_code").val(),
+                        content: $("#contact_content").val()
+                    },
+                    timeout: 10000,
+                    success: function (response, status) {
+                        switch (response) {
+                            case "SS":
+                                $("#ss_msg").html('Cảm ơn bạn, chúng tôi sẽ sớm liên lạc với bạn').show();
+                                $("#form *").not('.submit').val('');
+                                reloadCapcha('captcha');
+                                break;
+                            case "WRONG_CODE":
+                                $("#ss_msg").html('Mã bảo vệ chưa đúng').show();
+                                reloadCapcha('captcha');
+                                break;
+                            case "EMPTY_FULLNAME":
+                                $("#ss_msg").html('Bạn chưa nhập họ tên').show();
+                                break;
+                            case "EMPTY_EMAIL":
+                                $("#ss_msg").html('Bạn chưa nhập email').show();
+                                break;
+                            case "WRONG_EMAIL":
+                                $("#ss_msg").html('Email chưa đúng').show();
+                                break;
+                            case "EMPTY_CONTENT":
+                                $("#ss_msg").html('Bạn chưa nhập nội dung').show();
+                                break;
+                            default:
+                                $("#ss_msg").html('Có lỗi xảy ra, bạn vui lòng thử lại sau.').show();
+                                reloadCapcha('captcha');
+                                break;
+
+                        }
+                    }
+                });
+            }
+
+        });
+    });
+</script>
+<style>
+    .error{
+        color: red;
+    }
+</style>
+<div id="container">
+    <div class="main clearfix">
+        <div class="contact">
+            <div class="title">
+                <span>Liên hệ với chúng tôi</span>
+            </div>
+            <div class="box-cont2 clearfix">
+                <div class="left-contact">
+                    <form id="form">
+                        <div class="time-work">
+                            <p class="bottom3"><strong>Giờ làm việc:</strong>  </p>
+                            <p>{time_work}</p>
+                        </div>                
+                        <p id="ss_msg" style="color: red; display: none;"></p>
+                        <ul class="form-list">                    
+                            <li>
+                                <label>Họ và tên: <span class="clred">*</span></label>
+                                <input type="text" class="required" name="fulname" id="fulname" value="" />
+                            </li>
+                            <li>
+                                <label>Email: <span class="clred">*</span></label>
+                                <input type="text" class="required" name="email" id="email" value="" />
+                            </li>
+                            <li>
+                                <label>Điện thoại: <span class="clred">*</span></label>
+                                <input type="text" class="required" name="phone" id="phone" value="" />
+                            </li>
+                            <li>
+                                <label>Tiêu đề: <span class="clred">*</span></label>
+                                <input type="text" class="required" name="title" id="title" value="" />
+                            </li>
+                            <li>
+                                <label>Nội dung: <span class="clred">*</span></label>
+                                <textarea class="required" name="content" id="contact_content" ></textarea>
+                            </li>
+                            <li>
+                                <label>Mã bảo vệ: <span class="clred">*</span></label>
+                                <input class="inputtype" type="text" class="required" name="contact_code" id="contact_code" value="" />
+                                <a href="javascript: void(0)">
+                                    <img id="captcha" class="captcha" src="{link_home}captcha.php?width=60&amp;height=22&amp;characters=3&amp;rand={rand}" width="60" height="22" alt="Microbiz mã bảo vệ" />
+                                    <a title="Chọn hình mới" style="margin: 10px 5px;" href="javascript: reloadCapcha('captcha')"><img id="reload-captcha" src="{skin_path}images/reload.gif" /></a>
+                                </a>
+                            </li>
+                        </ul>                
+                        <div class="button-sent"><input type="submit" class="submit" value="Gửi" name="Gửi đi" /></div>                
+                    </form>
+
+                </div>
+                <div class="right-contact">
+                    <div class="info-contact">
+                        <p class="bottom3"><strong>Liên hệ:</strong>  </p>
+                        <p>Địa chỉ: {address}<br />
+                            Tel: {tel} - Fax: {fax}<br />
+                            Website: <a href="{link_home}">{link_home}</a><br />
+                            Email: {email}</p>
+                    </div>
+                    <div class="map">
+                        <p><strong>Bản đồ: </strong></p>
+                        <div class="map-cont"><img src="{skin_path}demo/images/Microbiz---Lien-he_03.jpg" width="495" height="416" alt="map" /></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<!-- END: main -->
