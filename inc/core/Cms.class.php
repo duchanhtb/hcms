@@ -16,12 +16,10 @@ if (!defined('ALLOW_ACCESS'))
 class cms {
 
     var $skin;
-    var $page;
-    var $detaul_page = "home";
-    var $title = "";
-    var $description = "";
-    var $keywords = "";
-    var $cms_headear;
+    var $default_page;
+    var $title;
+    var $description;
+    var $keywords;
 
     /**
      * @Desc construct function
@@ -31,7 +29,7 @@ class cms {
         global $skin, $layout;
         $this->skin = $skin;
         $this->layout = $layout;
-        $this->detaul_page = 'home';
+        $this->default_page = 'home';
     }
 
     /**
@@ -48,7 +46,7 @@ class cms {
      * @return string: html
      */
     function getCache($file_name) {
-        $cache_dir = ROOT_PATH . 'cache/';
+        $cache_dir = ROOT_PATH . CACHE_FOLDER . DS;
         $cache_file = $cache_dir . $file_name . '.html';
 
         if (file_exists($cache_file)) { // if cache file exists
@@ -65,9 +63,9 @@ class cms {
             }
 
             return file_get_contents($cache_file);
-        } else {
-            return '';
-        }
+        } 
+        
+        return false;
     }
 
     /**
@@ -76,14 +74,15 @@ class cms {
      * @return true
      */
     function setCache($file_name, $content) {
-        $cache_dir = ROOT_PATH . 'cache/';
-        // tao thu muc cache
+        $cache_dir = ROOT_PATH . CACHE_FOLDER. DS;
+        
+        // create cache folder if not exists
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir, 0777, true);
         }
 
         $cache_file = $cache_dir . $file_name . '.html';
-
+        
         $fp = @fopen($cache_file, 'w');
         @fwrite($fp, trim($content));
         @fclose($fp);
@@ -107,8 +106,8 @@ class cms {
      */
     function getHtmlLayout() {
         // get layout
-        $file_skin_htm = ROOT_PATH . "skin/" . $this->skin . "/layout/" . $this->layout . '.htm';
-        $file_skin_html = ROOT_PATH . "skin/" . $this->skin . "/layout/" . $this->layout . '.html';
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.htm';
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER ."/" . $this->skin . "/layout/" . $this->layout . '.html';
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);
@@ -126,57 +125,57 @@ class cms {
      * @return string: html
      */
     function addTemplateHtml($html) {
-        $style = '.hcms-module-close{
-                        transition: all 0.3s ease-out 0s;
-                        position: absolute;
-                        top: 0px;
-                        right: 0px;
-                        display: none;
-                        background: #000;
-                        width: 22px;
-                        height: 22px;
-                        color: #fff !important;
-                        line-height: 21px;
-                        text-align: center;
-                        font-size: 20px;
-                        -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-                        filter: alpha(opacity=50);
-                        -moz-opacity:0.5;
-                        -khtml-opacity: 0.5;
-                        opacity: 0.5;
-                    }
-                    .hcms-module-close:hover{
-                        -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-                        filter: alpha(opacity=100);
-                        -moz-opacity: 1;
-                        -khtml-opacity: 1;
-                        opacity: 1;
-                    }
-                    .hcms-module{
-                        border:1px solid #FFCC66;
-                    border-top: none;
-                        position:relative !important;
-                    }
-                    .hcms-module-wrap{
-                        border: 1px solid #fafafa;
-                    }
-                    .hcms-module-wrap .hcms-module-header{
-                        display:block;
-                        background-color: #FFFF99;
-                        border: 1px solid #FFCC66;
-                        color: #000000;
-                        opacity: 0.9;
-                        padding: 2px;
-                        text-align:center;
-                        text-transform:capitalize;
-                    }
-                    .hcms-module:hover .hcms-module-close{
-                        display:block !important;
-                    }';
+        $style = '
+        .hcms-module-close{
+            transition: all 0.3s ease-out 0s;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            display: none;
+            background: #000;
+            width: 22px;
+            height: 22px;
+            color: #fff !important;
+            line-height: 21px;
+            text-align: center;
+            font-size: 20px;
+            -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+            filter: alpha(opacity=50);
+            -moz-opacity:0.5;
+            -khtml-opacity: 0.5;
+            opacity: 0.5;
+        }
+        .hcms-module-close:hover{
+            -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+            filter: alpha(opacity=100);
+            -moz-opacity: 1;
+            -khtml-opacity: 1;
+            opacity: 1;
+        }
+        .hcms-module{
+            border:1px solid #FFCC66;
+        border-top: none;
+            position:relative !important;
+        }
+        .hcms-module-wrap{
+            border: 1px solid #fafafa;
+        }
+        .hcms-module-wrap .hcms-module-header{
+            display:block;
+            background-color: #FFFF99;
+            border: 1px solid #FFCC66;
+            color: #000000;
+            opacity: 0.9;
+            padding: 2px;
+            text-align:center;
+            text-transform:capitalize;
+        }
+        .hcms-module:hover .hcms-module-close{
+            display:block !important;
+        }';
 
 
         add_inline_style('cms-template', $style);
-
 
         $arrPost = $this->getPositionLayout($html);
 
@@ -188,6 +187,7 @@ class cms {
         return $html;
     }
 
+    
     /**
      * @Desc main function of the CMS
      * @return echo html code of the website
@@ -198,18 +198,19 @@ class cms {
         // if show template, don't set cache
         $tpl = Input::get('tpl', 'int', 0);
 
+        
+        // check if cache file exists
         $url = curPageURL();
         $url_query_string = str_replace(base_url(), '', $url);
-        /*
-          $page_cache_file = ($url_query_string != '') ? md5($url_query_string) : md5('home');
-          $html = $this->getCache($page_cache_file);
-          if($tpl != 1 && $html != ''){
-          echo $html;
-          exit;
-          }
-         */
+        
+        $page_cache_file = ($url_query_string != '') ? md5($url_query_string) : md5($this->default_page);
+        $html = $this->getCache($page_cache_file);
+        if($tpl != 1 && $html != '' && CACHE_STATUS == 'on'){
+            echo $html;
+            exit;
+        }
 
-        $page = Input::get("page", "txt", "home");
+        $page = Input::get("page", "txt", $this->default_page);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
         if (isset($pageInfo['layout']) && $pageInfo['layout'] != '') {
@@ -223,10 +224,8 @@ class cms {
         if ($tpl == 1) {
             $html = $this->addTemplateHtml($html);
         }
-        // end show position of module
-
+        
         if (is_array($pageInfo) && count($pageInfo) > 0) {
-
             $title = $pageInfo['meta_title'];
             $keywords = $pageInfo['meta_keyword'];
             $description = $pageInfo['meta_description'];
@@ -279,8 +278,11 @@ class cms {
             $html = $this->cmsLanguage($html);
 
             // set db status 
-            //$this->setCache($page_cache_file, $html);
-            //cacheSetting(false);
+            if(CACHE_STATUS == 'on'){
+                $this->setCache($page_cache_file, $html);
+                cacheSetting(false);
+            }
+            
 
             echo $html;
         }else {
@@ -308,9 +310,9 @@ class cms {
     }
 
     /**
-     * @Desc replace language code from string
-     * @param string $html: html of the website that have language code 
-     * @return string: html of the website
+     * @Desc get page position, each page have a layout, example position in layout: <!--pos_content-->
+     * @param string $page: page name
+     * @return array
      */
     function getPositionPage($page) {
         $miniPage = new Page();
@@ -321,8 +323,8 @@ class cms {
         }
 
         // get layout
-        $file_skin_htm = ROOT_PATH . "skin/" . $this->skin . "/layout/" . $this->layout . '.htm';
-        $file_skin_html = ROOT_PATH . "skin/" . $this->skin . "/layout/" . $this->layout . '.html';
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.htm';
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.html';
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);

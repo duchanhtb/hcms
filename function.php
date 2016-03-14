@@ -217,7 +217,7 @@ function cacheSetting($changed) {
     if ($changed == true) {
         $arrSetting['reload_cache'] = 1;
     }
-    $cache_file = ROOT_PATH . 'cache/setting.json';
+    $cache_file = ROOT_PATH . CACHE_FOLDER. DS .'setting.json';
     $fp = @fopen($cache_file, 'w');
     @fwrite($fp, json_encode($arrSetting));
     @fclose($fp);
@@ -229,7 +229,7 @@ function cacheSetting($changed) {
  * @return int
  */
 function getCacheSetting() {
-    $cache_file = ROOT_PATH . 'cache/setting.json';
+    $cache_file = ROOT_PATH . CACHE_FOLDER. DS.'setting.json';
     $setting = file_get_contents($cache_file);
     if ($setting) {
         return json_decode($setting, true);
@@ -268,15 +268,19 @@ function getSiteUrl() {
  * @param str $name: module name excluding extension php
  * @return HTML code
  */
-function loadModule($name) {
-    $module_path = ROOT_PATH . "modules/$name.php";
+function loadModule($name) {    
+    // language
+    $lang = getLanguage();
+    
+    $module_path = MODULE_PATH . "$name.php";
     if (file_exists($module_path)) {
         include_once($module_path);
-    } else {
-        return 'module dose not exists';
+        $module = new $name();
+        return $module->draw();
     }
-    $module = new $name();
-    return $module->draw();
+    
+    return $lang['module_not_exists'];
+    
 }
 
 /**
@@ -377,6 +381,11 @@ function paging_ajax($current_page, $total_page, $func_callback, $item_each_page
  * @return HTML paging
  */
 function paging($current_page, $total_page, $linkpage) {
+    
+    // language
+    $lang = getLanguage();
+    
+    
     if ($linkpage == false) {
         $linkpage = curPageURL();
     }
@@ -397,7 +406,7 @@ function paging($current_page, $total_page, $linkpage) {
     if ($total_page <= 10) {
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
-                    '">&lt;&lt; Trước</a></li>';
+                    '">&lt;&lt; '.$lang['next'].'</a></li>';
         }
 
         for ($i = 1; $i <= $total_page; $i++) {
@@ -411,7 +420,7 @@ function paging($current_page, $total_page, $linkpage) {
 
         if ($current_page != $total_page) {
             $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) .
-                    '">Tiếp &gt;&gt;</a></li>';
+                    '">'.$lang['next'].' &gt;&gt;</a></li>';
         }
     }
 
@@ -421,7 +430,7 @@ function paging($current_page, $total_page, $linkpage) {
 
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
-                    '">&lt;&lt; Trước</a></li>';
+                    '">&lt;&lt; '.$lang['previous'].'</a></li>';
         }
 
         for ($i = $minpage; $i <= $maxpage; $i++) {
@@ -434,7 +443,7 @@ function paging($current_page, $total_page, $linkpage) {
         }
 
         if ($current_page != $maxpage) {
-            $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) . '">Tiếp &gt;&gt;</a>';
+            $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) . '">'.$lang['next'].' &gt;&gt;</a>';
         }
     }
     $data .= '</ul>';
@@ -497,7 +506,7 @@ function getHtmlPaging($cur_page, $total_page, $linkpage = false) {
     				<a href="' . $first_page_link . '" class="page-far-left"></a>
     				<a href="' . $link_prev . '" class="page-left"></a>
     				<div id="page-info">Page <strong>' . $cur_page . '</strong> / ' . $total_page .
-                '</div>
+                        '</div>
     				<a href="' . $link_next . '" class="page-right"></a>
     				<a href="' . $last_page_link . '" class="page-far-right"></a>
     			</td>

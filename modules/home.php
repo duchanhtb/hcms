@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  * @desc module list html of introduction
  */
 class home extends Module {
@@ -16,14 +16,7 @@ class home extends Module {
     }
 
     function draw() {
-        global $skin, $title, $keywords, $description;
         $xtpl = new XTemplate($this->tpl);
-
-        $skin_path = base_url() . 'skin/' . $skin . '/';
-        $xtpl->assign('link_home', base_url());
-        $xtpl->assign('skin_path', $skin_path);
-
-
 
         $xtpl->parse('main');
         return $xtpl->out('main');

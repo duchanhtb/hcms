@@ -26,7 +26,7 @@ class Page extends Base {
      * @return string (name of layout)
      */
     function getLayout($page) {
-        $page = $this->getRecord("*", " AND page = $page ");
+        $page = $this->getRecord("*", " AND `name` = '$page' ");
         return $page['layout'];
     }
 
@@ -35,7 +35,7 @@ class Page extends Base {
      * @return array
      */
     function getAll() {
-        return $this->get('id, name, parent');
+        return $this->get('*');
     }
 
     /**
@@ -53,50 +53,43 @@ class Page extends Base {
         if ($sort && $order) {
             return $this->get("*", $con, "$sort $order", $start, $this->num_per_page);
         } else {
-            return $this->get("*", $con, " name DESC ", $start, $this->num_per_page);
+            return $this->get("*", $con, " `name` DESC ", $start, $this->num_per_page);
         }
         return false;
     }
 
     /**
-     * @Desc get infomation of page via page name
+     * @Desc get page infomation
      * @param string $name: name of page      
      * @return array
      */
     function getPageInfo($name) {
-        $allPage = $this->get();
-        $pageInfo = array();
-        if (count($allPage) > 0) {
-            foreach ($allPage as $value) {
-                if ($value['name'] == $name) {
-                    $pageInfo = $value;
-                }
-            }
-            if (is_array($pageInfo) && count($pageInfo) > 0) {
-                $pos = $pageInfo['position'];
-                $parentInfo = $this->getParent($allPage, $pageInfo['parent']);
-                $pos_parent = $parentInfo['position'];
-                $pos = json_decode($pos, true);
-                $pos_parent = json_decode($pos_parent, true);
+        $pageInfo = $this->getRecord("*", " AND `name` = '$name' ");
+        $allPage = $this->getAll();        
+        
+        if (is_array($pageInfo) && count($pageInfo) > 0) {
+            $pos = $pageInfo['position'];
+            $parentInfo = $this->getParent($allPage, $pageInfo['parent']);            
+            $pos_parent = $parentInfo['position'];
+            $pos = json_decode($pos, true);
+            $pos_parent = json_decode($pos_parent, true);
 
-                $new_post = array_merge_recursive((array) $pos_parent, (array) $pos);
-                $pageInfo['position'] = $new_post;
-            }
+            $new_post = array_merge_recursive((array) $pos_parent, (array) $pos);
+            $pageInfo['position'] = $new_post;
+
+            return $pageInfo;
         }
-        return $pageInfo;
+
+        return false;
     }
 
+    /**
+     * @Desc get page infomation using for admin
+     * @param string $name: name of page      
+     * @return array
+     */
     function getPageInfoAdmin($name) {
-        $allPage = $this->get();
-        $pageInfo = array();
-        if (count($allPage) > 0) {
-            foreach ($allPage as $value) {
-                if ($value['name'] == $name) {
-                    $pageInfo = $value;
-                }
-            }
-        }
-        return $pageInfo;
+        return $this->getRecord("*", " AND `page` = '$name' ");
     }
 
     /**

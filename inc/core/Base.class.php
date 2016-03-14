@@ -130,14 +130,6 @@ class Base {
             $sql .= " WHERE 1 $con ";
         }
 
-        if ($order) {
-            $sql .= " ORDER BY $order ";
-        }
-
-        if ($start >= 0 && $num > 0) {
-            $sql .= " LIMIT $start, $num ";
-        }
-
         //var_dump($sql);
 
         $key = md5($sql);

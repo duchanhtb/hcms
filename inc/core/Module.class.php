@@ -5,19 +5,16 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class Module extends Base {
 
     var $file = '';
     var $tpl = '';
-    var $skin_path = '';
-    var $cache_html = false;
-    var $cache_time = 0;  // cache time live (second)
-
+    
     function module() {
         global $skin;
-        $this->tpl = "skin/$skin/module/" . $this->file;
-        $this->skin_path = base_url() . 'skin/' . $skin . '/';
+        $this->tpl = SKIN_FOLDER . "/" . $skin . "/" . MODULE_FOLDER . "/" . $this->file;
     }
+
 }
