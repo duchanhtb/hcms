@@ -8,10 +8,12 @@ include("Idiorm.class.php");
 
 class DB extends ORM{
     
+    const CHARSET = 'utf8';
+    
     public static function config($dbInfo) {
         
         self::configure(array(
-            'connection_string' => 'mysql:host='.$dbInfo['dbHost'].';dbname='.$dbInfo['dbName'],
+            'connection_string' => 'mysql:host='.$dbInfo['dbHost'].';dbname='.$dbInfo['dbName'].';charset='. self::CHARSET,
             'username' => $dbInfo['dbUser'],
             'password' => $dbInfo['dbPass']
         ));

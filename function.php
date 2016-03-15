@@ -538,6 +538,12 @@ function removeQuerystringVar($url, $key) {
  * @param $param: array parram example array('id'=>1,'name'=>2)
  * @return URL
  */
+/**
+ * @Desc create link of cms, when we want to rewrite link, we only change this function
+ * @param $page: page of the cms 
+ * @param $param: array parram example array('id'=>1,'name'=>2)
+ * @return URL
+ */
 function createLink($page, $param = false, $rewrite = true) {
     $link = base_url();
     if ($rewrite == false) {
@@ -547,116 +553,15 @@ function createLink($page, $param = false, $rewrite = true) {
         }
         return $link;
     }
-
-    switch ($page) {
-        case "intro":
-            $page = 'aboutus';
-            break;
-
-        case "news_detail":
-            if (isset($param['category']) && $rewrite == true) {
-                $link .= title_url($param['category']) . '/' . $param['id'] . '-' . title_url($param['title']);
-            } else {
-                $link .= 'news/' . $param['id'] . '-' . title_url($param['title']);
-            }
-            return $link . '.html';
-            break;
-
-        case "preview":
-            $param['name'] = ($param['name'] != '') ? $param['name'] : 'preview';
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'preview/' . $param['id'] . '-' . title_url($param['name']);
-                $link .= '.html';
-                if (isset($param['start'])) {
-                    $link .= '&start=' . $param['start'];
-                }
-                return $link;
-            }
-            break;
-
-        case "microbiz":
-            $param['title'] = ($param['title'] != '') ? $param['title'] : 'microbiz';
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'microbiz/' . $param['id'] . '-' . title_url($param['title']);
-                $link .= '.html';
-                return $link;
-            }
-            break;
-
-        case "news":
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'news/' . $param['cid'] . '/' . title_url($param['name']);
-                return $link . '.html';
-            }
-            break;
-
-        case "template":
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'template/' . title_url($param['name']) . '-' . $param['id'];
-                return $link . '.html';
-            }
-            break;
-
-        case "product":
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'product/' . $param['cid'] . '/' . title_url($param['name']);
-                return $link . '.html';
-            }
-            break;
-
-        case "product_detail":
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'product/' . $param['id'] . '-' . title_url($param['name']);
-                return $link . '.html';
-            }
-            break;
-
-        case "search":
-            if (is_array($param) && count($param > 0) && $rewrite == true) {
-                $link .= 'product-detail/' . title_url($param['name']) . '_' . $param['id'];
-                return $link . '.html';
-            }
-            break;
+    $link .= $page;
+    if(isset($param['subpage']) && $param['subpage'] !=''){
+        $link .= '/'.$page['subpage'];
     }
-
-    if ($page != 'search') {
-        $link .= $page;
-    } else {
-        $link .= '?page=' . $page;
-    }
-
-    if (is_array($param) && count($param > 0)) {
-        $check = false;
-        if (strstr($link, '?')) {
-            $check = true;
-        }
-        foreach ($param as $key => $value) {
-            if ($check == false) {
-                $str = '?';
-                $check = true;
-            } else {
-                $str = '&';
-            }
-            if ($key == 'title' || $key == 'name') {
-                $link .= $str . $key . '=' . title_url($value);
-            } else {
-                $link .= $str . $key . '=' . $value;
-            }
-        }
-    }
-    //return $link;
-    if ($page == 'rss' || $page == 'feed') {
-        return $link;
+    if ($param && $param['id'] > 0 && $param['title'] != '') {
+        $id_endcode = alphaID($param['id'], false);
+        $link .= '/' . title_url($param['title']) . '/' . $id_endcode;
     }
     return $link . '.html';
-
-    $link = base_url() . "index.php?page=" . $page;
-    if (is_array($param) && count($param > 0)) {
-        foreach ($param as $key => $value) {
-            $link .= '&' . $key . '=' . $value;
-        }
-    }
-    return $link;
 }
 
 /**
@@ -1373,32 +1278,31 @@ function cms_header() {
     global $graph_tags, $cms_style, $cms_inline_style, $cms_script, $title, $keywords, $description;
 
     $html = '';
-
     // title
-    if ($title != '') {
-        $html .= "<title>$title</title>";
+    if ($title) {
+        $html .= "<title>$title</title>".PHP_EOL;
     } else {
-        $html .= "<title>" . getCmsTitle() . "</title>";
+        $html .= "<title>" . getCmsTitle() . "</title>".PHP_EOL;
     }
-
+   
     //keyword
     if ($keywords != '') {
-        $html = '<meta name="keywords" content="' . $keywords . '" >';
+        $html .= '<meta name="keywords" content="' . $keywords . '" >'.PHP_EOL;
     } else {
-        $html = '<meta name="keywords" content="' . getCmsKeywords() . '" >';
+        $html .= '<meta name="keywords" content="' . getCmsKeywords() . '" >'.PHP_EOL;
     }
 
     //description
     if ($description != '') {
-        $html .= '<meta name="description" content="' . $description . '" >';
+        $html .= '<meta name="description" content="' . $description . '" >'.PHP_EOL;
     } else {
-        $html .= '<meta name="description" content="' . getCmsDescription() . '" >';
+        $html .= '<meta name="description" content="' . getCmsDescription() . '" >'.PHP_EOL;
     }
 
     // graph tags
     if (is_array($graph_tags) && count($graph_tags) > 0) {
         foreach ($graph_tags as $handle => $graph) {
-            $html .= '<meta property="og:' . $graph['property'] . '" content="' . $graph['content'] . '" />';
+            $html .= '<meta property="og:' . $graph['property'] . '" content="' . $graph['content'] . '" />'.PHP_EOL;
         }
     }
     
@@ -2065,7 +1969,7 @@ function update_multi_options($arrValue) {
  */
 function getThumbnail($folder, $path_or_id) {
     $path = '';
-    $thumb = 'uploads/noimage.jpg';
+    $no_image = 'uploads/noimage.jpg';
 
     if (is_int($path_or_id)) {
         $id = $path_or_id;
@@ -2075,23 +1979,25 @@ function getThumbnail($folder, $path_or_id) {
     } else {
         $path = trim($path_or_id, '.');
     }
+    
+    $http_prefix = substr($path, 0, 4);
+    if($http_prefix == 'http') return $path;
 
-    if ($path) {
-        $http_prefix = substr($path, 0, 4);
-        if($http_prefix == 'http') return $path;
-        
-        if($folder == 'origin'){
-            return base_url(). $path;
-        }
-        
-        global $imagesSize;
-        $size_info = $imagesSize[$folder];
-        $with = $size_info['width'];
-        $height = $size_info['height'];
-        $crop = $size_info['crop'];
-        $thumb = base_url() . createThumbnail($folder, $path, $with, $height, $crop);
+    if($folder == 'origin'){
+        return base_url(). $path;
     }
-    return $thumb;
+    
+    global $imagesSize;
+    $size_info = $imagesSize[$folder];
+    $with = $size_info['width'];
+    $height = $size_info['height'];
+    $crop = $size_info['crop'];
+    
+    if ($path) {
+        $thumb = base_url() . createThumbnail($folder, $path, $with, $height, $crop);
+        return $thumb;
+    }
+    return base_url() . createThumbnail($folder, $no_image, $with, $height, $crop);
 }
 
 /**
@@ -2108,7 +2014,12 @@ function createThumbnail($folder, $path, $width, $height, $crop = false) {
         $img_path = ROOT_PATH . $img_path;
 
         if (!file_exists($img_path)) {
-            return 'uploads/noimage.jpg';
+            $img_path = ROOT_PATH.'uploads/noimage.jpg';
+            $thumb_path = ROOT_PATH.'uploads/'.$folder.'/noimage.jpg';
+            $crop = ($crop == true) ? 'crop' : 'fit';
+            $imageThumb = new Image($img_path);
+            $imageThumb->createThumb($thumb_path, $width, $height, $crop);
+            return str_replace(ROOT_PATH, '/', $thumb_path);
         }
 
         // create Folder
@@ -2289,7 +2200,7 @@ if (!function_exists('bytesToSize')) {
  */
 function alphaID($in, $to_num = false, $pad_up = false, $pass_key = 'HCMS') {
     $out = '';
-    $index = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $index = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $base = strlen($index);
 
     if ($pass_key !== null) {

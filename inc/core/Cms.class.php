@@ -30,6 +30,7 @@ class cms {
         $this->skin = $skin;
         $this->layout = $layout;
         $this->default_page = 'home';
+        self::cms_rewrite();
     }
 
     /**
@@ -209,7 +210,7 @@ class cms {
             echo $html;
             exit;
         }
-
+        
         $page = Input::get("page", "txt", $this->default_page);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
@@ -318,13 +319,13 @@ class cms {
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
         if (isset($pageInfo['layout']) && $pageInfo['layout'] != '') {
-            $this->layout = str_replace('.html', '', $pageInfo['layout']);
-            $this->layout = str_replace('.htm', '', $pageInfo['layout']);
+            $this->layout = $pageInfo['layout'];
         }
 
         // get layout
-        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.htm';
-        $file_skin_html = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.html';
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout;
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout;
+        
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);
@@ -337,6 +338,53 @@ class cms {
         // show position of module
         $arrPost = $this->getPositionLayout($html);
         return $arrPost;
+    }
+    
+    
+    public static function cms_rewrite(){
+        
+        // set page request
+        $current_page = curPageURL();
+        $current_page = str_replace(base_url(), '', $current_page);
+        $current_page = explode('.', $current_page);
+        $current_page = $current_page[0];
+
+        if ($current_page) {
+            $current_page = explode('/', $current_page);
+            if (is_array($current_page) && count($current_page) > 0) {
+                $_REQUEST['page'] = $current_page[0];
+            }
+        }
+        
+        
+        // set subpage request
+        $current_page = curPageURL();
+        $current_page = str_replace(base_url(), '', $current_page);
+        $current_page = explode('.', $current_page);
+        $current_page = $current_page[0];
+
+        if ($current_page) {
+            $current_page = explode('/', $current_page);
+            if (count($current_page) > 0 && isset($current_page[1])) {
+                $_REQUEST['alias'] =  $current_page[1];
+            }
+        }
+        
+        
+        $current_page = curPageURL();
+        $current_page = str_replace(base_url(), '', $current_page);
+        if ($current_page) {
+            $current_page = explode('/', $current_page);
+            if (is_array($current_page) && count($current_page) > 0) {
+                $max_key = max(array_keys($current_page));
+                $max_value = $current_page[$max_key];
+                $max_value = explode('.', $max_value);
+                $max_value = $max_value[0];
+                if ($max_value) {
+                    $_REQUEST['id'] = alphaID($max_value, true);
+                }
+            }
+        }
     }
 
 }

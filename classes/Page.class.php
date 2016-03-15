@@ -89,7 +89,7 @@ class Page extends Base {
      * @return array
      */
     function getPageInfoAdmin($name) {
-        return $this->getRecord("*", " AND `page` = '$name' ");
+        return $this->getRecord("*", " AND `name` = '$name' ");
     }
 
     /**
