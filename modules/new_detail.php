@@ -16,10 +16,7 @@ class new_detail extends Module {
     }
 
     function draw() {
-
-        addTitle('Danh sách tin tức');
-        addDescription('Hệ thống quản trị nội dung HCMS');
-
+        
         $id = Input::get('id', 'int', '');
         if ($id) {
             $table_name = 't_news';
@@ -30,6 +27,9 @@ class new_detail extends Module {
             $this->xtpl->assign('title', $newDetail->title);
             $this->xtpl->assign('content', $newDetail->content);
             $this->xtpl->assign('date', date('H:i d/m/Y', strtotime($newDetail->date_created)));
+            
+            addTitle($newDetail->title);
+            addDescription($newDetail->brief);
         }
 
 

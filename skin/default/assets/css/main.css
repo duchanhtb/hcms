@@ -23,7 +23,7 @@ body.non-responsive {
     }
 }		
 p {
-    margin: 0 0 30px
+    margin: 0 0 10px
 }
 
 h1, h2, h3, h4, h5, h6, dl dt {
@@ -227,8 +227,34 @@ ul#list-new li a:hover{
 footer{
     background-color: #1c1c1c;
     padding: 8px 0;
+    margin-top: 20px;
 }
 footer p{
     margin-bottom: 0;
     font-size: 14px;
+}
+
+/***** paging ********/
+ul.paging {
+    float: right;
+    margin: 0 !important;
+}
+ul.paging li {
+    display: inline;
+    list-style: outside none none !important;
+    margin: 0 0 0 5px;
+}
+ul.paging li a {
+    color: #333;
+    padding: 2px 6px;
+    text-decoration: none;
+}
+ul.paging li.active a, 
+ul.paging li.current a, 
+ul.paging li:hover a {
+    background-color: #222428;
+    color: #fff !important;
+}
+ul.paging .last a {
+    padding-right: 0 !important;
 }

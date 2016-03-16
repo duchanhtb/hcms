@@ -140,11 +140,12 @@ class cms {
             line-height: 21px;
             text-align: center;
             font-size: 20px;
+            text-decoration: none;
             -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
             filter: alpha(opacity=50);
             -moz-opacity:0.5;
             -khtml-opacity: 0.5;
-            opacity: 0.5;
+            opacity: 0.5;            
         }
         .hcms-module-close:hover{
             -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
@@ -169,7 +170,9 @@ class cms {
             opacity: 0.9;
             padding: 2px;
             text-align:center;
-            text-transform:capitalize;
+            text-transform:uppercase;
+            font-family: arial, sans-serif;
+            font-size: 10px;
         }
         .hcms-module:hover .hcms-module-close{
             display:block !important;
@@ -265,7 +268,7 @@ class cms {
                 $html = str_replace('<!--' . $key . '-->', $html_pos, $html);
             }
 
-            $skin_path = base_url() . 'skin/' . $this->skin . '/';
+            $skin_path = base_url() . SKIN_FOLDER. '/' . $this->skin . '/';
             $html = str_replace('{skin_path}', $skin_path, $html);
             $html = str_replace('{cms_header}', cms_header(), $html);
             $html = str_replace('{cms_footer}', cms_footer(), $html);
@@ -344,47 +347,29 @@ class cms {
     public static function cms_rewrite(){
         
         // set page request
-        $current_page = curPageURL();
-        $current_page = str_replace(base_url(), '', $current_page);
-        $current_page = explode('.', $current_page);
-        $current_page = $current_page[0];
+        $current_link = str_replace(base_url(), '', curPageURL());
 
-        if ($current_page) {
-            $current_page = explode('/', $current_page);
-            if (is_array($current_page) && count($current_page) > 0) {
-                $_REQUEST['page'] = $current_page[0];
+        if ($current_link) {
+            $current_link = trim($current_link, '/');
+         
+            // get page
+            $page = substr($current_link, 0, strpos($current_link, '/'));
+            if($page)  $_REQUEST['page'] = $page;
+            
+            
+            // get alias
+            if(strpos($current_link, '/')){
+                $alias = substr($current_link, strpos($current_link, '/') + 1 , strrpos($current_link, '/') - strpos($current_link, '/') - 1);
+                if($alias) $_REQUEST['alias'] =  $alias;
             }
+            
+            
+            // get id
+            $id = substr($current_link, strrpos($current_link, '/') + 1 , strrpos($current_link, '.') - strrpos($current_link, '/') - 1);
+            if($id) $_REQUEST['id'] = alphaID($id, true);
+            
         }
         
-        
-        // set subpage request
-        $current_page = curPageURL();
-        $current_page = str_replace(base_url(), '', $current_page);
-        $current_page = explode('.', $current_page);
-        $current_page = $current_page[0];
-
-        if ($current_page) {
-            $current_page = explode('/', $current_page);
-            if (count($current_page) > 0 && isset($current_page[1])) {
-                $_REQUEST['alias'] =  $current_page[1];
-            }
-        }
-        
-        
-        $current_page = curPageURL();
-        $current_page = str_replace(base_url(), '', $current_page);
-        if ($current_page) {
-            $current_page = explode('/', $current_page);
-            if (is_array($current_page) && count($current_page) > 0) {
-                $max_key = max(array_keys($current_page));
-                $max_value = $current_page[$max_key];
-                $max_value = explode('.', $max_value);
-                $max_value = $max_value[0];
-                if ($max_value) {
-                    $_REQUEST['id'] = alphaID($max_value, true);
-                }
-            }
-        }
-    }
+    }// end function
 
 }

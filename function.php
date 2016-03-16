@@ -174,7 +174,7 @@ function getLanguage() {
     if (is_array($lang) && count($lang) > 0) {
         return $lang;
     } else {
-        $sql = "SELECT * FROM m_language WHERE 1 ";
+        $sql = "SELECT * FROM `m_language`";
         $rc = $oDb->query($sql);
         $rs = $oDb->fetchAll();
         foreach ($rs as $key => $value) {
@@ -380,7 +380,7 @@ function paging_ajax($current_page, $total_page, $func_callback, $item_each_page
  * @param $linkpage: link page we have example: http://hanhnguyen.co.cc/?page=
  * @return HTML paging
  */
-function paging($current_page, $total_page, $linkpage) {
+function paging($current_page, $total_page, $linkpage, $class = 'paging') {
     
     // language
     $lang = getLanguage();
@@ -402,7 +402,7 @@ function paging($current_page, $total_page, $linkpage) {
         return "";
     }
 
-    $data = '<ul class="pages">';
+    $data = '<ul class="'.$class.'">';
     if ($total_page <= 10) {
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
@@ -1635,7 +1635,7 @@ function getUserInfo($name) {
  */
 function checkUserExits($type, $value) {
     global $oDb;
-    $sql = "SELECT * FROM t_user WHERE `$type` = '$value' ";
+    $sql = "SELECT * FROM `t_user` WHERE `$type` = '$value' ";
     $query = $oDb->query($sql);
     if ($oDb->numRows($query) > 0) {
         $result = $oDb->fetchAll($query);

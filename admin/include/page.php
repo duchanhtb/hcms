@@ -32,12 +32,13 @@ $column = array(
         "editable"      => false,
         "required"      => "Bạn chưa nhập layout",
         "sufix_title"   => "",
+        "std"           => 'home.html',
         "show_on_list"  => true,
         "editable"      => false,
         "editlink"      => false
     ),
     "meta_title" => array(
-        "title"         => "Title",
+        "title"         => "Tiêu đề",
         "type"          => "textarea:noeditor",
         "row"           => 1,
         "editable"      => false,
@@ -47,7 +48,7 @@ $column = array(
         "editlink"      => false
     ),
     "meta_description" => array(
-        "title"         => "Title",
+        "title"         => "Miêu tả",
         "type"          => "textarea:noeditor",
         "row"           => 1,
         "editable"      => false,

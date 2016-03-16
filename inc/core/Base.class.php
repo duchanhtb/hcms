@@ -55,7 +55,7 @@ class Base {
         $fields = trim($fields, ",");
         $values = trim($values, ",");
 
-        $oDb->query("INSERT INTO " . $this->table . " (" . $fields . ") VALUES (" . $values . ")");
+        $oDb->query("INSERT INTO `" . $this->table . "` (" . $fields . ") VALUES (" . $values . ")");
 
         if ($oDb->affectedRows() > 0) {
             if ($this->pk_auto)
@@ -83,7 +83,7 @@ class Base {
         $Cache = $this->Cache;
         global $$Cache, $oDb;
 
-        $sql = " SELECT $field FROM $this->table ";
+        $sql = " SELECT $field FROM `$this->table` ";
 
         if ($con) {
             $sql .= " WHERE 1 $con ";
@@ -124,7 +124,7 @@ class Base {
         $Cache = $this->Cache;
         global $$Cache, $oDb;
 
-        $sql = " SELECT $field FROM $this->table ";
+        $sql = " SELECT $field FROM `$this->table` ";
 
         if ($con) {
             $sql .= " WHERE 1 $con ";
@@ -195,7 +195,7 @@ class Base {
             }
         }
 
-        $sql = 'UPDATE ' . $this->table . ' SET ' . $set . ' WHERE `' . $pk . '` = "' . $this->$pk . '"';
+        $sql = 'UPDATE `' . $this->table . '` SET ' . $set . ' WHERE `' . $pk . '` = "' . $this->$pk . '"';
         //var_dump($sql);
         $query_id = $oDb->query($sql);
 
@@ -328,7 +328,7 @@ class Base {
             }
             return true;
         } else {
-            $query = $oDb->query("SELECT * FROM " . $this->table . " WHERE `" . $pk . "` = '" . $this->$pk . "'");
+            $query = $oDb->query("SELECT * FROM `" . $this->table . "` WHERE `" . $pk . "` = '" . $this->$pk . "'");
             if ($oDb->numRows($query) > 0) {
                 $result = $oDb->fetchObject($query);
 
@@ -377,7 +377,7 @@ class Base {
         global $$Cache, $oDb;
 
         $this->$pk = $id;
-        $query_id = $oDb->query("DELETE FROM " . $this->table . " WHERE `" . $pk . "` = '" . $this->$pk . "'");
+        $query_id = $oDb->query("DELETE FROM `" . $this->table . "` WHERE `" . $pk . "` = '" . $this->$pk . "'");
         if ($oDb->affectedRows() > 0) {
             if (USING_MEMCACHE == '1') {
                 $$Cache->delete($this->key_prefix . $this->$pk);
