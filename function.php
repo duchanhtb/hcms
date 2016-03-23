@@ -1306,6 +1306,12 @@ function cms_header() {
         }
     }
     
+    // favicon
+    if(get_option('favicon')){
+        $html .= '<link rel="shortcut icon" type="image/x-icon" href="'.  base_url().get_option('favicon').'">';
+
+    }
+    
 
 
     ///////////////// inline css ////////////////////
@@ -1329,7 +1335,7 @@ function cms_header() {
     
     if($body_inline_css){
         $inline_css .= "body{".PHP_EOL . $body_inline_css."}". PHP_EOL;
-    }
+    }   
     
     
     // heading

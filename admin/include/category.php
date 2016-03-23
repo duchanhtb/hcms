@@ -10,16 +10,7 @@ if (!defined('ALLOW_ACCESS'))
 
 global $tbl_prefix;
 
-$column = array(
-    "parent_id" => array(
-        "title"         => "Danh mục cha",
-        "type"          => "combobox",
-        "data"          => getCategory(),
-        "editable"      => false,
-        "searchable"    => false,
-        "sufix_title"   => "",
-        "show_on_list"  => true
-    ),
+$column = array(    
     "name" => array(
         "title"         => "Tên danh mục",
         "type"          => "textarea:noeditor",
@@ -34,6 +25,15 @@ $column = array(
         "type"          => "input:image",
         "editable"      => false,
         "required"      => "Nhập ảnh danh mục",
+        "show_on_list"  => true
+    ),
+    "parent_id" => array(
+        "title"         => "Danh mục cha",
+        "type"          => "combobox",
+        "data"          => getCategory(),
+        "editable"      => false,
+        "searchable"    => false,
+        "sufix_title"   => "",
         "show_on_list"  => true
     ),
     "description" => array(

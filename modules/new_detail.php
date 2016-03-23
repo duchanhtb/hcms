@@ -26,7 +26,7 @@ class new_detail extends Module {
             
             $this->xtpl->assign('title', $newDetail->title);
             $this->xtpl->assign('content', $newDetail->content);
-            $this->xtpl->assign('date', date('H:i d/m/Y', strtotime($newDetail->date_created)));
+            $this->xtpl->assign('date', date('H\h:i - d/m/Y', strtotime($newDetail->date_created)));
             
             addTitle($newDetail->title);
             addDescription($newDetail->brief);

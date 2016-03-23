@@ -32,7 +32,7 @@ define("CACHE_STATUS", 'off');
 define("MODULE_PATH", ROOT_PATH . MODULE_FOLDER . DS);
 
 // calculator query in class database
-define("SHOW_QUERY_INFO", "off");
+define("SHOW_QUERY_INFO", "on");
 
 // define string encode password
 define('PASS_ENDCODE', 'HANHCMS');

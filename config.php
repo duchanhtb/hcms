@@ -86,16 +86,6 @@ if(strpos(strtolower($sitePath),"172.16.110.146/cms")> 0 ){
     $dbinfo['dbHostRead'] = "localhost";
 }
 
-if(strpos(strtolower($sitePath),"192.168.162.130/cms")> 0 ){    
-    $base_url = "http://192.168.162.130/cms/";
-    // database
-    $dbinfo['dbHost']	  = "localhost";
-    $dbinfo['dbUser']	  = "root";
-    $dbinfo['dbPass']	  = "tomtom";
-    $dbinfo['dbName']	  = "cms";
-    $dbinfo['dbSesName']  = "";
-    $dbinfo['dbHostRead'] = "localhost";
-}
 
 
 /* Config for web

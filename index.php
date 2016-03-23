@@ -16,19 +16,6 @@ include("config.php");
 $cms = new cms();
 $cms->run();
 
-
-if(isset($_REQUEST['query'])){
-    $_SESSION['query'] = $_REQUEST['query'];
-}
 $end_time = microtime(true);
 $total_time = ($end_time - $start_time);
-if(SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)){
-    $arrLogQuery = array_merge($oDb->listQuery, DB::get_query_log());    
-    echo '<pre>';
-    foreach($arrLogQuery as $query){
-    echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">'.trim($query) .'</p>';
-    }
-    echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">Time executed: <strong style="color:red; ">'.$total_time.'</strong>s</p>';
-    echo '</pre>';
-}
-if($oDb)@$oDb->close();
+echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">Time executed: <strong style="color:red; ">'.$total_time.'</strong> seconds</p>';

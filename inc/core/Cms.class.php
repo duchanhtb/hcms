@@ -292,6 +292,9 @@ class cms {
         }else {
             show_404_page();
         }
+        
+        // if setting, show log sql
+        $this->showLogSql();
     }
 
     /**
@@ -348,28 +351,43 @@ class cms {
         
         // set page request
         $current_link = str_replace(base_url(), '', curPageURL());
-
-        if ($current_link) {
+        if ($current_link && substr($current_link, strlen($current_link) - 4, 4) == 'html') {
             $current_link = trim($current_link, '/');
          
-            // get page
-            $page = substr($current_link, 0, strpos($current_link, '/'));
-            if($page)  $_REQUEST['page'] = $page;
-            
-            
-            // get alias
-            if(strpos($current_link, '/')){
-                $alias = substr($current_link, strpos($current_link, '/') + 1 , strrpos($current_link, '/') - strpos($current_link, '/') - 1);
-                if($alias) $_REQUEST['alias'] =  $alias;
+            $pathinfo = pathinfo($current_link);
+            if(!$pathinfo['dirname'] || $pathinfo['dirname'] == '.'){
+                $_REQUEST['page'] = $pathinfo['filename'];
+            }else{
+                
+                $dirname = explode('/', $pathinfo['dirname']);
+                if(isset($dirname[0]) && $dirname[0] != '') $_REQUEST['page'] = $dirname[0];
+                if(isset($dirname[1]) && $dirname[1] != '') $_REQUEST['alias'] = $dirname[1];
+                
+                
+                $id = $pathinfo['filename'];
+                $_REQUEST['id'] = alphaID($id, true);
             }
             
-            
-            // get id
-            $id = substr($current_link, strrpos($current_link, '/') + 1 , strrpos($current_link, '.') - strrpos($current_link, '/') - 1);
-            if($id) $_REQUEST['id'] = alphaID($id, true);
-            
         }
+        //var_dump($_REQUEST);
         
     }// end function
+    
+    
+    function showLogSql(){
+        global $oDb;
+        $show_query = Input::get('query', 'int', 0);
+        if($show_query) $_SESSION['query'] = $show_query;
+       
+        if(SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)){
+            $arrLogQuery = array_merge($oDb->listQuery, DB::get_query_log());    
+            echo '<pre>';
+            foreach($arrLogQuery as $query){
+                echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">'.trim($query) .'</p>';
+            }
+            echo '</pre>';
+        }
+        if($oDb)@$oDb->close();
+    }
 
 }
