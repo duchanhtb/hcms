@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class module_footer extends Module {
 
@@ -14,9 +14,11 @@ class module_footer extends Module {
         parent::module();
     }
 
-    function draw() {        
-        
-
+    
+    /**     
+     * @desc render html module
+     */
+    function draw() {
         $this->xtpl->parse('main');
         return $this->xtpl->out('main');
     }

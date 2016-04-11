@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  * @desc module list html of introduction
  */
 class module_header extends Module {
@@ -15,6 +15,10 @@ class module_header extends Module {
         parent::module();
     }
 
+    
+    /**     
+     * @desc render html module
+     */
     function draw() {
         register_style('main-css', $this->skin_path.'assets/css/main.css');
         $this->xtpl->parse('main');

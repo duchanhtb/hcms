@@ -15,6 +15,9 @@ class module_home extends Module {
         parent::module();
     }
 
+    /**     
+     * @desc render html module
+     */
     function draw() {
 
         addTitle('Danh sách tin tức');
@@ -56,6 +59,9 @@ class module_home extends Module {
         return $this->xtpl->out('main');
     }
 
+    /**     
+     * @desc create link for category
+     */
     function createLinkCategory($arrListCatId) {
         $html = '';
         if (count($arrListCatId) <= 0) {

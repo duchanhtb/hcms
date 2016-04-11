@@ -6,12 +6,23 @@ if (!defined('ALLOW_ACCESS'))
 /**
  * @author duchanh
  * @copyright 2012
+ * @desc class get data from $_POST, $_GET, $_REQUEST
  */
 class Input {
 
-    function Input() { // nothign to do
-    }
+    
+    /**
+     * @Desc construct function
+     */
+    function Input() {}
 
+    
+    /**
+     * @Desc get data from $_POST, $_GET, $_REQUEST anf $_FILE
+     * @param string $varname: variable
+     * @param string $type: type of data, example: int, txt, sql...
+     * @return mix
+     */
     public static function get($varname, $type = '', $vartext = '', $method = '') {
         global $HTTP_POST_VARS, $HTTP_GET_VARS, $HTTP_COOKIE_VARS, $_REQUEST;
         $value = "";

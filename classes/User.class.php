@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2016
  */
 class User extends Base {
 
@@ -38,41 +38,22 @@ class User extends Base {
     );
 
     /**
-     * @Desc get user
-     * @param string $con: condition
-     * @param string $sort: field want to sort    
-     * @param string $order: DESC OR ASC
-     * @param int $page: number of page
-     * @return array
-     */
-    function getUser($con = "", $sort = false, $order = false, $page = 1) {
-        $page = ($page > 1 ) ? $page : 1;
-
-        $start = ($page - 1) * ($this->num_per_page);
-
-        if ($sort && $order) {
-            return $this->get("*", $con, "$sort $order", $start, $this->num_per_page);
-        } else {
-            return $this->get("*", $con, " id ASC ", $start, $this->num_per_page);
-        }
-        return false;
-    }
-
-    /**
-     * @Desc function login
+     * @Desc get user by username and password in database and set to SESSION
      * @param string $username: username
-     * @param string $pass: password     
+     * @param string $password: password     
      * @return array
      */
-    function login($username, $pass) {
-        $password = createMd5Password($pass);
+    function login($username, $password) {
+        $md5_password = createMd5Password($password);
+        $user = DB::for_table($this->table)
+                ->where_equal('username', $username)
+                ->where_equal('password', $md5_password)
+                ->find_one();
 
-        $con = " AND `username` = '$username' AND `password` = '$password' ";
-        $user = $this->getRecord('*', $con);
-        if (is_array($user) && count($user) > 0) {
-            // set session
+        if ($user) {
+            // set user infomation to SESSION
             $_SESSION['user'] = $user;
-            $this->updateInfoByIP($user['id']);
+            $this->updateInfoByIP($user->id);
             return $user;
         }
         return false;
@@ -80,86 +61,77 @@ class User extends Base {
 
     /**
      * @Desc class update info by IP: example: ip, country, city...
-     * @param int $user_id: user id      
+     * @param int $id: user id      
      * @return boolean
      */
-    function updateInfoByIP($user_id) {
+    function updateInfoByIP($id) {
         $userIpInfo = unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip=' . getUserIp()));
-        $arrayUpdate = array(
-            'last_login_time' => date("y-m-d H:i:s", time()),
-            'last_login_ip' => getUserIp(),
-            'city' => $userIpInfo['geoplugin_city'],
-            'region_name' => $userIpInfo['geoplugin_regionName'],
-            'last_country_code' => $userIpInfo['geoplugin_countryCode'],
-            'last_country_name' => $userIpInfo['geoplugin_countryName'],
-            'last_latitude' => $userIpInfo['geoplugin_latitude'],
-            'last_longitude' => $userIpInfo['geoplugin_longitude'],
-            'last_currency_code' => $userIpInfo['geoplugin_currencyCode']
-        );
-        $this->save($user_id, $arrayUpdate);
-        return true;
+
+        $user = DB::for_table($this->table)->find_one($id);
+        $user->last_login_time = date("y-m-d H:i:s", time());
+        $user->last_login_ip = getUserIp();
+        $user->city = $userIpInfo['geoplugin_city'];
+        $user->region_name = $userIpInfo['geoplugin_regionName'];
+        $user->last_latitude = $userIpInfo['geoplugin_latitude'];
+        $user->last_longitude = $userIpInfo['geoplugin_longitude'];
+        $user->last_currency_code = $userIpInfo['geoplugin_currencyCode'];
+        $user->save();
     }
 
     /**
-     * @Desc function get user by username
+     * @Desc get user by username
      * @param string $username: username      
      * @return array
      */
     function getUserByUsername($username) {
-        $con = " AND `username` = '$username' AND status = 1 ";
-        $result = $this->getRecord("*", $con);
-        if (is_array($result) && count($result) > 0) {
-            return $result;
-        }
-        return false;
+        return DB::for_table($this->table)
+                        ->where_equal('username', $username)
+                        ->where_equal('status', 1)
+                        ->find_one();
     }
 
     /**
-     * @Desc function get user by email
-     * @param string $username: username      
+     * @Desc get user by email
+     * @param string $email: user email      
      * @return array
      */
     function getUserByEmail($email) {
-        $con = " AND `email` = '$email' AND status = 1 ";
-        $result = $this->getRecord("*", $con);
-        if (is_array($result) && count($result) > 0) {
-            return $result;
-        }
-        return false;
+        return DB::for_table($this->table)
+                        ->where_equal('email', $email)
+                        ->where_equal('status', 1)
+                        ->find_one();
     }
 
     /**
-     * @Desc function block user
-     * @param int $uid: username      
+     * @Desc update field 'status' set to 0 in the database
+     * @param int $id: user ID      
      * @return boolean
      */
-    function blockUser($uid) {
-        $this->read($uid);
-        $this->status = 0;
-        $this->update($uid, array('status'));
-        return true;
+    function blockUser($id) {
+        $user = DB::for_table($this->table)->find_one($id);
+        $user->status = 0;
+        return $user->save();
     }
 
     /**
-     * @Desc function block user
-     * @param int $uid: username      
+     * @Desc update field 'status' set to 1 in the database
+     * @param int $id: user ID
      * @return boolean
      */
-    function unBlockUser($uid) {
-        $this->read($uid);
-        $this->status = 1;
-        $this->update($uid, array('status'));
-        return true;
+    function unBlockUser($id) {
+        $user = DB::for_table($this->table)->find_one($id);
+        $user->status = 1;
+        return $user->save();
     }
 
     /**
-     * @Desc function remove user
-     * @param int $uid: username      
+     * @Desc remove user from database
+     * @param int $id: user ID
      * @return boolean
      */
-    function deleteUser($uid) {
-        $this->remove($uid);
-        return true;
+    function deleteUser($id) {
+        $user = DB::for_table($this->table)->find_one($id);
+        return $user->delete();
     }
 
-}
+} // end class

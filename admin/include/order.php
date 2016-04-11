@@ -100,6 +100,27 @@ $column = array(
  */
 function order($id, $act = 'list') {
     $html = '';
+    $style = '<style>
+        ul.order-product{
+            padding: 10px 0;          
+        }
+        ul.order-product li{
+            list-style: none;
+        }
+        ul.order-product img{
+            width: 80px;
+            margin-right: 10px;
+            float: left;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+        .order-info{
+             padding-left: 80px;
+        }
+        .order-info h3{
+            margin: 0px 0px 5px 0px;
+            font-weight: normal !important;
+        }</style>';
     switch ($act) {
         case "add":
         case "edit":
@@ -113,21 +134,21 @@ function order($id, $act = 'list') {
             if (count($arrListId) <= 0){
                 return '';
             }
+            $html .= $style;
             foreach ($arrListId as $id => $num) {
                 $miniProduct = new Product();
                 $miniProduct->read($id);
                 
-                $html .= '<ul style="padding: 10px 0;">   
-                            <li style="list-style: none">
-                                <a href="?f=product&search-input='. $miniProduct->name .'&search-column=name" target="_blank"><img src="'. getThumbnail('thumb-150', $miniProduct->default_img).'" width="80" style="margin-right: 10px; float: left; border: 1px solid #ddd;"></a>
-                                <div style="padding-left: 80px;">
-                                    <h3 style="margin: 0px 0px 5px 0px; font-weight: normal !important;"><a href="?f=product&search-input='. $miniProduct->name .'&search-column=name" target="_blank">'. $miniProduct->name . '</a></h3>
+                $html .= '<ul class="order-product">   
+                            <li>
+                                <a href="?f=product&search-input='. $miniProduct->name .'&search-column=name" target="_blank"><img src="'. getThumbnail('thumb-150', $miniProduct->default_img).'"></a>
+                                <div class="order-info">
+                                    <h3><a href="?f=product&search-input='. $miniProduct->name .'&search-column=name" target="_blank">'. $miniProduct->name . '</a></h3>
                                     <div>Số lượng: <strong>'. formatPrice($num) .'</strong></div>
                                 </div>
                                 <div style="clear:both"></div>
                             </li>
                           </ul>';
-                
             }            
             break;
     }

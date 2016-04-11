@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2016
  * @desc class about news
  */
 class News extends Base {
@@ -39,38 +39,20 @@ class News extends Base {
      * @return array
      */
     function getNewsByCategory($cat_id, $sort = 'ordering', $order = 'DESC', $page = 1) {
-        global $oDb;
         $page = ($page > 1) ? $page : 1;
         $num_per_page = ($this->num_per_page > 0 ) ? $this->num_per_page : 20;
-        $start = ($page - 1) * ($this->num_per_page);
+        $offset = ($page - 1) * ($this->num_per_page);
 
-        $sql = " SELECT * 
-                    FROM $this->table
-                    WHERE 1 AND status = 1 AND FIND_IN_SET( '$cat_id' , `cat_id` )";
+        $listNews = DB::for_table($this->table)->where_like('cat_id', "%$cat_id%");
+        if ($sort && $order == 'ASC') {
+            $listNews = $listNews->order_by_asc($sort);
+        }
+        if ($sort && $order == 'DESC') {
+            $listNews = $listNews->order_by_desc($sort);
+        }
+        $listNews = $listNews->limit($this->num_per_page)->offset($offset)->find_many();
 
-        $sql .= " ORDER BY $sort $order ";
-        $sql .= " LIMIT $start, $num_per_page ";
-
-        $rc = $oDb->query($sql);
-        $rs = $oDb->fetchAll($rc);
-        return $rs;
-    }
-
-    /**
-     * @Desc get news by condition
-     * @param string $con: the query condition
-     * @param string $sort: sort field
-     * @param string $order: direction, ASC or DESC 
-     * @param int $page: page number
-     * @return array
-     */
-    function getNews($con = "", $sort = 'ordering', $order = 'DESC', $page = 1) {
-        $page = ($page > 1) ? $page : 1;
-        $num_per_page = ($this->num_per_page > 0 ) ? $this->num_per_page : 20;
-        $start = ($page - 1) * ($this->num_per_page);
-
-        $list_field = 'id, cat_id, title, brief, date_created, img, hits ';
-        return $this->get($list_field, $con, " $sort $order", $start, $num_per_page);
+        return $listNews;
     }
 
     /**
@@ -79,10 +61,9 @@ class News extends Base {
      * @return boolean
      */
     function hits($id) {
-        global $oDb;
-        $sql = " UPDATE `$this->table` SET `hits` = `hits` + 1 WHERE `$this->table`.`id` = $id LIMIT 1 ";
-        $oDb->query($sql);
-        return true;
+        $news = DB::for_table($this->table)->where_equal('id', $id)->find_one();
+        $news->set('hits', $news->hits + 1);
+        return $news->save();
     }
 
     /**
@@ -92,11 +73,16 @@ class News extends Base {
      * @param int $number: number want to get     
      * @return array
      */
-    function getOtherNews($cat_id, $cur_id, $get_number = 5) {
-        $Category = new Category();
-        $allNewsCategory = $Category->getCatByType(1);
-        $list_id = $Category->getListSubCategory($allNewsCategory, $cat_id);
-        $con = " AND cat_id IN ($list_id) AND id != $cur_id";
-        return $this->get('*', $con, 'ordering DESC', 0, $number);
+    function getOtherNews($cat_id, $current_id, $get_number = 5) {
+
+        $listNews = DB::for_table($this->table)
+                ->where_not_equal('id', $current_id)
+                ->where_like('cat_id', "%$cat_id%")
+                ->order_by_desc('ordering')
+                ->limit($get_number)->offset(0)
+                ->find_many();
+
+        return $listNews;
     }
+
 }

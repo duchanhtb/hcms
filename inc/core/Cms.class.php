@@ -64,8 +64,8 @@ class cms {
             }
 
             return file_get_contents($cache_file);
-        } 
-        
+        }
+
         return false;
     }
 
@@ -75,15 +75,15 @@ class cms {
      * @return true
      */
     function setCache($file_name, $content) {
-        $cache_dir = ROOT_PATH . CACHE_FOLDER. DS;
-        
+        $cache_dir = ROOT_PATH . CACHE_FOLDER . DS;
+
         // create cache folder if not exists
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir, 0777, true);
         }
 
         $cache_file = $cache_dir . $file_name . '.html';
-        
+
         $fp = @fopen($cache_file, 'w');
         @fwrite($fp, trim($content));
         @fclose($fp);
@@ -107,8 +107,8 @@ class cms {
      */
     function getHtmlLayout() {
         // get layout
-        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout . '.htm';
-        $file_skin_html = ROOT_PATH . SKIN_FOLDER ."/" . $this->skin . "/layout/" . $this->layout . '.html';
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout . '.htm';
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout . '.html';
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);
@@ -191,7 +191,6 @@ class cms {
         return $html;
     }
 
-    
     /**
      * @Desc main function of the CMS
      * @return echo html code of the website
@@ -202,18 +201,18 @@ class cms {
         // if show template, don't set cache
         $tpl = Input::get('tpl', 'int', 0);
 
-        
+
         // check if cache file exists
         $url = curPageURL();
         $url_query_string = str_replace(base_url(), '', $url);
-        
+
         $page_cache_file = ($url_query_string != '') ? md5($url_query_string) : md5($this->default_page);
         $html = $this->getCache($page_cache_file);
-        if($tpl != 1 && $html != '' && CACHE_STATUS == 'on'){
+        if ($tpl != 1 && $html != '' && CACHE_STATUS == 'on') {
             echo $html;
             exit;
         }
-        
+
         $page = Input::get("page", "txt", $this->default_page);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
@@ -228,7 +227,7 @@ class cms {
         if ($tpl == 1) {
             $html = $this->addTemplateHtml($html);
         }
-        
+
         if (is_array($pageInfo) && count($pageInfo) > 0) {
             $title = $pageInfo['meta_title'];
             $keywords = $pageInfo['meta_keyword'];
@@ -268,7 +267,7 @@ class cms {
                 $html = str_replace('<!--' . $key . '-->', $html_pos, $html);
             }
 
-            $skin_path = base_url() . SKIN_FOLDER. '/' . $this->skin . '/';
+            $skin_path = base_url() . SKIN_FOLDER . '/' . $this->skin . '/';
             $html = str_replace('{skin_path}', $skin_path, $html);
             $html = str_replace('{cms_header}', cms_header(), $html);
             $html = str_replace('{cms_footer}', cms_footer(), $html);
@@ -282,17 +281,17 @@ class cms {
             $html = $this->cmsLanguage($html);
 
             // set db status 
-            if(CACHE_STATUS == 'on'){
+            if (CACHE_STATUS == 'on') {
                 $this->setCache($page_cache_file, $html);
                 cacheSetting(false);
             }
-            
+
 
             echo $html;
-        }else {
+        } else {
             show_404_page();
         }
-        
+
         // if setting, show log sql
         $this->showLogSql();
     }
@@ -329,9 +328,9 @@ class cms {
         }
 
         // get layout
-        $file_skin_htm = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout;
-        $file_skin_html = ROOT_PATH . SKIN_FOLDER. "/" . $this->skin . "/layout/" . $this->layout;
-        
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout;
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout;
+
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);
@@ -345,49 +344,51 @@ class cms {
         $arrPost = $this->getPositionLayout($html);
         return $arrPost;
     }
-    
-    
-    public static function cms_rewrite(){
-        
+
+    public static function cms_rewrite() {
+
         // set page request
         $current_link = str_replace(base_url(), '', curPageURL());
         if ($current_link && substr($current_link, strlen($current_link) - 4, 4) == 'html') {
             $current_link = trim($current_link, '/');
-         
+
             $pathinfo = pathinfo($current_link);
-            if(!$pathinfo['dirname'] || $pathinfo['dirname'] == '.'){
+            if (!$pathinfo['dirname'] || $pathinfo['dirname'] == '.') {
                 $_REQUEST['page'] = $pathinfo['filename'];
-            }else{
-                
+            } else {
+
                 $dirname = explode('/', $pathinfo['dirname']);
-                if(isset($dirname[0]) && $dirname[0] != '') $_REQUEST['page'] = $dirname[0];
-                if(isset($dirname[1]) && $dirname[1] != '') $_REQUEST['alias'] = $dirname[1];
-                
-                
+                if (isset($dirname[0]) && $dirname[0] != '')
+                    $_REQUEST['page'] = $dirname[0];
+                if (isset($dirname[1]) && $dirname[1] != '')
+                    $_REQUEST['alias'] = $dirname[1];
+
+
                 $id = $pathinfo['filename'];
                 $_REQUEST['id'] = alphaID($id, true);
             }
-            
         }
         //var_dump($_REQUEST);
-        
-    }// end function
-    
-    
-    function showLogSql(){
+    }
+
+// end function
+
+    function showLogSql() {
         global $oDb;
         $show_query = Input::get('query', 'int', 0);
-        if($show_query) $_SESSION['query'] = $show_query;
-       
-        if(SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)){
-            $arrLogQuery = array_merge($oDb->listQuery, DB::get_query_log());    
+        if ($show_query)
+            $_SESSION['query'] = $show_query;
+
+        if (SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)) {
+            $arrLogQuery = array_merge($oDb->listQuery, DB::get_query_log());
             echo '<pre>';
-            foreach($arrLogQuery as $query){
-                echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">'.trim($query) .'</p>';
+            foreach ($arrLogQuery as $query) {
+                echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">' . trim($query) . '</p>';
             }
             echo '</pre>';
         }
-        if($oDb)@$oDb->close();
+        if ($oDb)
+            @$oDb->close();
     }
 
 }

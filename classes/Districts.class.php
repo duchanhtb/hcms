@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class Districts extends Base {
 
@@ -17,10 +17,20 @@ class Districts extends Base {
 
     /**
      * @Desc get all district
-     * @return array
+     * @return array|boolean
      */
     function getAllDistrict() {
-        return $this->get('*', false);
+        global $allDistrict;
+        if (isset($allDistrict) && count($allDistrict) > 0) {
+            return $allDistrict;
+        }
+
+        $allDistrict = DB::for_table($this->table)->find_many();
+        if ($allDistrict && count($allDistrict) > 0) {
+            return $allDistrict;
+        }
+
+        return false;
     }
 
     /**
@@ -28,9 +38,12 @@ class Districts extends Base {
      * @param string $province_id: id of province
      * @return array
      */
-    function getDistrictByProvince($province_id) {
-        $con = " AND `province_id` = $province_id ";
-        return $this->get('*', $con);
+    function getDistrictByProvinceId($province_id) {
+        $arrDistrict = DB::for_table($this->table)->where_equal('province_id', $province_id)->find_many();
+        if ($arrDistrict && count($arrDistrict) > 0)
+            return $arrDistrict;
+
+        return false;
     }
 
 }

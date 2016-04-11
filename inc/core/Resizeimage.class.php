@@ -234,4 +234,5 @@ Class RESIZEIMAGE {
         }
         @imagedestroy($newimg);
     }
+
 }

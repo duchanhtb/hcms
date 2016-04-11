@@ -54,6 +54,11 @@ if (!defined('ALLOW_ACCESS'))
   getCategory($value, $action)
  */
 
+
+
+/**
+* @desc core class that interactive with database and render html for add from, edit form and list data
+*/
 class CmsTable extends Base {
 
     public $name = "Bản ghi";
@@ -315,7 +320,12 @@ class CmsTable extends Base {
                 } else {
                     $save_icon = "";
                 }
-                $html.= "<th><a href='javascript:order(\"" . $key . "\",\"" . $dir . "\");'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
+                if($value['type'] == 'input:function'){
+                    $html.= "<th><a href='javascript:void(0);'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
+                }else{
+                    $html.= "<th><a href='javascript:order(\"" . $key . "\",\"" . $dir . "\");'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
+                }
+                
             }
         }
         $html.= "</tr>";
@@ -1442,7 +1452,7 @@ class CmsTable extends Base {
                 if (function_exists($function)) {
                     $function($_POST[$key], 'doAdd');
                 }
-            } else if($value['type'] == 'textarea'){
+            } else if($value['type'] == 'textarea' && get_option('download-external-images')){
                 $data_item = downloadImagesFromHTML($_POST[$key]);
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : '';
@@ -1559,7 +1569,7 @@ class CmsTable extends Base {
                 if (function_exists($function)) {
                     $function($_POST[$key], 'doEdit');
                 }
-            } else if($value['type'] == 'textarea'){
+            } else if($value['type'] == 'textarea' && get_option('download-external-images')){
                 $data_item = downloadImagesFromHTML($_POST[$key]);            
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : "";
@@ -1773,6 +1783,8 @@ class CmsTable extends Base {
                 $oDb->query($sqlInsert);
             }
         }
-    }
+    } // end function
 
-}
+    
+    
+} // end class

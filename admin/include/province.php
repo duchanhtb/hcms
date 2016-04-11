@@ -5,38 +5,40 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 $column = array(
     "name" => array(
-        "title"         => "Tên tỉnh",
-        "type"          => "textarea:noeditor",
-        "row"           => 1,
-        "required"      => "Nhâp tên tỉnh",
-        "searchable"    => true,
-        "editlink"      => true,
-        "show_on_list"  => true
+        "title" => "Tên tỉnh",
+        "type" => "textarea:noeditor",
+        "row" => 1,
+        "required" => "Nhâp tên tỉnh",
+        "searchable" => true,
+        "editlink" => true,
+        "show_on_list" => true
     ),
     "country_id" => array(
-        "title"         => "Country",
-        "type"          => "combobox",
-        "editable"      => false,
-        "searchable"    => true,
-        "data"          => getCountry(),
-        "sufix_title"   => "",
-        "show_on_list"  => true
+        "title" => "Country",
+        "type" => "combobox",
+        "editable" => false,
+        "searchable" => true,
+        "data" => getCountry(),
+        "sufix_title" => "",
+        "show_on_list" => true
     ),
 );
 
+/**
+ * @Desc get country from database 
+ * @return array
+ */
+function getCountry() {
+    global $mt_prefix;
+    $arrCountry = DB::for_table($mt_prefix . 'country')->order_by_asc('name')->find_many();
 
-function getCountry(){
-    $miniCountry = new Country();
-    $arrCountry = $miniCountry->get();
-    
     $result = array();
-    foreach($arrCountry as $key=>$value){
-        $result[$value['id']] = $value['name'];
+    foreach ($arrCountry as $country) {
+        $result[$country->id] = $country->name;
     }
-    
     return $result;
 }

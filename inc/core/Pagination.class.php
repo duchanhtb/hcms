@@ -115,4 +115,5 @@ class Page {
     function displayArrayPages($numberCol) {
         $this->displayStringTotalPage($numberCol);
     }
+
 }

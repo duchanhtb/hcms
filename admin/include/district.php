@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 $column = array(
     "name" => array(
@@ -29,13 +29,14 @@ $column = array(
 );
 
 function getProvince() {
-    global $oDb;
+    global $mt_prefix;
+    $table = $mt_prefix."provinces";
     $result = array();
-    $sql = "SELECT id, name  FROM m_provinces WHERE 1 ";
-    $rc = $oDb->query($sql);
-    $rs = $oDb->fetchAll($rc);
-    foreach ($rs as $key => $value) {
-        $result[$value['id']] = $value['name'];
+    
+    $allProvince = DB::for_table($table)->order_by_asc('name')->find_many();
+    foreach($allProvince as $province){
+        $result[$province->id] = $province->name;
     }
+    
     return $result;
 }

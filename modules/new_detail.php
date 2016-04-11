@@ -15,8 +15,11 @@ class new_detail extends Module {
         parent::module();
     }
 
-    function draw() {
-        
+    
+    /**     
+     * @desc render html module
+     */
+    function draw() {        
         $id = Input::get('id', 'int', '');
         if ($id) {
             $table_name = 't_news';
@@ -30,6 +33,10 @@ class new_detail extends Module {
             
             addTitle($newDetail->title);
             addDescription($newDetail->brief);
+            
+            // update hits view
+            $newDetail->set('hits', $newDetail->hits + 1);
+            $newDetail->save();
         }
 
 

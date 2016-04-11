@@ -13,7 +13,7 @@ include("config.php");
 class ajax {
 
     /**
-     * @Desc function construck
+     * @Desc function construct
      */
     function ajax() {
         $cmd = Input::get('cmd', 'txt', '');
@@ -70,6 +70,15 @@ class ajax {
         }
     }
 
+    
+    /**
+     * @desc delete module in page
+     * @param string $page page name
+     * @param string $pos position
+     * @param string $module module name
+     * @param int $eq 
+     * @return echo "ss"
+     */
     function delete_module() {
         $page = Input::get('page', 'txt', '');
         $pos = Input::get('pos', 'txt', '');
@@ -90,6 +99,12 @@ class ajax {
         echo 'ss';
     }
 
+    
+    /**
+     * @desc update page position
+     * @param string $page page name
+     * @return echo 'ss'
+     */
     function update_page_info() {
         $page = Input::get('page', 'txt', '');
         $miniPage = new Page();
@@ -103,7 +118,7 @@ class ajax {
 
     /**
      * @desc update options, add new if not exists
-     * @param 
+     * @param string $type action type save|reset
      * @return nothing
      */
     function of_ajax_post_action() {
@@ -138,8 +153,9 @@ class ajax {
     }
 
     /**
-     * @Desc delete media
-     * @return ss
+     * @Desc delete media by list ID
+     * @param string $list_id list ID, each ID separate by a comma ','
+     * @return echo 'ss'
      */
     function delete_media() {
         $list_id = Input::get('list_id', 'txt', '');
@@ -154,7 +170,7 @@ class ajax {
 
     /**
      * @Desc update media infomation include alt, name, des...
-     * @return ss
+     * @return echo 'ss'
      */
     function update_media_info() {
         $id = Input::get('id', 'int', 0);
@@ -229,81 +245,6 @@ class ajax {
                 break;
         }
         echo 'ss';
-    }
-
-   
-
-    
-    
-    /**
-     * @Desc search images from google
-     * @param string $q: the keyword
-     * @param int $num: number want to get, default is 24
-     * @return nothing, print json
-     */
-    function get_google_image() {
-        $q = Input::get('q', 'txt', '');
-        $num = Input::get('num', 'int', 32);
-        $result = array();
-        $page = floor($num / 8);
-        
-        if ($q != '') {
-            for($n = 1; $n <= $page; $n++){
-                $apiURL = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" . urlencode($q) . "&rsz=8&start=".($n*8);
-                $requestContent = json_decode(file_get_contents($apiURL), true);
-                $resultImages = $requestContent['responseData']['results'];
-                for ($i = 0; $i < 8; $i++) {
-                    $imageInfo = $resultImages[$i];
-                    $img = array(
-                        'url' => $imageInfo['url'],
-                        'thumb' => $imageInfo['tbUrl'],
-                        'info'  => $imageInfo['width'].' x '.$imageInfo['height']
-                    );
-                    $result[]= $img;
-                }
-            }
-        }
-        
-        echo json_encode($result);
-        
-    }
-    
-    
-    /**
-     * @Desc function save images from url, add this to media
-     * @param string $url: images url
-     * @return nothing, print json
-     */
-    function save_google_image(){
-        $src = Input::get('src','txt','');
-        if($src){
-            
-            $file_name = getFileName($src);
-            $file_name = remove_special_char($file_name);
-            
-            $type = Input::get('f', 'txt', 'media');
-            $dir = "../uploads/images/" . $type . "/" . date('Y_m_d') . '/';
-
-            // create folder
-            if (!is_dir($dir)) {
-                mkdir($dir, 0775, true);
-            }
-
-            // download file
-            $file_path = trim($dir, '.') . $file_name;
-            $ok = download_file($src, ROOT_PATH . $file_path);
-            if(!$ok){
-                $result = array('status' => 403, 'msg' => 'Folder can not writable');
-                echo json_encode($result);
-                die;
-            }
-
-            // insert to the media
-            insertMedia($file_path, 0, $type);
-            
-            $result = array('status' => 200, 'msg' => 'sucsess');
-            echo json_encode($result); die;
-        }
     }
     
     

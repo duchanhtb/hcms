@@ -75,7 +75,7 @@ class Image {
         return true;
     }
 
-    /*     * **********************************
+    /**************************************
       /* SETTERS
       /************************************
 
@@ -83,6 +83,7 @@ class Image {
      * Sets path to temp files
      * @param string $path
      */
+
     public function setPathToTempFiles($path) {
         $path = realpath($path) . DIRECTORY_SEPARATOR;
         $this->pathToTempFiles = $path;
@@ -112,11 +113,11 @@ class Image {
         return true;
     }
 
-    /************************************
+    /*     * **********************************
       /* ACTIONS
       /************************************
 
-    /**
+      /**
      * Resizes an image
      * Some portions of this function as found on
      * http://www.bitrepository.com/resize-an-image-keeping-its-aspect-ratio-using-php-and-gd.html
@@ -139,6 +140,7 @@ class Image {
      *               b = bottom
      *               array( y-coordinate, height)
      */
+
     public function resize($max_width, $max_height, $method = "fit", $cropAreaLeftRight = "c", $cropAreaBottomTop = "c", $jpgQuality = 100) {
         $width = $this->getWidth();
         $height = $this->getHeight();
@@ -419,10 +421,10 @@ class Image {
         return true;
     }
 
-    /************************************
-    /* CHECKERS
-    /************************************
-    /**
+    /*     * **********************************
+      /* CHECKERS
+      /************************************
+      /**
      * Checks whether image is RGB
      * @return bool
      */
@@ -468,11 +470,11 @@ class Image {
         return false;
     }
 
-    /************************************
-    /* GETTERS
-    /************************************
+    /**************************************
+      /* GETTERS
+      /************************************
 
-    /**
+      /**
      * Returns function names
      */
 
@@ -671,14 +673,15 @@ class Image {
         return $this->imageInfo["height"] / $this->imageInfo["width"];
     }
 
-    /************************************
-    /* OTHER STUFF
-    /************************************
+    /*     * **********************************
+      /* OTHER STUFF
+      /************************************
 
-    /**
+      /**
      * Replacement for imagerotate if it doesn't exist
      * As found on http://www.php.net/manual/de/function.imagerotate.php#93692
      */
+
     protected function rotateImage($img, $rotation) {
         $width = imagesx($img);
         $height = imagesy($img);
@@ -717,4 +720,4 @@ class Image {
         return false;
     }
 
-}
+} // end class

@@ -195,4 +195,4 @@ class Cache {
         $this->conn->flush();
     }
 
-}
+} // end class

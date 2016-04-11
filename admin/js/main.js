@@ -504,7 +504,7 @@ $(document).ready(function () {
                 dayNamesMin: day_names_min,
                 weekHeader: 'Не',
                 dateFormat: 'yy-mm-dd',
-                timeFormat: 'hh:mm:ss',
+                timeFormat: 'HH:mm:ss',
                 showMonthAfterYear: false,
                 yearSuffix: '',
                 changeYear: false,

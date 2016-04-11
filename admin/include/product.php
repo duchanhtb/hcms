@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 
 global $tbl_prefix;
@@ -49,7 +49,7 @@ $column = array(
         "required"      => "Nhâp mã sản phẩm",
         "searchable"    => true,
         "editlink"      => true,
-        "show_on_list"  => true
+        "show_on_list"  => false
     ),
     "price" => array(
         "title"         => "Giá",
@@ -74,7 +74,7 @@ $column = array(
         "table"         => array(
             'table_name'    => 't_product_images',
             'primary_key'   => 'id',
-            'images_url'    => 'images',
+            'images_url'    => 'url',
             'relate_id'     => 'product_id'
         ),
         "editable"      => false,

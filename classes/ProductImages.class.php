@@ -5,98 +5,71 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class ProductImages extends Base {
 
     var $fields = array(
         'product_id',
-        'images',
+        'url',
         'ordering'
     ); //fields in table (excluding Primary Key)
     var $table = "t_product_images";
 
     /**
-     * @Desc get product images by list Id
-     * @param string $pid
+     * @Desc get product images by product Id 
+     * @param int $pid: product ID
      * @return array
      */
-    function getProductImageById($pid) {
-        return $this->get("*", " AND product_id = $pid ", " `id` DESC ");
+    function getProductImageByProductId($pid) {
+        return DB::for_table($this->table)->where_equal('product_id', $pid)->order_by_desc('id')->find_many();
     }
 
     /**
-     * @Desc get product images
-     * @param string $product_id: list product_id example "1,2,3,4";
+     * @Desc get product images by list Id example "1,2,3,4"
+     * @param string $pid sperate by comma (,)
      * @return array
      */
-    function getProductImageByListID($list_pid) {
-        if ($list_pid != "") {
-            $result = array();
-            $arrayId = explode(',', $list_pid);
-            foreach ($arrayId as $pid) {
-                $result[$pid] = array();
-            }
-
-            $listProductImages = $this->get("*", " AND product_id IN ($list_pid) ", " id DESC ");
-            if (count($listProductImages) > 0) {
-                foreach ($listProductImages as $key => $value) {
-                    $product_id = $value['product_id'];
-                    array_push($result[$product_id], $listProductImages[$key]);
-                }
-            }
-            return $result;
-        }
-        return NULL;
+    function getProductImageByListProductId($listId) {
+        $arrId = explode(',', $listId);
+        return DB::for_table($this->table)->where_in('product_id', $arrId)->order_by_desc('id')->find_many();
     }
 
     /**
-     * @Desc get product images default
-     * @param string $list_id: list product_id example "1,2,3,4";
+     * @Desc delete product that have product_id = -1;
      * @return array
      */
-    function getProductImageDefault($list_id) {
-        $image = array();
-        $result = $this->get("product_id,images", " AND product_id IN ($list_id) ", " ID ASC ");
-        if (count($result) > 0) {
-            foreach ($result as $key => $value) {
-                $image[$value['product_id']] = array('images' => $value['images']);
-            }
-        }
-
-        return $image;
-    }
-
-    /**
-     * @Desc delete product that have product_id <= 0     
-     * @return array
-     */
-    function deleteImageUndendity() {
-        global $oDb;
-        $this->deleteProductImage(-1);
+    function deleteImageUndendity($pid = '-1') {
+        $this->deleteProductImage($pid);
     }
 
     /**
      * @Desc set product images that have product_id = -1;
      * @param int $pid: product id 
+     * @param int $tmp_id the temporary id
      * @return array
      */
-    function setProductId($pid) {
-        global $oDb;
-        $sql = "UPDATE `$this->table` SET `product_id` = $pid WHERE `product_id` = -1 ";
-        $oDb->query($sql);
+    function setProductId($pid, $tmp_id = '-1') {
+        $images = DB::for_table($this->table)->where_equal('product_id', $tmp_id);
+        if (!$images)
+            return;
+        foreach ($images as $image) {
+            $imgObj = DB::for_table($this->table)->find_one($image->id);
+            $imgObj->product_id = $pid;
+            $imgObj->save();
+        }
     }
 
     /**
-     * @Desc set product images that have product_id = -1;
+     * @Desc delete product images
      * @param int $pid: product id 
      * @return array
      */
     function deleteProductImage($pid) {
-        $list_image = $this->get(" id ", " AND `product_id` = $pid ");
-        if (is_array($list_image) && count($list_image) > 0) {
-            foreach ($list_image as $key => $value) {
-                $this->deleteImage($value['id']);
+        $images = DB::for_table($this->table)->where_equal('product_id', $pid)->find_many();
+        if (is_array($images) && count($images) > 0) {
+            foreach ($images as $image) {
+                $this->deleteImage($image->id);
             }
         }
     }
@@ -107,26 +80,31 @@ class ProductImages extends Base {
      * @return boolean
      */
     function deleteImage($id) {
-        $this->read($id);
-        $thumb_path = '..' . $this->thumb_path;
-        if (file_exists($thumb_path)) {
-            @unlink($thumb_path);
+        global $imagesSize;
+        $imgObj = DB::for_table($this->table)->find_one($id);
+        if (!$imgObj)
+            return;
+
+        // delete origin images
+        $image_path = ROOT_PATH . $imgObj->images;
+        if (file_exists($image_path)) {
+            @unlink($image_path);
         }
 
-        $thumb50_path = '..' . $this->thumb50_path;
-        if (file_exists($thumb50_path)) {
-            @unlink($thumb50_path);
+        // delete thumb
+        foreach ($imagesSize as $folder => $wh) {
+            $image = $imgObj->images;
+            $path_info = pathinfo($image);
+            $basename = $path_info['basename'];
+            $dirname = $path_info['dirname'];
+            $thumb_path = ROOT_PATH . $dirname . '/' . $folder . '/' . $basename;
+            if (file_exists($thumb_path)) {
+                @unlink($thumb_path);
+            }
         }
 
-        $thumb300_path = '..' . $this->thumb300_path;
-        if (file_exists($thumb300_path)) {
-            @unlink($thumb300_path);
-        }
-
-        $images_path = '..' . $this->images_path;
-        if (file_exists($images_path)) {
-            @unlink($images_path);
-        }
-        return $this->remove($id);
+        // delete record in database
+        $imgObj->delete();
     }
-}
+
+}// end class

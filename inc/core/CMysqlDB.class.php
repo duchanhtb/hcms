@@ -433,4 +433,5 @@ class CMysqlDB {
             return @mysql_query($query, $link);
         }
     }
-}
+
+} // end class

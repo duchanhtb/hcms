@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2014
+ * @copyright 2015
  */
 class Provinces extends Base {
 
@@ -21,25 +21,27 @@ class Provinces extends Base {
      * @return array
      */
     function getAllProvince() {
-        return $this->get('*', false, 'name');
+        return DB::for_table($this->table)->order_by_asc('name')->find_many();
     }
 
     /**
      * @Desc get all province with districts
      * @return array
      */
-    function getAllProvinceDistrict() {
+    function getAllProvinceWithDistrict() {
         $Districts = new Districts();
         $allDistrict = $Districts->getAllDistrict();
-        foreach ($allDistrict as $k => $v) {
-            $district[$v['province_id']][] = array('id' => $v['id'], 'name' => $v['name']);
+        $result = array();
+        
+        $allDistrict = DB::for_table($this->table_district)->find_many();
+        foreach ($allDistrict as $district) {
+            $arrDistrict[$district->province_id][] = $district;
         }
-
-
-        $allProvince = $this->getAllProvince();
-        foreach ($allProvince as &$value) {
-            $value['district'] = $district[$value['id']];
+       
+        $allProvince = DB::for_table($this->table)->order_by_asc('name')->find_many();
+        foreach ($allProvince as &$province) {
+            $province->district = $arrDistrict[$province->id];
         }
         return $allProvince;
     }
-}
+} // end class

@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class NewsCategory extends Base {
 
@@ -30,54 +30,38 @@ class NewsCategory extends Base {
      * @param string $con: condition     
      * @return array
      */
-    function getAll($sort = false, $order = false) {
-        global $allCat;
-        if (is_array($allCat) && count($allCat) > 0) {
-            return $allCat;
+    function getAll($sort = 'ordering', $order = "DESC") {
+        global $allNewsCategory;
+        if (is_array($allNewsCategory) && count($allNewsCategory) > 0) {
+            return $allNewsCategory;
         }
 
-        if ($sort && $order) {
-            $allCat = $this->get("*", $con, "$sort $order ");
-        } else {
-            $allCat = $this->get("*", $con, "ordering DESC, parent_id ASC ");
+        $allNewsCategory = DB::for_table($this->table);
+
+        if ($sort && $order == 'ASC') {
+            $allNewsCategory->order_by_asc($sort);
         }
-        return $allCat;
-    }
-
-    /**
-     * @Desc get category with condition 
-     * @param string $con: condition
-     * @param string $order: field want to sort
-     * @param string $order: DESC or ASC
-     * @return array
-     */
-    function getCategory($con = "", $sort = "id", $order = "DESC", $page = 1) {
-        $page = ($page > 1 ) ? $page : 1;
-
-        $start = ($page - 1) * ($this->num_per_page);
-
-        if ($sort && $order) {
-            return $this->get("*", $con, "$sort $order, ordering asc ", $start, $this->num_per_page);
-        } else {
-            return $this->get("*", $con, " id DESC, ordering DESC ", $start, $this->num_per_page);
+        if ($sort && $order == 'DESC') {
+            $allNewsCategory->order_by_desc($sort);
         }
-        return false;
+
+        return $allNewsCategory->find_many();
     }
 
     /**
      * @Desc get list id of category
-     * @param array $allCat: array of category
+     * @param array $allNewsCategory: array of category
      * @param int $parent_id: parent id  
      * @return string example: 1,5,23,3
      */
-    function getListSubCategory($allCat, $parent_id = 0) {
+    function getListSubCategory($allNewsCategory, $parent_id = 0) {
         $list_id = $parent_id . ',';
-        if (is_array($allCat) && count($allCat) > 0) {
-            $temp_array = $allCat;
-            foreach ($allCat as $key => $value) {
-                if ($value['parent_id'] == $parent_id) {
+        if (is_array($allNewsCategory) && count($allNewsCategory) > 0) {
+            $temp_array = $allNewsCategory;
+            foreach ($allNewsCategory as $key => $category) {
+                if ($category->parent_id == $parent_id) {
                     unset($temp_array[$key]);
-                    $list_id .= $this->getListSubCategory($temp_array, $value['id']);
+                    $list_id .= $this->getListSubCategory($temp_array, $category->id);
                 }
             }
         }
@@ -87,21 +71,21 @@ class NewsCategory extends Base {
 
     /**
      * @Desc get list id of category
-     * @param array $allCat: array of category
+     * @param array $allNewsCategory: array of category
      * @param int $parent_id: parent id  
      * @return string example: 1,5,23,3
      */
-    function getSubCat($allCat, $parent_id = 0, $status = false) {
+    function getSubCat($allNewsCategory, $parent_id = 0, $status = false) {
         $result = array();
-        if (is_array($allCat) && count($allCat) > 0) {
-            $temp_array = $allCat;
-            foreach ($allCat as $key => $value) {
-                if ($value['parent_id'] == $parent_id) {
+        if (is_array($allNewsCategory) && count($allNewsCategory) > 0) {
+            $temp_array = $allNewsCategory;
+            foreach ($allNewsCategory as $key => $category) {
+                if ($category->parent_id == $parent_id) {
                     if ($status === false) {
-                        array_push($result, $value);
+                        array_push($result, $category);
                     } else {
-                        if ($value['status'] == 1) {
-                            array_push($result, $value);
+                        if ($category->status == 1) {
+                            array_push($result, $category);
                         } else {
                             continue;
                         }
@@ -115,17 +99,17 @@ class NewsCategory extends Base {
 
     /**
      * @Desc get parent id of category
-     * @param array $allCat: array of category
+     * @param array $allNewsCategory: array of category
      * @param int $parent_id: parent id  
      * @return string example: 1,5,23,3
      */
-    function getParentCat($allCat, $cid) {
-        if (is_array($allCat) && count($allCat) > 0) {
-            foreach ($allCat as $key => $value) {
-                $subCat = $this->getSubCat($allCat, $value['id']);
-                foreach ($subCat as $k => $v) {
-                    if ($v['id'] == $cid) {
-                        return $value;
+    function getParentCat($allNewsCategory, $cid) {
+        if (is_array($allNewsCategory) && count($allNewsCategory) > 0) {
+            foreach ($allNewsCategory as $key => $category) {
+                $subCat = $this->getSubCat($allNewsCategory, $category->id);
+                foreach ($subCat as $k => $sub) {
+                    if ($sub->id == $cid) {
+                        return $category;
                     }
                 }
             }
@@ -136,16 +120,16 @@ class NewsCategory extends Base {
 
     /**
      * @Desc get category info based on cateogry id
-     * @param array $allCat: array of category
+     * @param array $allNewsCategory: array of category
      * @param int $cid: id of category 
      * @package string $field: fiend want to get
      * @return string
      */
-    function getCategoryInfo($allCat, $cid, $field = 'name') {
-        if (count($allCat) > 0) {
-            foreach ($allCat as $k => $value) {
-                if ($value['id'] == $cid) {
-                    return $value[$field];
+    function getCategoryInfo($allNewsCategory, $cid, $field = 'name') {
+        if (count($allNewsCategory) > 0) {
+            foreach ($allNewsCategory as $category) {
+                if ($category->id == $cid) {
+                    return $category->$field;
                 }
             }
         }

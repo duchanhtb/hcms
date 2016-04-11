@@ -53,6 +53,11 @@ class Media extends Base {
         'word' => array('doc', 'docx', 'docm', 'dot', 'dotx', 'odt', 'ott', 'odm')
     );
 
+    
+    /**
+     * @desc construct function that register necessary css and javascript library
+     * @return 
+     */
     public function __construct() {
 
         if (function_exists('admin_url')) {
@@ -849,4 +854,4 @@ class Media extends Base {
         return trans('unknow');
     }
 
-}
+} // end class

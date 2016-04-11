@@ -32,7 +32,7 @@ define("CACHE_STATUS", 'off');
 define("MODULE_PATH", ROOT_PATH . MODULE_FOLDER . DS);
 
 // calculator query in class database
-define("SHOW_QUERY_INFO", "on");
+define("SHOW_QUERY_INFO", "off");
 
 // define string encode password
 define('PASS_ENDCODE', 'HANHCMS');
@@ -44,8 +44,3 @@ define('MAX_SIZE_IMAGE', '1280x1024');
 
 // DEBUG
 define("CMS_DEBUG", true);
-
-
-
-
-

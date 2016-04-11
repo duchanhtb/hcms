@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class Banner extends Base {
 
@@ -23,57 +23,39 @@ class Banner extends Base {
     var $table = "t_banner";
 
     /**
-     * @Desc function get banner 
-     * @param $con: condition 
-     * @param $sort: sort 
-     * @param $order: 
-     * @param $page:
-     * @return array
+     * @Desc function get all banner      
+     * @return array|boolean
      */
-    function getAll($sort = false, $order = false) {
+    function getAll() {
         global $allBanner;
         if (isset($allBanner) && count($allBanner) > 0) {
             return $allBanner;
         }
-        $con = '';
-        if ($sort && $order) {
-            $allBanner = $this->get("*", $con, "$sort $order");
-            return $allBanner;
-        } else {
-            $allBanner = $this->get('*', $con, " ordering DESC ");
+        $allBanner = DB::for_table($this->table)->find_many();
+        if ($allBanner && count($allBanner) > 0) {
             return $allBanner;
         }
+
         return false;
     }
 
     /**
      * @Desc function get banner 
-     * @param string $con: condition 
-     * @param string $sort: sort 
-     * @param string $order: 
-     * @param int $page: page
-     * @return array
+     * @param int $id: banner ID     
+     * @return array|boolean
      */
-    function getBanner($con = "", $sort = false, $order = false, $page = 1) {
-        $page = ($page > 1 ) ? $page : 1;
-
-        $start = ($page - 1) * ($this->num_per_page);
-        if ($sort && $order) {
-            return $this->get("*", $con, "$sort $order", $start, $this->num_per_page);
-        } else {
-            return $this->get("*", $con, " ordering DESC ", $start, $this->num_per_page);
-        }
+    function getBannerById($id) {
+        $banner = Db::for_table($this->table)->where_equal('id', $id)->find_one();
+        if ($banner)
+            return $banner;
 
         return false;
     }
 
     /**
      * @Desc function get banner by position
-     * @param string $con: condition 
-     * @param string $sort: sort 
-     * @param string $order: 
-     * @param int $page: page
-     * @return array
+     * @param string $pos: name of position     
+     * @return array|boolean
      */
     function getBannerByPosition($pos) {
         $allBanner = $this->getAll();
@@ -87,3 +69,5 @@ class Banner extends Base {
     }
 
 }
+
+// end class

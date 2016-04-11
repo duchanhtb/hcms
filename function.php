@@ -119,14 +119,14 @@ function getFileExt($filename) {
  * @return boolean
  */
 function download_file($file_url, $save_to) {
-    
+
     $save_to = @trim($save_to, '..');
     $path_info = pathinfo($save_to);
     $dir_name = $path_info['dirname'];
-    if(!is_writable($dir_name)){
+    if (!is_writable($dir_name)) {
         return false;
     }
-    
+
     if (!is_dir($dir_name)) {
         mkdir($dir_name, 0777, true);
     }
@@ -136,15 +136,15 @@ function download_file($file_url, $save_to) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $file_content = curl_exec($ch);
     curl_close($ch);
-    
-    if(!$file_content){
+
+    if (!$file_content) {
         return false;
     }
-    
+
     $downloaded_file = fopen($save_to, 'w');
     fwrite($downloaded_file, $file_content);
     fclose($downloaded_file);
-    
+
     return true;
 }
 
@@ -217,7 +217,7 @@ function cacheSetting($changed) {
     if ($changed == true) {
         $arrSetting['reload_cache'] = 1;
     }
-    $cache_file = ROOT_PATH . CACHE_FOLDER. DS .'setting.json';
+    $cache_file = ROOT_PATH . CACHE_FOLDER . DS . 'setting.json';
     $fp = @fopen($cache_file, 'w');
     @fwrite($fp, json_encode($arrSetting));
     @fclose($fp);
@@ -229,7 +229,7 @@ function cacheSetting($changed) {
  * @return int
  */
 function getCacheSetting() {
-    $cache_file = ROOT_PATH . CACHE_FOLDER. DS.'setting.json';
+    $cache_file = ROOT_PATH . CACHE_FOLDER . DS . 'setting.json';
     $setting = file_get_contents($cache_file);
     if ($setting) {
         return json_decode($setting, true);
@@ -268,19 +268,18 @@ function getSiteUrl() {
  * @param str $name: module name excluding extension php
  * @return HTML code
  */
-function loadModule($name) {    
+function loadModule($name) {
     // language
     $lang = getLanguage();
-    
+
     $module_path = MODULE_PATH . "$name.php";
     if (file_exists($module_path)) {
         include_once($module_path);
         $module = new $name();
         return $module->draw();
     }
-    
+
     return $lang['module_not_exists'];
-    
 }
 
 /**
@@ -381,11 +380,11 @@ function paging_ajax($current_page, $total_page, $func_callback, $item_each_page
  * @return HTML paging
  */
 function paging($current_page, $total_page, $linkpage, $class = 'paging') {
-    
+
     // language
     $lang = getLanguage();
-    
-    
+
+
     if ($linkpage == false) {
         $linkpage = curPageURL();
     }
@@ -402,11 +401,11 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
         return "";
     }
 
-    $data = '<ul class="'.$class.'">';
+    $data = '<ul class="' . $class . '">';
     if ($total_page <= 10) {
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
-                    '">&lt;&lt; '.$lang['next'].'</a></li>';
+                    '">&lt;&lt; ' . $lang['next'] . '</a></li>';
         }
 
         for ($i = 1; $i <= $total_page; $i++) {
@@ -420,7 +419,7 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
 
         if ($current_page != $total_page) {
             $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) .
-                    '">'.$lang['next'].' &gt;&gt;</a></li>';
+                    '">' . $lang['next'] . ' &gt;&gt;</a></li>';
         }
     }
 
@@ -430,7 +429,7 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
 
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
-                    '">&lt;&lt; '.$lang['previous'].'</a></li>';
+                    '">&lt;&lt; ' . $lang['previous'] . '</a></li>';
         }
 
         for ($i = $minpage; $i <= $maxpage; $i++) {
@@ -443,7 +442,7 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
         }
 
         if ($current_page != $maxpage) {
-            $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) . '">'.$lang['next'].' &gt;&gt;</a>';
+            $data .= '<li class="btn-next"><a href="' . $linkpage . ($current_page + 1) . '">' . $lang['next'] . ' &gt;&gt;</a>';
         }
     }
     $data .= '</ul>';
@@ -506,7 +505,7 @@ function getHtmlPaging($cur_page, $total_page, $linkpage = false) {
     				<a href="' . $first_page_link . '" class="page-far-left"></a>
     				<a href="' . $link_prev . '" class="page-left"></a>
     				<div id="page-info">Page <strong>' . $cur_page . '</strong> / ' . $total_page .
-                        '</div>
+                '</div>
     				<a href="' . $link_next . '" class="page-right"></a>
     				<a href="' . $last_page_link . '" class="page-far-right"></a>
     			</td>
@@ -538,6 +537,7 @@ function removeQuerystringVar($url, $key) {
  * @param $param: array parram example array('id'=>1,'name'=>2)
  * @return URL
  */
+
 /**
  * @Desc create link of cms, when we want to rewrite link, we only change this function
  * @param $page: page of the cms 
@@ -554,8 +554,8 @@ function createLink($page, $param = false, $rewrite = true) {
         return $link;
     }
     $link .= $page;
-    if(isset($param['subpage']) && $param['subpage'] !=''){
-        $link .= '/'.$page['subpage'];
+    if (isset($param['subpage']) && $param['subpage'] != '') {
+        $link .= '/' . $page['subpage'];
     }
     if ($param && $param['id'] > 0 && $param['title'] != '') {
         $id_endcode = alphaID($param['id'], false);
@@ -811,59 +811,7 @@ function DecryptData($input, $key_seed = 'KEY_ENCRYPT_DECRYPT_HANHCMS') {
     return $text;
 }
 
-/**
- * @Desc count user online
- * @return array: include total visitor and current online array('total'=>123, 'current'=>123)
- */
-function counter() {
-    $rip = $_SERVER['REMOTE_ADDR'];
-    $sd = date("H:i:s Y/m/d", time());
-    $count = 1;
-    $maxu = 1;
-    $total = 0;
 
-    $file1 = "ip.txt";
-    $lines = file($file1);
-    $line2 = "";
-
-    foreach ($lines as $line_num => $line) {
-        if ($line == 0) {
-            $pos_haicham = strpos($line, ':');
-            $strlen = strlen($line);
-            $total = trim(substr($line, $pos_haicham + 1, $strlen - $pos_haicham));
-        } else if ($line_num == 1) {
-            $pos_haicham = strpos($line, ':');
-            $strlen = strlen($line);
-            $maxu = trim(substr($line, $pos_haicham + 1, $strlen - $pos_haicham));
-        } else {
-            $fp = strpos($line, "****");
-            $nam = substr($line, 0, $fp);
-            $sp = strpos($line, "++++");
-            $val = substr($line, $fp + 4, $sp - ($fp + 4));
-
-            $diff = strtotime($sd) - strtotime($val);
-
-            if ($diff < 300 && $nam != $rip) {
-                $count = $count + 1;
-                $line2 = $line2 . $line;
-                $total++;
-            }
-        }
-    }
-
-    $my = $rip . "****" . $sd . "++++\n";
-    if ($count > $maxu)
-        $maxu = $count;
-
-    $open1 = fopen($file1, "w");
-    fwrite($open1, "total_user: $total\n");
-    fwrite($open1, "current online: $maxu\n");
-    fwrite($open1, "$line2");
-    fwrite($open1, "$my");
-    fclose($open1);
-    $arrCounter = array('total' => $total, 'online' => $maxu);
-    return $arrCounter;
-}
 
 /**
  * @Desc convert string to url
@@ -1138,6 +1086,19 @@ if (!function_exists('mime_content_type')) {
 
 }
 
+
+/**
+ * @Desc get default windows fonts
+ * @param nothing
+ * @return array
+ */
+if(!function_exists('hcms_windows_fonts')){
+    function hcms_windows_fonts(){        
+        $fonts = "Arial,Arial Black,Arial Bold,Arial Bold Italic,Arial Italic,Comic Sans MS,Courier New,Courier New Bold,Courier New Bold Italic,Courier New Italic,Estrangelo Edessa,Franklin Gothic Medium,Franklin Gothic Medium,Italic,Gautami,Georgia,Georgia Bold,Georgia Bold Italic,Georgia Italic Impact,Latha,Lucida Console,Lucida Sans Unicode,Microsoft Sans Serif,Modern MS Sans Serif,MS Serif,Mv Boli,Palatino Linotype,Palatino Linotype Bold,Palatino Linotype Bold Italic,Palatino Linotype Italic,Roman,Script,Small Fonts,Symbol,Symbol,Tahoma,Tahoma Bold,Times New Roman,Times New Roman Bold,Times New Roman Bold Italic,Times New Roman Italic,Trebuchet MS,Trebuchet MS Bold,Trebuchet MS Bold Italic,Trebuchet MS Italic,Tunga,Verdana,Verdana Bold,Verdana Bold Italic Verdana Italic,Webdings,WingDings,WST_Czech,WST_Engl,WST_Fren,WST_Germ,WST_Ital,WST_Span,WST_Swed";
+        return explode(',', $fonts);
+    }
+}
+
 /**
  * @Desc translate multi language
  * @param string $key: key of word in the database or string input. Example $lang[language] = 'Ngôn ngữ' in Vietnamese / $language['language'] = Language in English
@@ -1280,126 +1241,43 @@ function cms_header() {
     $html = '';
     // title
     if ($title) {
-        $html .= "<title>$title</title>".PHP_EOL;
+        $html .= "<title>$title</title>" . PHP_EOL;
     } else {
-        $html .= "<title>" . getCmsTitle() . "</title>".PHP_EOL;
+        $html .= "<title>" . getCmsTitle() . "</title>" . PHP_EOL;
     }
-   
+
     //keyword
     if ($keywords != '') {
-        $html .= '<meta name="keywords" content="' . $keywords . '" >'.PHP_EOL;
+        $html .= '<meta name="keywords" content="' . $keywords . '" >' . PHP_EOL;
     } else {
-        $html .= '<meta name="keywords" content="' . getCmsKeywords() . '" >'.PHP_EOL;
+        $html .= '<meta name="keywords" content="' . getCmsKeywords() . '" >' . PHP_EOL;
     }
 
     //description
     if ($description != '') {
-        $html .= '<meta name="description" content="' . $description . '" >'.PHP_EOL;
+        $html .= '<meta name="description" content="' . $description . '" >' . PHP_EOL;
     } else {
-        $html .= '<meta name="description" content="' . getCmsDescription() . '" >'.PHP_EOL;
+        $html .= '<meta name="description" content="' . getCmsDescription() . '" >' . PHP_EOL;
     }
 
     // graph tags
     if (is_array($graph_tags) && count($graph_tags) > 0) {
         foreach ($graph_tags as $handle => $graph) {
-            $html .= '<meta property="og:' . $graph['property'] . '" content="' . $graph['content'] . '" />'.PHP_EOL;
+            $html .= '<meta property="og:' . $graph['property'] . '" content="' . $graph['content'] . '" />' . PHP_EOL;
         }
     }
-    
+
     // favicon
-    if(get_option('favicon')){
-        $html .= '<link rel="shortcut icon" type="image/x-icon" href="'.  base_url().get_option('favicon').'">';
-
-    }
-    
-
-
-    ///////////////// inline css ////////////////////
-    $inline_css = '';      
-    
-    // body
-    $body_inline_css = '';
-    if(get_option('body-background-color') != ''){       
-        $body_inline_css .= "\tbackground-color: ". get_option("body-background-color"). ";" . PHP_EOL;
-    }    
-    if(get_option('primary-color') != ''){
-        $body_inline_css .= "\tcolor: ". get_option("primary-color"). ";"  . PHP_EOL;
-    }
-    if(get_option('body-font') != ''){
-        register_style('body-font', 'https://fonts.googleapis.com/css?family='.get_option("body-font"));
-        $body_inline_css .= "\tfont-family: ". str_replace("|",",", get_option("body-font")). ";"  . PHP_EOL;
-    }
-    if(get_option('body-size') != ''){
-        $body_inline_css .= "\tfont-size: ". trim(get_option("body-size")). "px;"  . PHP_EOL;
-    }
-    
-    if($body_inline_css){
-        $inline_css .= "body{".PHP_EOL . $body_inline_css."}". PHP_EOL;
-    }   
-    
-    
-    // heading
-    if(get_option('heading-font') != ''){
-        $inline_css .= "h1,h2,h3,h4,h5,h6{".PHP_EOL ."\tfont-family: ".get_option('heading-font'). ";" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h1-size') != ''){
-        $inline_css .= "h1{".PHP_EOL ."\tfont-size: ". trim(get_option('h1-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h2-size') != ''){
-        $inline_css .= "h2{".PHP_EOL ."\tfont-size: ". trim(get_option('h2-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h3-size') != ''){
-        $inline_css .= "h3{".PHP_EOL ."\tfont-size: ". trim(get_option('h3-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h4-size') != ''){
-        $inline_css .= "h4{".PHP_EOL ."\tfont-size: ". trim(get_option('h4-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h5-size') != ''){
-        $inline_css .= "h5{".PHP_EOL ."\tfont-size: ". trim(get_option('h5-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    if(get_option('h6-size') != ''){
-        $inline_css .= "h6{".PHP_EOL ."\tfont-size: ". trim(get_option('h6-size')) . "px;" . PHP_EOL. "}". PHP_EOL;
-    }
-    
-    
-    
-    // nav font
-    if(get_option('mainnav-font') != ''){
-        $inline_css .= "nav {".PHP_EOL ."\tfont-family: ".get_option('mainnav-font'). ";" . PHP_EOL. "}". PHP_EOL;
-    }
-    
-    // link color
-    if(get_option('link-color') != ''){
-        $inline_css .= "a {color: ". get_option('link-color') ."}". PHP_EOL;
-    }
-    if(get_option('link-hover-color') != ''){
-        $inline_css .= 'a:hover {color: '. get_option('link-hover-color') .'}'. PHP_EOL;
-    }
-    if (is_array($cms_inline_style) && count($cms_inline_style)) {
-        foreach ($cms_inline_style as $data) {
-            $inline_css .= $data . PHP_EOL;
-        }
-    }
-    
-    // custom css
-    if(get_option('custom-css') != ''){       
-        $inline_css .= get_option('custom-css'). PHP_EOL;                
-    }
-    
-    if($inline_css){
-        $html .= PHP_EOL;
-        $html .= '<style type="text/css">'.PHP_EOL;
-        $html .=  $inline_css;
-        $html .= '</style>'.PHP_EOL;
+    if (get_option('favicon')) {
+        $html .= '<link rel="shortcut icon" type="image/x-icon" href="' . base_url() . get_option('favicon') . '">'. PHP_EOL;
     }
 
-    
     // style
     if (is_array($cms_style) && count($cms_style) > 0) {
         foreach ($cms_style as $handle => $style) {
             $ver = (isset($style['ver']) && $style['ver'] != '') ? '?ver=' . $style['ver'] : '';
             $media = isset($style['meida']) ? $style['meida'] : 'all';
-            $html .= '<link rel="stylesheet" href="' . $style['src'] . $ver . '" media=' . $media . ' />' . PHP_EOL;
+            $html .= '<link rel="stylesheet" href="' . $style['src'] . $ver . '" media="' . $media . '" />' . PHP_EOL;
         }
     }
 
@@ -1412,6 +1290,96 @@ function cms_header() {
             $media = isset($style['meida']) ? $style['meida'] : 'all';
             $html .= '<script src="' . $script['src'] . '" type="text/javascript" name="' . $handle . '"></script>' . PHP_EOL;
         }
+    }
+
+    ///////////////// inline css ////////////////////
+    $inline_css = '';
+    $link_google_fonts = false;
+    // body
+    $body_inline_css = '';
+    if (get_option('body-background-color') != '') {
+        $body_inline_css .= "\tbackground-color: " . get_option("body-background-color") . ";" . PHP_EOL;
+    }
+    if (get_option('primary-color') != '') {
+        $body_inline_css .= "\tcolor: " . get_option("primary-color") . ";" . PHP_EOL;
+    }
+    if (get_option('body-font') != '') {   
+        if(!in_array(get_option("body-font"), hcms_windows_fonts())){
+            $link_google_fonts[get_option("heading-font")] = 'https://fonts.googleapis.com/css?family=' . get_option("body-font");
+        }        
+        $body_inline_css .= "\tfont-family: " . str_replace("|", ",", get_option("body-font")) . ";" . PHP_EOL;
+    }
+    if (get_option('body-size') != '') {
+        $body_inline_css .= "\tfont-size: " . trim(get_option("body-size")) . "px;" . PHP_EOL;
+    }
+
+    if ($body_inline_css) {
+        $inline_css .= "body{" . PHP_EOL . $body_inline_css . "}" . PHP_EOL;
+    }
+
+
+    // heading
+    if (get_option('heading-font') != '') {
+        if(!in_array(get_option("heading-font"), hcms_windows_fonts())){
+            $link_google_fonts[get_option("heading-font")] = 'https://fonts.googleapis.com/css?family=' . get_option("heading-font");
+        }        
+        $inline_css .= "h1,h2,h3,h4,h5,h6{" . PHP_EOL . "\tfont-family: " . get_option('heading-font') . ";" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h1-size') != '') {
+        $inline_css .= "h1{" . PHP_EOL . "\tfont-size: " . trim(get_option('h1-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h2-size') != '') {
+        $inline_css .= "h2{" . PHP_EOL . "\tfont-size: " . trim(get_option('h2-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h3-size') != '') {
+        $inline_css .= "h3{" . PHP_EOL . "\tfont-size: " . trim(get_option('h3-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h4-size') != '') {
+        $inline_css .= "h4{" . PHP_EOL . "\tfont-size: " . trim(get_option('h4-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h5-size') != '') {
+        $inline_css .= "h5{" . PHP_EOL . "\tfont-size: " . trim(get_option('h5-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+    if (get_option('h6-size') != '') {
+        $inline_css .= "h6{" . PHP_EOL . "\tfont-size: " . trim(get_option('h6-size')) . "px;" . PHP_EOL . "}" . PHP_EOL;
+    }
+
+
+
+    // nav font
+    if (get_option('mainnav-font') != '') {
+        $inline_css .= "nav {" . PHP_EOL . "\tfont-family: " . get_option('mainnav-font') . ";" . PHP_EOL . "}" . PHP_EOL;
+    }
+
+    // link color
+    if (get_option('link-color') != '') {
+        $inline_css .= "a {color: " . get_option('link-color') . "}" . PHP_EOL;
+    }
+    if (get_option('link-hover-color') != '') {
+        $inline_css .= 'a:hover {color: ' . get_option('link-hover-color') . '}' . PHP_EOL;
+    }
+    if (is_array($cms_inline_style) && count($cms_inline_style)) {
+        foreach ($cms_inline_style as $data) {
+            $inline_css .= $data . PHP_EOL;
+        }
+    }
+    
+    if($link_google_fonts){
+        $html .= '<!-- google fonts -->'. PHP_EOL;
+        foreach($link_google_fonts as $link_google_font)
+        $html .= '<link rel="stylesheet" href="' . $link_google_font . '" media="all" />' . PHP_EOL;
+    }
+
+    // custom css
+    if (get_option('custom-css') != '') {
+        $inline_css .= get_option('custom-css') . PHP_EOL;
+    }
+
+    if ($inline_css) {
+        $html .= PHP_EOL;
+        $html .= '<style type="text/css">' . PHP_EOL;
+        $html .= $inline_css;
+        $html .= '</style>' . PHP_EOL;
     }
     
     return $html;
@@ -1503,7 +1471,7 @@ function checkValidEmail($email) {
  * @return IP address
  */
 function getUserIp() {
-    if(trim($_SERVER["REMOTE_ADDR"]) == "::1"){
+    if (trim($_SERVER["REMOTE_ADDR"]) == "::1") {
         return '127.0.0.1';
     }
     return trim($_SERVER["REMOTE_ADDR"]);
@@ -1523,44 +1491,44 @@ function sendMail($to, $reply = false, $subject, $content) {
      * https://accounts.google.com/b/0/DisplayUnlockCaptcha
      * https://security.google.com/settings/security/activity?hl=en&pli=1
      */
-    
+
     require_once (INC_PATH . 'lib/PHPMailer/PHPMailerAutoload.php');
-    
-    
+
+
     //$hex_password = "2291817227dceab849837be0ce62b3e3";
-    
+
     $smtp_name = get_option('smtp-name');
     $smtp_email = get_option('smtp-email');
     $smtp_password = get_option('smtp-password');
-    
-    $smtp_port = (get_option('smtp-port') != '') ? get_option('smtp-port') : 465; 
-    
-    if($smtp_name && $smtp_email && $smtp_password){
+
+    $smtp_port = (get_option('smtp-port') != '') ? get_option('smtp-port') : 465;
+
+    if ($smtp_name && $smtp_email && $smtp_password) {
         $form = array(
-            'name'  => $smtp_name,
-            'email'  => $smtp_email,
-            'password'  => $smtp_password,
+            'name' => $smtp_name,
+            'email' => $smtp_email,
+            'password' => $smtp_password,
         );
-    }else{
+    } else {
         require_once (INC_PATH . 'lib/AES/AES.class.php');
-        
+
         $hex_name = "38f129991c2a6b3b886a62e61ab13bd6";
         $hex_email = "e3f73c65c8cd19443af8c929d2a0031c1b440648402d0ae2cf46b07e163a1ec0";
         $hex_pwd = "2291817227dceab849837be0ce62b3e3";
-        
+
         $AES = new AES(AES_KEY);
-       
+
         $form = array(
-            'name'  => $AES->decrypt(hex2bin($hex_name)),
-            'email'  => $AES->decrypt(hex2bin($hex_email)),
-            'password'  => $AES->decrypt(hex2bin($hex_pwd))
+            'name' => $AES->decrypt(hex2bin($hex_name)),
+            'email' => $AES->decrypt(hex2bin($hex_email)),
+            'password' => $AES->decrypt(hex2bin($hex_pwd))
         );
     }
-    
-    if(!$reply){
+
+    if (!$reply) {
         $reply = $form;
     }
-    
+
     $mail = new PHPMailer(); // create a new object
     $mail->IsSMTP(); // enable SMTP
     $mail->SMTPDebug = false; // debugging: 1 = errors and messages, 2 = messages only
@@ -1574,12 +1542,12 @@ function sendMail($to, $reply = false, $subject, $content) {
     $mail->Password = $form['password'];
     $mail->SetFrom($form['email'], $form['name']);
     $mail->AddReplyTo($reply['email'], $reply['name']);
-    
+
     $mail->Subject = $subject;
     $mail->Body = $content;
     $mail->MsgHTML($content);
     $mail->AddAddress($to['email'], $to['name']);
-    if(!$mail->Send()) {
+    if (!$mail->Send()) {
         return "Mailer Error: " . $mail->ErrorInfo;
     } else {
         return "Message has been sent";
@@ -1704,7 +1672,6 @@ function userLogout() {
     setcookie("cms_password", "", time() - 3600);
     redirect('login.php');
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// END USER FUNCTION ////////////////////////////////////////////
@@ -1954,10 +1921,10 @@ function update_option($option_name, $option_value) {
  */
 function update_multi_options($arrValue) {
     global $oDb;
-    $sql_insert = '';    
+    $sql_insert = '';
     $sql_truncate = "TRUNCATE TABLE `m_options`";
     $oDb->query($sql_truncate);
-    
+
     foreach ($arrValue as $option_name => $option_value) {
         $sql_insert .= " ('$option_name', '$option_value'),";
     }
@@ -1985,20 +1952,21 @@ function getThumbnail($folder, $path_or_id) {
     } else {
         $path = trim($path_or_id, '.');
     }
-    
-    $http_prefix = substr($path, 0, 4);
-    if($http_prefix == 'http') return $path;
 
-    if($folder == 'origin'){
-        return base_url(). $path;
+    $http_prefix = substr($path, 0, 4);
+    if ($http_prefix == 'http')
+        return $path;
+
+    if ($folder == 'origin') {
+        return base_url() . $path;
     }
-    
+
     global $imagesSize;
     $size_info = $imagesSize[$folder];
     $with = $size_info['width'];
     $height = $size_info['height'];
     $crop = $size_info['crop'];
-    
+
     if ($path) {
         $thumb = base_url() . createThumbnail($folder, $path, $with, $height, $crop);
         return $thumb;
@@ -2020,8 +1988,8 @@ function createThumbnail($folder, $path, $width, $height, $crop = false) {
         $img_path = ROOT_PATH . $img_path;
 
         if (!file_exists($img_path)) {
-            $img_path = ROOT_PATH.'uploads/noimage.jpg';
-            $thumb_path = ROOT_PATH.'uploads/'.$folder.'/noimage.jpg';
+            $img_path = ROOT_PATH . 'uploads/noimage.jpg';
+            $thumb_path = ROOT_PATH . 'uploads/' . $folder . '/noimage.jpg';
             $crop = ($crop == true) ? 'crop' : 'fit';
             $imageThumb = new Image($img_path);
             $imageThumb->createThumb($thumb_path, $width, $height, $crop);
@@ -2112,7 +2080,7 @@ if (!function_exists('bytesToSize')) {
         return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
     }
 
-;
+    ;
 }
 
 /**
