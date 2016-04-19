@@ -71,6 +71,13 @@ $column = array(
 );
 
 
+
+/**
+ * @Desc custom function for admin  
+ * @param int $id: page id
+ * @param string $act: action
+ * @return html
+ */
 function pageAction($id, $act){
     $link = "page.php?id=".$id;
     switch ($act){
@@ -83,4 +90,30 @@ function pageAction($id, $act){
             return '<img src="images/icon-module.png" alt="add module">';
             break;
     }
+}
+
+
+/**
+ * @Desc custom function for admin  
+ * @param string $page: page name
+ * @return html
+ */
+function pageLink($page_id, $act = 'list') {
+    switch($act){
+        case "add":
+        case "edit":
+            return $page_id;
+            break;
+        
+        
+        case "list":
+        default :
+            $miniPage = new Page();
+            $miniPage->read($page_id);
+            
+            return '<a href="page.php?id=' . $page_id . '">' .  $miniPage->name . '</a>';
+            break;
+            
+    }
+    
 }

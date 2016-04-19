@@ -30,7 +30,7 @@ class cms {
         $this->skin = $skin;
         $this->layout = $layout;
         $this->default_page = 'home';
-        self::cms_rewrite();
+        self::cmsRewrite();
     }
 
     /**
@@ -216,8 +216,8 @@ class cms {
         $page = Input::get("page", "txt", $this->default_page);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
-        if (isset($pageInfo['layout']) && $pageInfo['layout'] != '') {
-            $pathPath = pathinfo($pageInfo['layout']);
+        if ($pageInfo->layout) {
+            $pathPath = pathinfo($pageInfo->layout);
             $this->layout = $pathPath['filename'];
         }
 
@@ -228,11 +228,11 @@ class cms {
             $html = $this->addTemplateHtml($html);
         }
 
-        if (is_array($pageInfo) && count($pageInfo) > 0) {
-            $title = $pageInfo['meta_title'];
-            $keywords = $pageInfo['meta_keyword'];
-            $description = $pageInfo['meta_description'];
-            $position = $pageInfo['position'];
+        if ($pageInfo) {
+            $title = $pageInfo->meta_title;
+            $keywords = $pageInfo->meta_keyword;
+            $description = $pageInfo->meta_description;
+            $position = $pageInfo->position;
 
             foreach ($position as $key => $arrModule) {
                 if (!is_array($arrModule) || count($arrModule) <= 0) {
@@ -323,8 +323,8 @@ class cms {
     function getPositionPage($page) {
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
-        if (isset($pageInfo['layout']) && $pageInfo['layout'] != '') {
-            $this->layout = $pageInfo['layout'];
+        if ($pageInfo->layout) {
+            $this->layout = $pageInfo->layout;
         }
 
         // get layout
@@ -345,7 +345,7 @@ class cms {
         return $arrPost;
     }
 
-    public static function cms_rewrite() {
+    public static function cmsRewrite() {
 
         // set page request
         $current_link = str_replace(base_url(), '', curPageURL());

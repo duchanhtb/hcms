@@ -6,7 +6,7 @@ if (!defined('ALLOW_ACCESS'))
 /**
  * function for CMS admin
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 
 /**
@@ -180,15 +180,18 @@ function show_admin_content() {
     global $arrMenu;
     /*     * ************* content admin ***************** */
     
-    $func = isset($_GET['f']) ? $_GET['f'] : "";
+    $func = Input::get('f', 'txt', '');
     if($func == ''){
         redirect("index.php?f=home");
     }
     
     $html = '';
     if ($func && file_exists(ADMIN_PATH . "include/$func.php")) {
+        
+        // include file
         include_once(ADMIN_PATH . "include/$func.php");
         $func_info = getSubArrayValue($arrMenu, 'id', $func);
+        
         switch ($func) {
             case 'options':
                 $cmsOptions = new cmsOptions($of_options);
@@ -249,7 +252,7 @@ function show_admin_content() {
  * @return true|false
  */
 function getAdminTitle($arrConfig) {
-    $f = isset($_REQUEST['f']) ? $_REQUEST['f'] : "";
+    $f = Input::get('f','txt','');
     if ($f) {
         foreach ($arrConfig as $key => $value) {
             if (isset($value['id']) && $f == $value['id']) {
@@ -260,40 +263,6 @@ function getAdminTitle($arrConfig) {
     return 'HCMS';
 }
 
-/**
- * @Desc function remove sign
- * @param string $str: the input string
- * @return string
- */
-function remove_sign($str) {
-    $str = remove_sign_1($str);
-    $str = str_replace(array('–', '…', '“', '”', "~", "!", "@", "#", "$", "%", "^", "&", "*", "/", "\\", "?", "<", ">", "'", "\"", ":", ";", "{", "}", "[", "]", "|", "(", ")", ",", ".", "`", "+", "=", "-"), "", $str);
-    $str = preg_replace("/[^_A-Za-z0-9- ]/i", '', $str);
-    return strtolower($str);
-}
-
-/**
- * @Desc function remove VNI string. example ê->e, â->a, ẹ->e
- * @param string $str: the input string
- * @return string
- */
-function remove_sign_1($str) {
-    $str = str_replace(array("à", "á", "ạ", "ả", "ã", "ă", "ằ", "ắ", "ặ", "ẳ", "ẵ", "â", "ầ", "ấ", "ậ", "ẩ", "ẫ"), "a", $str);
-    $str = str_replace(array("À", "Á", "Ạ", "Ả", "Ã", "Ă", "Ằ", "Ắ", "Ặ", "Ẳ", "Ẵ", "Â", "Ầ", "Ấ", "Ậ", "Ẩ", "Ẫ"), "A", $str);
-    $str = str_replace(array("è", "é", "ẹ", "ẻ", "ẽ", "ê", "ề", "ế", "ệ", "ể", "ễ"), "e", $str);
-    $str = str_replace(array("È", "É", "Ẹ", "Ẻ", "Ẽ", "Ê", "Ề", "Ế", "Ệ", "Ể", "Ễ"), "E", $str);
-    $str = str_replace("đ", "d", $str);
-    $str = str_replace("Đ", "D", $str);
-    $str = str_replace(array("ỳ", "ý", "ỵ", "ỷ", "ỹ", "ỹ"), "y", $str);
-    $str = str_replace(array("Ỳ", "Ý", "Ỵ", "Ỷ", "Ỹ"), "Y", $str);
-    $str = str_replace(array("ù", "ú", "ụ", "ủ", "ũ", "ư", "ừ", "ứ", "ự", "ử", "ữ"), "u", $str);
-    $str = str_replace(array("Ù", "Ú", "Ụ", "Ủ", "Ũ", "Ư", "Ừ", "Ứ", "Ự", "Ử", "Ữ"), "U", $str);
-    $str = str_replace(array("ì", "í", "ị", "ỉ", "ĩ"), "i", $str);
-    $str = str_replace(array("Ì", "Í", "Ị", "Ỉ", "Ĩ"), "I", $str);
-    $str = str_replace(array("ò", "ó", "ọ", "ỏ", "õ", "ô", "ồ", "ố", "ộ", "ổ", "ỗ", "ơ", "ờ", "ớ", "ợ", "ở", "ỡ"), "o", $str);
-    $str = str_replace(array("Ò", "Ó", "Ọ", "Ỏ", "Õ", "Ô", "Ồ", "Ố", "Ộ", "Ổ", "Ỗ", "Ơ", "Ờ", "Ớ", "Ợ", "Ở", "Ỡ"), "O", $str);
-    return $str;
-}
 
 /**
  * @Desc get current address
@@ -311,114 +280,10 @@ function getAddress() {
  * @return string
  */
 function getIP() {
-    $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : getenv('REMOTE_ADDR');
-    return $ip;
+    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : getenv('REMOTE_ADDR');    
 }
 
-/**
- * @Desc function remove VNI string. example ê->e, â->a, ẹ->e
- * @param string $str: the input string
- * @return string
- */
-function remove_special_char($str) {
-    // chuyen co dau sang khong dau
-    $vietChar = 'á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ|é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ|ó|ò|ỏ|õ|ọ|ơ|ớ|ờ|ở|ỡ|ợ|ô|ố|ồ|ổ|ỗ|ộ|ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự|í|ì|ỉ|ĩ|ị|ý|ỳ|ỷ|ỹ|ỵ|đ|Á|À|Ả|Ã|Ạ|Ă|Ắ|Ằ|Ẳ|Ẵ|Ặ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ|É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ|Ó|Ò|Ỏ|Õ|Ọ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự|Í|Ì|Ỉ|Ĩ|Ị|Ý|Ỳ|Ỷ|Ỹ|Ỵ|Đ';
-    $engChar = 'a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|e|e|e|e|e|e|e|e|e|e|e|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|u|u|u|u|u|u|u|u|u|u|u|i|i|i|i|i|y|y|y|y|y|d|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|E|E|E|E|E|E|E|E|E|E|E|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|U|U|U|U|U|U|U|U|U|U|U|I|I|I|I|I|Y|Y|Y|Y|Y|D';
-    $arrVietChar = explode("|", $vietChar);
-    $arrEngChar = explode("|", $engChar);
-    $str = str_replace($arrVietChar, $arrEngChar, $str);
 
-    // url title 
-    $separator = 'dash';
-    $lowercase = false;
-    if ($separator == 'dash') {
-        $search = '_';
-        $replace = '-';
-    } else {
-        $search = '-';
-        $replace = '_';
-    }
-
-    $trans = array('&\#\d+?;' => '', '&\S+?;' => '', '\s+' => $replace, '[^a-z0-9\-\._]' =>
-        '', $replace . '+' => $replace, $replace . '$' => $replace, '^' . $replace => $replace,
-        '\.+$' => '');
-
-    $str = strip_tags($str);
-    foreach ($trans as $key => $val) {
-        $str = preg_replace("#" . $key . "#i", $val, $str);
-    }
-
-    if ($lowercase === true) {
-        $str = strtolower($str);
-    }
-    $str = trim(stripslashes($str));
-
-    // return value
-    return strtolower($str);
-}
-
-/**
- * @Desc convert date time to "time ago"
- * @param datetime $date: mysql datetime Y-m-d H:i
- * @return string
- */
-function print_date($date) {
-    $input_date = explode(" ", trim($date));
-
-    $in_date = explode("-", $input_date[0]);
-    $in_date = $in_date[2] . "-" . $in_date[1] . "-" . $in_date[0];
-
-    $in_time = explode(':', $input_date[1]);
-    $in_hour = $in_time[0];
-    $in_minute = $in_time[1];
-    $in_second = $in_time[2];
-
-
-    $date_now = date('d-m-Y');
-    $hour_now = date('H');
-    $minute_now = date('i');
-    $second_now = date('s');
-
-    if ($date_now == $in_date) {
-        if ($in_hour == $hour_now) {
-            if ($in_minute == $minute_now) {
-                $date_output = (int) $second_now - (int) $in_second;
-                $date_output = $date_output . " giây trước";
-            } else {
-                $date_output = (int) $minute_now - (int) $in_minute;
-                $date_output = $date_output . " phút trước";
-            }
-        } else {
-            $date_output = (int) $hour_now - (int) $in_hour;
-            $date_output = $date_output . " giờ trước";
-        }
-    } else {
-        $date_output = $in_date; //." &nbsp;". implode(":",$in_time);
-    }
-
-    return $date_output;
-}
-
-/**
- * @Desc clear session favorite post
- * @return nothing
- */
-function clear_favorite() {
-    $_SESSION['favorite-post'] = null;
-}
-
-/**
- * @Desc check favorite post
- * @param int $id: id of favorite post
- * @return boolean
- */
-function isfavorite_post($id) {
-    if (isset($_SESSION['favorite-post'][$id])) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 /**
  * @Desc convert string to price
@@ -464,7 +329,7 @@ function cal_date($date, $num_day, $format = 'Y-m-d H:i:s') {
  */
 function getImagesTable($table_info, $rid) {
     if (!$rid) {
-        return array();
+        return false;
     }
     global $oDb;
     $table_name = $table_info['table_name'];
@@ -570,30 +435,7 @@ function getCategory() {
     return $arr_category;
 }
 
-/**
- * @Desc custom function for admin  
- * @param string $page: page name
- * @return html
- */
-function pageLink($page_id, $act = 'list') {
-    switch($act){
-        case "add":
-        case "edit":
-            return $page_id;
-            break;
-        
-        
-        case "list":
-        default :
-            $miniPage = new Page();
-            $miniPage->read($page_id);
-            
-            return '<a href="page.php?id=' . $page_id . '">' .  $miniPage->name . '</a>';
-            break;
-            
-    }
-    
-}
+
 
 /**
  * @Desc get class for admin menu, class="mnu_select tooltip" or class="tooltip"  
@@ -622,17 +464,6 @@ function getClassMenu($menu) {
     }
 }
 
-/**
- * @Desc get file name of string: example: the input is "/var/www/html/abc.txt" the output is abc.txt 
- * @param string $str: table in the database
- * @return string
- */
-function getFileName($str) {
-    $path_info = pathinfo($str);
-    $ext = $path_info['extension'];
-    $filename = $path_info['filename'];
-    return $filename . '.' . $ext;
-}
 
 /**
  * @Desc get max value of primary key
@@ -641,11 +472,7 @@ function getFileName($str) {
  * @return int
  */
 function getMaxId($table, $id_field = 'id') {
-    global $oDb;
-    $sql = "SELECT $id_field FROM $table ORDER BY $id_field DESC LIMIT 0,1";
-    $rc = $oDb->query($sql);
-    $rs = $oDb->fetchArray($rc);
-    return $rs[$id_field] + 1;
+    return DB::for_table($table)->max($id_field) + 1;
 }
 
 /* return value of array.
@@ -706,8 +533,8 @@ function downloadImagesFromHTML($html) {
         // check if image exists on this hosting
         if (strpos($src, base_url()) === false) {
             
-            $file_name = getFileName($src);
-            $file_name = remove_special_char($file_name);
+            $file_name = CFile::getFileName($src);
+            $file_name = CFile::removeSpecialChar($file_name);
             
             $type = Input::get('f', 'txt', 'media');
             $dir = "../uploads/images/" . $type . "/" . date('Y_m_d') . '/';
@@ -718,8 +545,8 @@ function downloadImagesFromHTML($html) {
             }
 
             // download file
-            $file_path = trim($dir, '.') . $file_name;
-            download_file($src, ROOT_PATH . $file_path);
+            $file_path = trim($dir, '.') . $file_name;            
+            CFile::downloadFile($src, ROOT_PATH . $file_path);
 
             // insert to the media
             insertMedia($file_path);

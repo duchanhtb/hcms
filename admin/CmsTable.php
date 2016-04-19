@@ -532,7 +532,7 @@ class CmsTable extends Base {
 
                                 case "input:file":
                                     if (isset($item[$key]) && $item[$key] != '') {
-                                        $title = getFilename($item[$key]);
+                                        $title = CFile::getFilename($item[$key]);
                                     } else {
                                         $title = 'not found';
                                     }

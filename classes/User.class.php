@@ -89,6 +89,22 @@ class User extends Base {
                         ->where_equal('status', 1)
                         ->find_one();
     }
+    
+    /**
+     * @Desc check username already exists
+     * @param string $username: username      
+     * @return true|false
+     */
+    function checkUsernameExists($username) {
+        $user =  DB::for_table($this->table)
+                        ->where_equal('username', $username)                        
+                        ->find_one();
+        
+        if($user) return true;
+        
+        return false;
+    }
+    
 
     /**
      * @Desc get user by email
@@ -101,6 +117,23 @@ class User extends Base {
                         ->where_equal('status', 1)
                         ->find_one();
     }
+    
+    
+    /**
+     * @Desc check email exists
+     * @param string $email: user email      
+     * @return array
+     */
+    function checkEmailExists($email) {
+        $user = DB::for_table($this->table)
+                        ->where_equal('email', $email)                        
+                        ->find_one();
+        if($user) return true;
+        
+        return false;
+    }
+    
+    
 
     /**
      * @Desc update field 'status' set to 0 in the database

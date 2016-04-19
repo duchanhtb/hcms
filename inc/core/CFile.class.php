@@ -8,8 +8,6 @@ if (!defined('ALLOW_ACCESS'))
  * @copyright 2015
  */
 class CFile {
-    /**
-      -- start Method section  -- */
 
     /**
      * 	Scope: Public
@@ -21,7 +19,6 @@ class CFile {
     }
 
     /**
-     *  
      * 	Scope: Public
      * 	Level: Class
      */
@@ -94,6 +91,7 @@ class CFile {
 
     /**
      * 	Scope: Public
+     *  @example CFile::unzip('/var/www/html/xxx.zip', 'var/www/html/')
      */
     public static function unzip() {
         $iParNum = func_num_args();
@@ -129,8 +127,9 @@ class CFile {
 
     /**
      * 	Scope: Public
+     *  @example CFile::unzip('/var/www/html/abc/xxx')
      */
-    function makeDirFromString() {
+    public static function makeDirFromString() {
         $iParNum = func_num_args();
         $aPar = func_get_args();
 
@@ -142,7 +141,7 @@ class CFile {
         foreach ($aPath as $v) {
             $sNewPath .= $v;
             if (!in_array($v, array("", ".", "..")) && !is_dir($sNewPath)) {
-                mkdir($sNewPath, 0777);
+                mkdir($sNewPath, 0775);
             }
             $sNewPath .= "/";
         }
@@ -151,7 +150,7 @@ class CFile {
     /**
      * 	Scope: Public
      */
-    function copyDir() {
+    public static function copyDir() {
         $iParNum = func_num_args();
         $aPar = func_get_args();
 
@@ -197,7 +196,7 @@ class CFile {
     /**
      * 	Scope: Public
      */
-    function removeDir() {
+    public static function removeDir() {
         $iParNum = func_num_args();
         $aPar = func_get_args();
 
@@ -239,6 +238,98 @@ class CFile {
 
         closedir($vDirHandle);
         rmdir($sSrcDir);
+    }
+
+    /**
+     * @Desc function remove VNI string. example ê->e, â->a, ẹ->e
+     * @param string $str: the input string
+     * @return string
+     */
+    public static function removeSpecialChar($str) {
+        // chuyen co dau sang khong dau
+        $vietChar = 'á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ|é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ|ó|ò|ỏ|õ|ọ|ơ|ớ|ờ|ở|ỡ|ợ|ô|ố|ồ|ổ|ỗ|ộ|ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự|í|ì|ỉ|ĩ|ị|ý|ỳ|ỷ|ỹ|ỵ|đ|Á|À|Ả|Ã|Ạ|Ă|Ắ|Ằ|Ẳ|Ẵ|Ặ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ|É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ|Ó|Ò|Ỏ|Õ|Ọ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự|Í|Ì|Ỉ|Ĩ|Ị|Ý|Ỳ|Ỷ|Ỹ|Ỵ|Đ';
+        $engChar = 'a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|e|e|e|e|e|e|e|e|e|e|e|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|o|u|u|u|u|u|u|u|u|u|u|u|i|i|i|i|i|y|y|y|y|y|d|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|E|E|E|E|E|E|E|E|E|E|E|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|O|U|U|U|U|U|U|U|U|U|U|U|I|I|I|I|I|Y|Y|Y|Y|Y|D';
+        $arrVietChar = explode("|", $vietChar);
+        $arrEngChar = explode("|", $engChar);
+        $str = str_replace($arrVietChar, $arrEngChar, $str);
+
+        // url title 
+        $separator = 'dash';
+        $lowercase = false;
+        if ($separator == 'dash') {
+            $search = '_';
+            $replace = '-';
+        } else {
+            $search = '-';
+            $replace = '_';
+        }
+
+        $trans = array('&\#\d+?;' => '', '&\S+?;' => '', '\s+' => $replace, '[^a-z0-9\-\._]' =>
+            '', $replace . '+' => $replace, $replace . '$' => $replace, '^' . $replace => $replace,
+            '\.+$' => '');
+
+        $str = strip_tags($str);
+        foreach ($trans as $key => $val) {
+            $str = preg_replace("#" . $key . "#i", $val, $str);
+        }
+
+        if ($lowercase === true) {
+            $str = strtolower($str);
+        }
+        $str = trim(stripslashes($str));
+
+        // return value
+        return strtolower($str);
+    }
+
+    /**
+     * @Desc get file name of string: example: the input is "/var/www/html/abc.txt" the output is abc.txt 
+     * @param string $str: table in the database
+     * @return string
+     */
+    public static function getFileName($str) {
+        $path_info = pathinfo($str);
+        $ext = $path_info['extension'];
+        $filename = $path_info['filename'];
+        return $filename . '.' . $ext;
+    }
+    
+    
+
+    /**
+     * @Desc function download file from url
+     * @param string $file_url: filename include extension
+     * @param string $save_to: part save file
+     * @return boolean
+     */
+    public static function downloadFile($file_url, $save_to) {
+
+        $save_to = @trim($save_to, '..');
+        $path_info = pathinfo($save_to);
+        $dir_name = $path_info['dirname'];
+        if (!is_writable($dir_name)) {
+            return false;
+        }
+
+        if (!is_dir($dir_name)) {
+            mkdir($dir_name, 0777, true);
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POST, 0);
+        curl_setopt($ch, CURLOPT_URL, $file_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $file_content = curl_exec($ch);
+        curl_close($ch);
+
+        if (!$file_content) {
+            return false;
+        }
+
+        $downloaded_file = fopen($save_to, 'w');
+        fwrite($downloaded_file, $file_content);
+        fclose($downloaded_file);
+
+        return true;
     }
 
 }

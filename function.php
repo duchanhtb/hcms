@@ -4,36 +4,12 @@
 
 /**
  * @author DucHanh
- * @copyright 2011
+ * @copyright 2012
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// COMMON FUNCTION //////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * @Desc check yahoo status
- * @param string $yid: yahoo id example: hanhnguyen_rav
- * @return true|false
- */
-function check_yahoo_status($yid) {
-    $status = file_get_contents("http://opi.yahoo.com/online?u={$yid}&m=a&t=1");
-    if ($status === '00')
-        return false;
-    elseif ($status === '01')
-        return true;
-}
 
-/**
- * @Desc check skype status
- * @param string $skype: skype id example: hanhcoltech
- * @return true|false
- */
-function check_skype_status($skype) {
-    $status = file_get_contents("http://mystatus.skype.com/{$skype}.num");
-    if ($status === '2')
-        return true;
-    else
-        return false;
-}
 
 /**
  * @Desc Break string from start to $length charactor, (only break on space letter)
@@ -58,21 +34,7 @@ function _substr($str, $length, $minword = 3) {
     return $sub . (($len < strlen($str)) ? '...' : '');
 }
 
-/**
- * @Desc Break string from start to $length charactor
- * @param $str: string to break
- * @param $length: number of charactor
- * @param $minword: min charactor of word
- * @return string
- */
-function _cutStr($str, $start = 0, $len) {
-    $str = strip_tags($str);
-    if ($len > strlen($str)) {
-        return $str;
-    } else {
-        return substr($str, $start, $len) . '...';
-    }
-}
+
 
 /**
  * @Desc get id of youtube
@@ -103,52 +65,6 @@ function get_youtube_id($ytURL) {
 }
 
 /**
- * @Desc function get extensions of file
- * @param $filename: filename include extension
- * @return string
- */
-function getFileExt($filename) {
-    $path_info = pathinfo($filename);
-    return $path_info['extension'];
-}
-
-/**
- * @Desc function download file from url
- * @param string $file_url: filename include extension
- * @param string $save_to: part save file
- * @return boolean
- */
-function download_file($file_url, $save_to) {
-
-    $save_to = @trim($save_to, '..');
-    $path_info = pathinfo($save_to);
-    $dir_name = $path_info['dirname'];
-    if (!is_writable($dir_name)) {
-        return false;
-    }
-
-    if (!is_dir($dir_name)) {
-        mkdir($dir_name, 0777, true);
-    }
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_POST, 0);
-    curl_setopt($ch, CURLOPT_URL, $file_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $file_content = curl_exec($ch);
-    curl_close($ch);
-
-    if (!$file_content) {
-        return false;
-    }
-
-    $downloaded_file = fopen($save_to, 'w');
-    fwrite($downloaded_file, $file_content);
-    fclose($downloaded_file);
-
-    return true;
-}
-
-/**
  * @Desc remove  whitespace from between html tag
  * @param string $html: html string
  * @return string
@@ -174,11 +90,10 @@ function getLanguage() {
     if (is_array($lang) && count($lang) > 0) {
         return $lang;
     } else {
-        $sql = "SELECT * FROM `m_language`";
-        $rc = $oDb->query($sql);
-        $rs = $oDb->fetchAll();
-        foreach ($rs as $key => $value) {
-            $lang[$value['key']] = $value[$cur_lang];
+        $table = 'm_language';
+        $arrLanguage = DB::for_table($table)->find_many();
+        foreach($arrLanguage as $language){
+            $lang[$language->key] = $language->$cur_lang;
         }
     }
     return $lang;
@@ -234,7 +149,7 @@ function getCacheSetting() {
     if ($setting) {
         return json_decode($setting, true);
     }
-    return null;
+    return false;
 }
 
 /**
@@ -269,9 +184,6 @@ function getSiteUrl() {
  * @return HTML code
  */
 function loadModule($name) {
-    // language
-    $lang = getLanguage();
-
     $module_path = MODULE_PATH . "$name.php";
     if (file_exists($module_path)) {
         include_once($module_path);
@@ -449,76 +361,6 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
     return $data;
 }
 
-/**
- * @Desc function return HTML paging
- * @param $current_page: nunber current of the page
- * @param $total_page: total page we have
- * @param $linkpage: link page we have example: http://hanhnguyen.co.cc/?page=
- * @return HTML paging
- */
-function getHtmlPaging($cur_page, $total_page, $linkpage = false) {
-    if ($linkpage == false) {
-        $linkpage = curPageURL();
-    }
-    $linkpage = removeQuerystringVar($linkpage, 'page');
-    $pageHtml = '';
-    if ($total_page >= 1) {
-        $option_page = '';
-        for ($i = 1; $i <= $total_page; $i++) {
-            if ($i == $cur_page) {
-                $option_page .= '<option value="' . $i . '" selected="">' . $i . '</option>';
-            } else {
-                $option_page .= '<option value="' . $i . '">' . $i . '</option>';
-            }
-        }
-        if ($total_page == 1) {
-            $first_page_link = $linkpage;
-            $last_page_link = $linkpage . '&page=' . ($total_page);
-
-            $link_next = $linkpage . '&page=' . ($cur_page);
-            $link_prev = $linkpage . '&page=' . ($cur_page);
-        } else
-        if ($cur_page == 1) {
-            $first_page_link = $linkpage;
-            $last_page_link = $linkpage . '&page=' . ($total_page);
-
-            $link_next = $linkpage . '&page=' . ($cur_page + 1);
-            $link_prev = $linkpage . '&page=' . ($cur_page);
-        } else
-        if ($cur_page == $total_page) {
-            $first_page_link = $linkpage;
-            $last_page_link = $linkpage . '&page=' . ($total_page);
-
-            $link_next = $linkpage . '&page=' . ($cur_page);
-            $link_prev = $linkpage . '&page=' . ($cur_page - 1);
-        } else {
-            $first_page_link = $linkpage;
-            $last_page_link = $linkpage . '&page=' . ($total_page);
-
-            $link_next = $linkpage . '&page=' . ($cur_page + 1);
-            $link_prev = $linkpage . '&page=' . ($cur_page - 1);
-        }
-
-        $pageHtml = '<table border="0" cellpadding="0" cellspacing="0" id="paging-table">
-    			<tr>
-    			<td>
-    				<a href="' . $first_page_link . '" class="page-far-left"></a>
-    				<a href="' . $link_prev . '" class="page-left"></a>
-    				<div id="page-info">Page <strong>' . $cur_page . '</strong> / ' . $total_page .
-                '</div>
-    				<a href="' . $link_next . '" class="page-right"></a>
-    				<a href="' . $last_page_link . '" class="page-far-right"></a>
-    			</td>
-    			<td>
-    			<select id="page" onchange="ChangePage();">
-                    ' . $option_page . '				
-    			</select>
-    			</td>
-    			</tr>
-    			</table>';
-    }
-    return $pageHtml;
-}
 
 /**
  * @Desc remove varible of the url example http://hanhnguyen.co.cc?page=1 and we want to remove string 'page=1';
@@ -654,94 +496,6 @@ function curPageURL() {
 }
 
 /**
- * @Desc get <option></option> of array, add charactor example '--' of child option
- * @param $allCat: all category
- * @param $parent_id: id of parent category 
- * @param $space: space want to add to child option
- * @param $id_selected: Id want to add selected
- * @return URL
- */
-function getHtmlOptionCategory($allCat, $parent_id = 0, $space = '--', $id_selected = 0) {
-    $html = '';
-    $cur_id = Input::get('id', 'int', 0);
-    $submenu = Input::get('submenu', 'txt', "");
-    if ($submenu != 'category') {
-        $cur_id = 0;
-    }
-
-    if (is_array($allCat) && count($allCat) > 0) {
-        $temp_array = $allCat;
-        foreach ($allCat as $key => $value) {
-            if ($value['parent_id'] == $parent_id && ($value['id'] != $cur_id)) {
-                $selected = '';
-                if ($value['id'] == $id_selected) {
-                    $selected = 'selected=""';
-                }
-                $html .= '<option value="' . $value['id'] . '" ' . $selected . '>' . $space . $value['name'] .
-                        '</option>';
-                unset($temp_array[$key]);
-                $html .= getHtmlOptionCategory($temp_array, $value['id'], $space . '--', $id_selected);
-            }
-        }
-    }
-    return $html;
-}
-
-/**
- * @Desc add drash before sub category
- * @param $allCat: all category
- * @param $parent_id: id of parent category 
- * @param $drash: drash, default is -
- * @return URL
- */
-function addDrashCategory(&$allCat, $parent_id = 0, $drash = '-') {
-    if (is_array($allCat) && count($allCat) > 0) {
-        foreach ($allCat as $key => &$value) {
-            if ($value['parent_id'] == $parent_id) {
-                if ($parent_id != 0) {
-                    $value['name'] = $drash . $value['name'];
-                }
-                addDrashCategory($allCat, $value['id'], $drash);
-            }
-        }
-    }
-}
-
-/**
- * @Desc get <option></option> of array, add charactor example '--' of child option
- * @param $allCat: all category
- * @param $parent_id: id of parent page 
- * @param $space: space want to add to child option
- * @param $id_selected: Id want to add selected
- * @return URL
- */
-function getHtmlOptionPage($allCat, $parent_id = 0, $space = '--', $id_selected = 0) {
-    $html = '';
-    $cur_id = Input::get('id', 'int', 0);
-    $submenu = Input::get('submenu', 'txt', "");
-    if ($submenu != 'category') {
-        $cur_id = 0;
-    }
-
-    if (is_array($allCat) && count($allCat) > 0) {
-        $temp_array = $allCat;
-        foreach ($allCat as $key => $value) {
-            if ($value['parent'] == $parent_id && ($value['id'] != $cur_id)) {
-                $selected = '';
-                if ($value['id'] == $id_selected) {
-                    $selected = 'selected=""';
-                }
-                $html .= '<option value="' . $value['id'] . '" ' . $selected . '>' . $space . $value['name'] .
-                        '</option>';
-                unset($temp_array[$key]);
-                $html .= getHtmlOptionPage($temp_array, $value['id'], $space . '--', $id_selected);
-            }
-        }
-    }
-    return $html;
-}
-
-/**
  * @Desc show error 404 
  * @return 
  */
@@ -870,19 +624,17 @@ function title_url($str) {
 }
 
 /**
- * @Desc convert string to url
+ * @Desc list module name in module folder
  * @return array
  */
 function list_module() {
     $arrModule = array();
-    $module_dir = ROOT_PATH . "modules/";
-    $arrFile = scandir($module_dir, 0);
+    $arrFile = scandir(MODULE_PATH, 0);
     if (count($arrFile) > 0) {
         foreach ($arrFile as $key => $value) {
             if ($key == 0 || $key == 1) {
                 continue;
             }
-
             if (!strpos($value, '.php')) {
                 continue;
             }
@@ -975,8 +727,8 @@ function deleteMedia($media) {
         $Media->remove($id);
     } else { // if $media variable is the path in the database
         $path = $media;
-        $media_info = $Media->getMediaByPath($path);
-        $path = ROOT_PATH . trim($media_info['path']);
+        $mediaObj = $Media->getMediaByPath($path);
+        $path = ROOT_PATH . trim($mediaObj->path);
         // delete origion file
         if (file_exists($path)) {
             @unlink($path);
@@ -992,7 +744,7 @@ function deleteMedia($media) {
             }
         }
 
-        $id = $media_info['id'];
+        $id = $mediaObj->id;
         $Media->remove($id);
     }
     $upload_path = ROOT_PATH . 'uploads/';
@@ -1413,7 +1165,7 @@ function getCmsTitle() {
     $page = Input::get('page', 'txt', 'home');
     $Page = new Page();
     $pageInfo = $Page->getPageInfo($page);
-    return $pageInfo['meta_title'];
+    return $pageInfo->meta_title;
 }
 
 /**
@@ -1424,7 +1176,7 @@ function getCmsKeywords() {
     $page = Input::get('page', 'txt', 'home');
     $Page = new Page();
     $pageInfo = $Page->getPageInfo($page);
-    return $pageInfo['meta_keyword'];
+    return $pageInfo->meta_keyword;
 }
 
 /**
@@ -1435,7 +1187,7 @@ function getCmsDescription() {
     $page = Input::get('page', 'txt', 'home');
     $Page = new Page();
     $pageInfo = $Page->getPageInfo($page);
-    return $pageInfo['meta_description'];
+    return $pageInfo->meta_description;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1554,295 +1306,14 @@ function sendMail($to, $reply = false, $subject, $content) {
     }
 }
 
-/**
- * @Desc check pemisstion of user Admin
- * @return true|false
- */
-function checkAdminPermission() {
-    global $_SESSION;
-    return $_SESSION;
-    if (isset($_SESSION['user'])) {
-        $user = $_SESSION['user'];
-        if ($user['group_id'] == 100) {
-            return $user;
-        }
-    }
-    return false;
-}
-
-/**
- * @Desc check pemisstion of Admin
- * @return true|false
- */
-function checkUserAdmin() {
-    global $_SESSION;
-    if (isset($_SESSION['user'])) {
-        $user = $_SESSION['user'];
-        if ($user['group_id'] >= 50) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    return false;
-}
-
-/**
- * @Desc get info from session user (after signed)
- * @param $name: info want to get
- * @return corresponding values
- */
-function getUserInfo($name) {
-    global $_SESSION;
-    if (isset($_SESSION['user'])) {
-        $user = $_SESSION['user'];
-        return $user['username'];
-    }
-    return '';
-}
-
-/**
- * @Desc check user exists via type: example username, email, id...
- * @param $type: field in database example email, username...
- * @param $value: value of type example hanhcoltech@gmail.com, duchanhtb
- * @return array
- */
-function checkUserExits($type, $value) {
-    global $oDb;
-    $sql = "SELECT * FROM `t_user` WHERE `$type` = '$value' ";
-    $query = $oDb->query($sql);
-    if ($oDb->numRows($query) > 0) {
-        $result = $oDb->fetchAll($query);
-        return $result[0];
-    } else {
-        return false;
-    }
-}
-
-/**
- * @Desc function process user when login 
- * @return unidentified
- */
-function userLogin() {
-    global $_SESSION, $error;
-    $username = isset($_COOKIE['cms_username']) ? $_COOKIE['cms_username'] : '';
-    $password = isset($_COOKIE['cms_password']) ? $_COOKIE['cms_password'] : '';
-    $ref = Input::get('ref', 'txt', '');
-
-    if (isset($_POST['username']) && isset($_POST['password'])) {
-        $username = Input::get('username');
-        $password = Input::get('password');
-
-        if (isset($_POST['remember'])) {
-            setcookie("cms_username", $username, time() + 3600); // Sets the cookie username
-            setcookie("cms_password", $password, time() + 3600); // Sets the cookie password
-        }
-
-        if ($username != '' && $password != '') {
-            $User = new User();
-            $user = $User->login($username, $password);
-            if ($user) {
-                $_SESSION['user'] = $user;
-                redirect(urldecode($ref));
-            } else {
-                $error = 'Username or Password not match';
-            }
-        } else {
-            $error = 'Invalid Username or Password';
-        }
-    } else if ($username && $password) {
-        $User = new User();
-        $user = $User->login($username, $password);
-        if ($user) {
-            $_SESSION['user'] = $user;
-            redirect(urldecode($ref));
-        } else {
-            $error = 'Invalid Username or Password';
-        }
-    }
-}
-
-/**
- * @Desc function process user when logout 
- * @return unidentified
- */
-function userLogout() {
-    unset($_SESSION['user']);
-    setcookie("cms_username", "", time() - 3600);
-    setcookie("cms_password", "", time() - 3600);
-    redirect('login.php');
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// END USER FUNCTION ////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// TIME FUNCTION ////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * @Desc return string of month example: January, December...
- * @param $month_number: number in(1...12)
- * @return string
- */
-function getMonthOfNumber($month_number) {
-    $month_name = date('F', mktime(0, 0, 0, $month_number));
-    return $month_name;
-}
 
-/**
- * @Desc return string since $unix_time_stamp to current time 
- * @param $unix_time_stamp: unix time stamp
- * @return string
- */
-function getTimeAgo($unix_time_stamp) {
-    $cur_time = time();
-    if ($cur_time > $unix_time_stamp) {
-        $diff_second = $cur_time - $unix_time_stamp;
-        //return $diff_second;
-        if ($diff_second < 60) {
-            return $diff_second . 'seconds before';
-        } else if ($diff_second < 3600) {
-            $minutes = ceil($diff_second / 60);
-            return $minutes . ' minutes before';
-        } else if ($diff_second < 86400) {
-            $hour = ceil($diff_second / 3600);
-            return $hour . ' hours ago';
-        } else if ($diff_second < (86400 * 30)) {
-            $day = ceil($diff_second / 86400);
-            return $day . ' days ago';
-        } else if ($diff_second < (12 * 30 * 86400)) {
-            return ceil($diff_second / (30 * 86400)) . ' months ago';
-        } else {
-            return ceil($diff_second / (13 * 30 * 86400)) . ' years ago';
-        }
-    } else {
-        return '';
-    }
-}
 
-/**
- * @Desc get html of Minute
- * @param $minute: current minute (selected="") 
- * @return HTML
- */
-function getOptionMinute($minute) {
-    $html = '';
-    for ($i = 0; $i <= 59; $i++) {
-        if ($i < 10) {
-            $ii = '0' . $i;
-        } else {
-            $ii = $i;
-        }
-
-        if ($i == $minute) {
-            $html .= '<option value="' . $i . '" selected="selected">' . $ii . '</option>';
-        } else {
-            $html .= '<option value="' . $i . '">' . $ii . '</option>';
-        }
-    }
-    return $html;
-}
-
-/**
- * @Desc get html of Hour
- * @param $hour: current hour (selected="") 
- * @return HTML
- */
-function getOptionHour($hour) {
-    $html = '';
-    for ($i = 0; $i <= 23; $i++) {
-        if ($i < 10) {
-            $ii = '0' . $i;
-        } else {
-            $ii = $i;
-        }
-        if ($i == $hour) {
-            $html .= '<option value="' . $i . '" selected="selected">' . $ii . '</option>';
-        } else {
-            $html .= '<option value="' . $i . '">' . $ii . '</option>';
-        }
-    }
-    return $html;
-}
-
-/**
- * @Desc get html of Day
- * @param $dd: current day (selected="") 
- * @return HTML
- */
-function getOptionDay($dd) {
-    $html = '';
-    for ($i = 0; $i <= 31; $i++) {
-        if ($i < 10) {
-            $ii = '0' . $i;
-        } else {
-            $ii = $i;
-        }
-
-        if ($i == 0) {
-            $html .= '<option value="">dd</option>';
-        } else {
-            if ($i == $dd) {
-                $html .= '<option value="' . $i . '" selected="selected">' . $ii . '</option>';
-            } else {
-                $html .= '<option value="' . $i . '">' . $ii . '</option>';
-            }
-        }
-    }
-    return $html;
-}
-
-/**
- * @Desc get html of Month
- * @param $mm: current month (selected="") 
- * @return HTML
- */
-function getOptionMonth($mm) {
-    $html = '';
-    for ($i = 1; $i <= 12; $i++) {
-        if ($i == 0) {
-            $html .= '<option value="">mm</option>';
-        } else {
-            $t = strtotime('2005-' . $i . '-20');
-            $month_name = date('M', $t);
-            if ($i == $mm) {
-                $html .= '<option value="' . $i . '" selected="selected">' . $month_name .
-                        '</option>';
-            } else {
-                $html .= '<option value="' . $i . '">' . $month_name . '</option>';
-            }
-        }
-    }
-    return $html;
-}
-
-/**
- * @Desc get html of year
- * @param $yy: current year (selected="")
- * @param $start: start year
- * @param $num: number of year display (from start);
- * @return HTML
- */
-function getOptionYear($yy, $start = 1960, $num = 50) {
-    $html = '';
-    for ($i = $start; $i <= $start + $num; $i++) {
-        if ($i == 0) {
-            $html .= '<option value="">yyyy</option>';
-        } else {
-            if ($i == $yy) {
-                $html .= '<option value="' . $i . '" selected="selected">' . $i . '</option>';
-            } else {
-                $html .= '<option value="' . $i . '">' . $i . '</option>';
-            }
-        }
-    }
-    return $html;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// END TIME FUNCTION ////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// OTHER FUNCTION ////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1853,22 +1324,21 @@ function getOptionYear($yy, $start = 1960, $num = 50) {
  * @return string
  */
 function get_option($option_name) {
-    global $oDb, $all_option;
+    global $allOptions;
 
-    if (isset($all_option) && count($all_option) > 0) {
-        if (isset($all_option[$option_name]))
-            return $all_option[$option_name];
+    if (isset($allOptions) && count($allOptions) > 0) {
+        if (isset($allOptions[$option_name]))
+            return $allOptions[$option_name];
         else
             return "";
     }else {
-        $all_option = array();
-        $sql = 'SELECT * FROM  `m_options` ';
-        $query = $oDb->query($sql);
-        $result_array = $oDb->fetchAll($query);
-        foreach ($result_array as $key => $value) {
-            $all_option[$value['name']] = $value['value'];
+        $table = 'm_options';
+        $allOptions = array();
+        $options = DB::for_table($table)->find_many();
+        foreach($options as $option){
+            $allOptions[$option->name] = $option->value;
         }
-        return isset($all_option[$option_name]) ? $all_option[$option_name] : "";
+        return isset($allOptions[$option_name]) ? $allOptions[$option_name] : false;
     }
 }
 
@@ -1879,17 +1349,11 @@ function get_option($option_name) {
  * @return boolean
  */
 function add_option($option_name, $option_value) {
-    global $oDb;
-    $sql = " SELECT `name`, `value` FROM `m_options` WHERE `name` = '$option_name' ";
-    $rc = $oDb->query($sql);
-    if ($oDb->numRows($rc) > 0) {
-        return true;
-    } else {
-        $sql = " INSERT INTO `m_options` (`name`, `value`) VALUES ('$option_name', '$option_value') ";
-        $oDb->query($sql);
-        return true;
-    }
-    return false;
+    $table = 'm_options';
+    $option = DB::for_table($table)->create();
+    $option->name = $option_name;
+    $option->value = $option_value;
+    return $option->save();    
 }
 
 /**
@@ -1898,19 +1362,18 @@ function add_option($option_name, $option_value) {
  * @param string $option_value, option value
  * @return boolean
  */
-function update_option($option_name, $option_value) {
-    global $oDb;
-    $current_value = get_option($option_name);
-    if ($current_value) { // update if exists;
-        $sql = " UPDATE `m_options` SET `value` = '$option_value' WHERE `name` = '$option_name' ";
-        $oDb->query($sql);
-        return true;
-    } else { // add if not exists
-        $sql = " INSERT INTO `m_options` (`name`, `value`) VALUES ('$option_name', '$option_value') ";
-        $oDb->query($sql);
-        return true;
+function update_option($option_name, $option_value) {    
+    $table = 'm_options';
+    $option = DB::for_table($table)->where_equal('name', $option_name)->find_one();
+    if($option){
+        $option->value = $option_value;
+        return $option->save();
+    }else{
+        $option = DB::for_table($table)->create();
+        $option->name = $option_name;
+        $option->value = $option_value;
+        return $option->save();    
     }
-    return false;
 }
 
 /**
@@ -1920,18 +1383,18 @@ function update_option($option_name, $option_value) {
  * @return boolean
  */
 function update_multi_options($arrValue) {
-    global $oDb;
-    $sql_insert = '';
-    $sql_truncate = "TRUNCATE TABLE `m_options`";
-    $oDb->query($sql_truncate);
-
+    // clean all data in table
+    $table = 'm_options';
+    DB::for_table($table)->raw_execute("TRUNCATE TABLE `$table`");
+    
     foreach ($arrValue as $option_name => $option_value) {
-        $sql_insert .= " ('$option_name', '$option_value'),";
+        $option = DB::for_table($table)->create();
+        $option->name = $option_name;
+        $option->value = $option_value;
+        $option->save(); 
     }
-    if ($sql_insert) {
-        $sql_insert = "INSERT INTO `m_options` (`name`, `value`) VALUES " . trim($sql_insert, ',');
-        $oDb->query($sql_insert);
-    }
+   
+    return true;
 }
 
 /**

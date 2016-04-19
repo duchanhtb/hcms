@@ -2,13 +2,13 @@
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 if (!defined('ALLOW_ACCESS'))
     exit('No direct script access allowed');
 
 
-// check permission
+// check permission, only super admin can upload file
 if ((int) @$_SESSION['admin']['level'] < 3) {
     redirect("index.php?f=restrict");
 }
@@ -19,12 +19,22 @@ define('OPTIONS_IMAGES', ADMIN_IMAGES . 'options/');
 
 /* ----------------------------------------------------------------------------------- */
 /* General */
+
+/* option css */
 admin_register_style('cms-option', admin_url() . 'css/admin-options.css');
+
+/* Color picker */
 admin_register_style('cms-option-colorpicker', admin_url() . 'css/color-picker.min.css');
+
+/* Jquery UI */
 admin_register_style('cms-option-jquery-ui', admin_url() . 'css/jquery-ui-custom.css');
+
+/* Color Pick */
 admin_register_style('cms-option-color-pick', admin_url() . 'css/colpick.css');
+
+/* Sticky tooltip */
 admin_register_style('cms-option-stickytooltip', admin_url() . 'css/stickytooltip.css');
-admin_register_style('cms-option-stickytooltip', admin_url() . 'css/stickytooltip.css');
+
 
 /* ----------------------------------------------------------------------------------- */
 $of_options[] = array("name" => trans('setting_general'),

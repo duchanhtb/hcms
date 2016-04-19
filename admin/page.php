@@ -20,9 +20,8 @@ $cms = new Cms();
 $miniPage = new Page();
 
 $miniPage->read($id);
-$page = $miniPage->name;
-$pageInfo = $miniPage->getPageInfoAdmin($page);
-$position = json_decode($pageInfo['position'], true);
+$position = $miniPage->name;
+$position = json_decode($position->position, true);
 ?>
 <!DOCTYPE html>
 <html>

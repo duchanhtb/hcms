@@ -53,7 +53,7 @@ if (!is_dir($dir)) {
 }
 
 if ($_FILES['userfile']['name'] != 'none' && $_FILES['userfile']['name'] != '') {
-    $image_image = remove_special_char($_FILES['userfile']['name']); //@ereg_replace("[^a-zA-Z0-9_.]", "_",$_FILES['userfile']['name']);
+    $image_image = CFile::removeSpecialChar($_FILES['userfile']['name']); 
     $file_name = CFile::uploadFile($_FILES['userfile']['tmp_name'], $image_image, $dir);
     $file_upload = $dir . $file_name;
     $file_upload = ($file_upload != 'none') ? $file_upload : "";
@@ -131,7 +131,7 @@ if ($_FILES['userfile']['name'] != 'none' && $_FILES['userfile']['name'] != '') 
         $arrResult = array('status' => 'success', 'id' => $id, 'src' => trim($img, '.'));
     } else {
         $Media = new Media();
-        $img = $Media->getSrcMedia($file_upload);
+        $img = $Media->getSrcMediaIcon($file_upload);
         $img = str_replace(base_url(), '', $img);
         $arrResult = array('status' => 'success', 'id' => $media_id, 'src' => trim($img, '.'));
     }

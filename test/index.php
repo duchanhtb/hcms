@@ -3,14 +3,10 @@
 define('ALLOW_ACCESS', TRUE);
 include('../config.php');
 
-require_once (INC_PATH . 'lib/AES/AES.class.php');
 
 
-$Cart = new Cart();
-$Cart->addProductToCart(17);
-var_dump($Cart->getCartInfo());
+$a = CFile::getFileDir(MODULE_PATH);
+var_dump($a);
 
-$Product = new Product();
-$a = $Product->getProductCartInfo();
-
-var_dump($Product->getTotalCartPrice());
+$b = list_module();
+var_dump($b);

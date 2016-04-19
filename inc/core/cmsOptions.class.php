@@ -22,17 +22,44 @@ class cmsOptions extends Base {
 
         if (function_exists('admin_url')) {
 
-            admin_register_style('cms-options', admin_url() . 'css/admin-options.css'); // options style
-            admin_register_style('cms-options-picker', admin_url() . 'css/color-picker.min.css'); // options-picker
-            admin_register_style('jquery-ui-custom', admin_url() . 'css/jquery-ui-custom.css'); // jquery ui-custom
-            admin_register_style('jquery-colpick', admin_url() . 'css/colpick.css'); // jquery colpick
+            /*
+             * Style
+             * ************************************* ************************************ */
+            // options style
+            admin_register_style('cms-options', admin_url() . 'css/admin-options.css');
 
+            // Picker
+            admin_register_style('cms-options-picker', admin_url() . 'css/color-picker.min.css');
+
+            // jquery ui-custom
+            admin_register_style('jquery-ui-custom', admin_url() . 'css/jquery-ui-custom.css');
+
+            // colpick
+            admin_register_style('jquery-colpick', admin_url() . 'css/colpick.css');
+
+            
+            /*
+             * Script
+             * ************************************* ************************************ */
+            // maskedinput link: https://github.com/digitalBush/jquery.maskedinput
             admin_register_script('option-maskedinput', admin_url() . 'js/jquery.maskedinput-1.2.2.js', false, true);
+
+            // cookie
             admin_register_script('option-cookie', admin_url() . 'js/cookie.js', false, true);
+
+            // colpick
             admin_register_script('option-colpick', admin_url() . 'js/colpick.js', false, true);
+
+            // smof
             admin_register_script('option-smof', admin_url() . 'js/smof.js', false, true);
+
+            // jquery Ui
             admin_register_script('jquery-ui', admin_url() . 'js/jquery-ui.min.js', false, true);
+
+            // wiget
             admin_register_script('jquery-wiget', admin_url() . 'js/jquery.ui.widget.js', false, true);
+
+            // iris
             admin_register_script('option-iris', admin_url() . 'js/iris.min.js', false, true);
         }
 

@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class Page extends Base {
 
@@ -26,36 +26,24 @@ class Page extends Base {
      * @return string (name of layout)
      */
     function getLayout($page) {
-        $page = $this->getRecord("*", " AND `name` = '$page' ");
-        return $page['layout'];
+        $page = DB::for_table($this->table)->where_equal('name', $page)->find_one();
+        if ($page)
+            return $page->layout;
+
+        return false;
     }
 
     /**
-     * @Desc get all of page     
+     * @Desc get all page in the database
      * @return array
      */
     function getAll() {
-        return $this->get('*');
-    }
+        global $allPage;
+        if (is_array($allPage))
+            return $allPage;
 
-    /**
-     * @Desc get page with conditions
-     * @param string $con: conditions 
-     * @param string $sort: field want to sort
-     * @param string $order: DESC or ASC 
-     * @param int $page: page 
-     * @return array
-     */
-    function getPage($con, $sort, $order, $page) {
-        $page = ($page > 1 ) ? $page : 1;
-        $start = ($page - 1) * ($this->num_per_page);
-
-        if ($sort && $order) {
-            return $this->get("*", $con, "$sort $order", $start, $this->num_per_page);
-        } else {
-            return $this->get("*", $con, " `name` DESC ", $start, $this->num_per_page);
-        }
-        return false;
+        $allPage = DB::for_table($this->table)->find_many();
+        return $allPage;
     }
 
     /**
@@ -64,20 +52,23 @@ class Page extends Base {
      * @return array
      */
     function getPageInfo($name) {
-        $pageInfo = $this->getRecord("*", " AND `name` = '$name' ");
-        $allPage = $this->getAll();        
-        
-        if (is_array($pageInfo) && count($pageInfo) > 0) {
-            $pos = $pageInfo['position'];
-            $parentInfo = $this->getParent($allPage, $pageInfo['parent']);            
-            $pos_parent = $parentInfo['position'];
-            $pos = json_decode($pos, true);
-            $pos_parent = json_decode($pos_parent, true);
+        $page = DB::for_table($this->table)
+                ->where_equal('name', $name)
+                ->find_one();
 
+        $allPage = $this->getAll();
+
+        if ($page) {
+            $position = $page->position;
+            $parentPage = $this->getParent($allPage, $page->parent);
+            $parent_position = $parentPage->position;
+            $pos = json_decode($position, true);
+            $pos_parent = json_decode($parent_position, true);
+            
             $new_post = array_merge_recursive((array) $pos_parent, (array) $pos);
-            $pageInfo['position'] = $new_post;
+            $page->position = $new_post;
 
-            return $pageInfo;
+            return $page;
         }
 
         return false;
@@ -89,7 +80,9 @@ class Page extends Base {
      * @return array
      */
     function getPageInfoAdmin($name) {
-        return $this->getRecord("*", " AND `name` = '$name' ");
+        return DB::for_table($this->table)
+                        ->where_equal('name', $name)
+                        ->find_one();
     }
 
     /**
@@ -99,12 +92,12 @@ class Page extends Base {
      * @return array
      */
     function getParent($allPage, $id_parent) {
-        foreach ($allPage as $key => $value) {
-            if ($value['id'] == $id_parent) {
-                return $value;
+        foreach ($allPage as $page) {
+            if ($page->id == $id_parent) {
+                return $page;
             }
         }
-        return null;
+        return false;
     }
 
 }

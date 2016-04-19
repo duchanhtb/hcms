@@ -2,7 +2,7 @@
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class Page {
 

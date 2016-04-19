@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  * @desc class render html admin media
  */
 class Media extends Base {
@@ -24,14 +24,31 @@ class Media extends Base {
         'date'
     ); //fields in table (excluding Primary Key)
     
+    /* database table */
     var $table = "t_media";
+    
+    /* Name in admin */
     var $name = "Media";
+    
+    /* number record in page */
     var $rop = 48;
+    
+    /* total page = (total record)/(row per page) */
     var $totalPage = 0;
+    
+    /* Total record in the table */
     var $totalRow = 0;
+    
+    /* Display type: gird or list, the default is grid */
     var $view;
+    
+    /* search keyword */
     var $q = "";
+    
+    /* current array record get in the table */
     var $arrMedia = array();
+    
+    /* Group type of extensions */
     var $arrFileExt = array(
         'audio' => array('3gp', 'act', 'aiff', 'aac', 'au', 'awb', 'dct', 'dss', 'dvf', 'flac', 'gsm', 'illax', 'ivs', 'm4a', 'mnf', 'mp3', 'mpc', 'msv', 'ogg', 'oga', 'ra', 'rm', 'raw', 'sln', 'tta', 'vox', 'wav', 'wma', 'wv'),
         'compressed' => array('rar', 'zip', 'a', 'ar', 'cpio', 'shar', 'lbr', 'iso', 'lbr', 'mar', 'tar', 'bz2', 'f', 'gz', 'gz', 'lz', 'lzma', 'lzo', 'rz', 'sfark', 'xz', 'infl'),
@@ -61,16 +78,20 @@ class Media extends Base {
     public function __construct() {
 
         if (function_exists('admin_url')) {
-
+            
+            /* simple modal */
             admin_register_style('media-simplemodal', admin_url() . 'css/simple-modal.css'); // simple modal
             admin_register_script('media-simplemodal', admin_url() . 'js/jquery.simplemodal.js', false, true); // simple modal
 
+            /* mediaelement */
             admin_register_style('media-style', admin_url() . 'css/mediaelementplayer.css');
             admin_register_script('mediaelement', admin_url() . 'js/mediaelement.min.js', false, true);
 
+            /* file upload */
             admin_register_script('jquery-ui-wiget', admin_url() . 'js/jquery.ui.widget.js', false, true);
             admin_register_script('jquery-fileupload', admin_url() . 'js/jquery.fileupload.js', false, true); // file upload
 
+            /* tipsy tooltip */
             admin_register_style('media-tipsy', admin_url() . 'css/tipsy.css'); // jquery tipsy
             admin_register_script('media-tipsy', admin_url() . 'js/jquery.tipsy.js', false, true);
         }
@@ -86,12 +107,11 @@ class Media extends Base {
      * @return array
      */
     public function getMediaByPath($path) {
-        $con = " AND path = '$path' ";
-        $result = $this->get('*', $con);
-        if (is_array($result)) {
-            return $result[0];
-        }
-        return false;
+        $media = DB::for_table($this->table)
+                ->where_equal('path', $path)
+                ->find_one();
+        
+        return $media;
     }
 
     /**
@@ -100,10 +120,13 @@ class Media extends Base {
      * @return array
      */
     public function getAllDateMeida() {
-        global $oDb;
-        $sql = "SELECT `date`, count(*) as total FROM $this->table GROUP BY YEAR(`date`), MONTH(`date`) ORDER BY `date` DESC ";
-        $rc = $oDb->query($sql);
-        return $oDb->fetchAll($rc);
+        return DB::for_table($this->table)
+                ->select('date')
+                ->select_expr('count(*)', 'total')
+                ->group_by_expr('YEAR(`date`)')
+                ->group_by_expr('MONTH(`date`)')
+                ->order_by_desc('date')
+                ->find_many();
     }
 
     /**
@@ -114,15 +137,15 @@ class Media extends Base {
         $cur_date = Input::get('search-date', 'txt', '');
         $arrDate = $this->getAllDateMeida();
         $option_date = '<option value="all">' . trans('all_time') . '</option>';
-        foreach ($arrDate as $key => $value) {
-            $unix_time = strtotime($value['date']);
+        foreach ($arrDate as $value) {
+            $unix_time = strtotime($value->date);
             $date_txt = date('Y - m', $unix_time);
             $date_value = date('Y-m', $unix_time);
             $tab = '&nbsp;&nbsp;&nbsp;&#151;&nbsp;&nbsp;&nbsp;';
             if ($date_value == $cur_date) {
-                $option_date .= '<option value="' . $date_value . '" selected="">' . $date_txt . $tab . '(&nbsp;' . formatPrice($value['total']) . ' ' . trans('files') . ' )</option>';
+                $option_date .= '<option value="' . $date_value . '" selected="">' . $date_txt . $tab . '(&nbsp;' . formatPrice($value->total) . ' ' . trans('files') . ' )</option>';
             } else {
-                $option_date .= '<option value="' . $date_value . '">' . $date_txt . $tab . '(' . formatPrice($value['total']) . ')</option>';
+                $option_date .= '<option value="' . $date_value . '">' . $date_txt . $tab . '(' . formatPrice($value->total) . ')</option>';
             }
         }
         return $option_date;
@@ -167,7 +190,7 @@ class Media extends Base {
      * @param $thumb: thumb folder if file is images
      * @return string
      */
-    public function getSrcMedia($path, $thumb = 'thumb-150') {
+    public function getSrcMediaIcon($path, $thumb = 'thumb-150') {
         $arrFileExt = $this->arrFileExt;
 
         $icon_file = "fileicon";
@@ -228,12 +251,12 @@ class Media extends Base {
                     break;
 
                 default:
-                    $url = $this->getSrcMedia($path, 'full');
+                    $url = $this->getSrcMediaIcon($path, 'full');
                     $html = '<span class="' . $icon_file . '" style="vertical-align:middle; display: table-cell; width: 100%; background: transparent url(' . $url . ') no-repeat center center;"></span>';
                     break;
             }
         } else {
-            $url = $this->getSrcMedia($path, 'full');
+            $url = $this->getSrcMediaIcon($path, 'full');
             $html = '<span style="vertical-align:middle; display: table-cell; width: 100%; background: transparent url(' . $url . ') no-repeat center center; background-size: contain"></span>';
         }
         return $html;
@@ -505,7 +528,7 @@ class Media extends Base {
                     $html_tooltip .= '<p>'.trans('desc').':&nbsp;&nbsp;&nbsp;<strong>' . $media_info['desc'] . '</strong></p>';;
                 }
                 $html .= '<li rel="media-tooltip" title="' . $html_tooltip . '"  id="media-' . $value['id'] . '" onclick="setUrlParam(this)" data-id="' . $value['id'] . '" data-url="' . base_url() . $value['path'] . '" data-path="' . $value['path'] . '"><div class="media-thumbnail">
-                            <img src="' . $this->getSrcMedia($value['path']) . '" /></div>
+                            <img src="' . $this->getSrcMediaIcon($value['path']) . '" /></div>
                           </li>';
                 $html_model .= $this->renderModel($value['id']);
             }
@@ -589,7 +612,7 @@ class Media extends Base {
                 $html .=
                         '<tr id="media-' . $value['id'] . '">
                                 <td class="check-cols"><input type="checkbox" name="idItem" class="idItem" value="' . $value['id'] . '" /></td>
-                                <td><a href="javascript:void(0)" onclick="showModel(' . $value['id'] . ')"><img src="' . $this->getSrcMedia($value['path']) . '" width="65" /></a></td>
+                                <td><a href="javascript:void(0)" onclick="showModel(' . $value['id'] . ')"><img src="' . $this->getSrcMediaIcon($value['path']) . '" width="65" /></a></td>
                                 <td class="media-file">
                                     <strong>' . $media_info['name'] . '</strong>
                                     <p><strong>(' . bytesToSize($media_info['size']) . ')</strong> / ' . strtoupper($media_info['ext']) . $text_wh . '</p>

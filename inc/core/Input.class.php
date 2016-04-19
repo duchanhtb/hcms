@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  * @desc class get data from $_POST, $_GET, $_REQUEST
  */
 class Input {

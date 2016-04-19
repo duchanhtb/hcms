@@ -29,13 +29,10 @@ if (!isset($_FILES["upload"]) || !is_uploaded_file($_FILES["upload"]["tmp_name"]
 
 // create directory for upload if it not exists
 $type = Input::get('type', 'txt', '');
-if (!$type) {
-    echo '';
-    exit;
-}
+if (!$type) { die(); }
+
 include("include/$type.php");
-$cur_folder = date('Y_m_d') . '/';
-$dir = "../uploads/images/" . $type . "/" . $cur_folder;
+$dir = "../uploads/images/" . $type . "/" . date('Y_m_d') . '/';
 
 // create folder
 if (!is_dir($dir)) {
@@ -43,14 +40,13 @@ if (!is_dir($dir)) {
 }
 
 if ($_FILES['upload']['name'] != 'none' && $_FILES['upload']['name'] != '') {
-    $image_image = remove_special_char($_FILES['upload']['name']); //@ereg_replace("[^a-zA-Z0-9_.]", "_",$_FILES['userfile']['name']);
-    $file_name = CFile::uploadFile($_FILES['upload']['tmp_name'], $image_image, $dir);
+    $file_name = CFile::removeSpecialChar($_FILES['upload']['name']); 
+    CFile::uploadFile($_FILES['upload']['tmp_name'], $file_name, $dir);
     $img = $dir . $file_name;
-    $img = ($img != 'none') ? $img : "";
-
-    // if file upload is images
+    
+    // if file upload is images create thumbnail
     if (@is_array(getimagesize($img))) {
-        // create thumb 
+        // create thumbnail
         global $imagesSize;
         foreach ($imagesSize as $folder => $images_config) {
             $thumb_width = $images_config['width']; // width

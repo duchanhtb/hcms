@@ -2,7 +2,7 @@
 
 /** for upload file with type:file
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 define('ALLOW_ACCESS', TRUE);
 include("config.php");
@@ -60,8 +60,8 @@ $aTypeUpload = array(
 );
 
 // show file file extension accept on server
-if (isset($_GET['ext']) && $_GET['ext'] == '1') {
-    $space = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*.';
+if (Input::get('ext','int', 0)) {
+    $space = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.";
     foreach ($aTypeUpload as $ext) {
         echo $space . $ext . '<br/>';
     }
@@ -82,8 +82,13 @@ if (!is_dir($dir)) {
 }
 
 if ($_FILES['userfile']['name'] != 'none' && $_FILES['userfile']['name'] != '') {
-    $file = remove_special_char($_FILES['userfile']['name']); //@ereg_replace("[^a-zA-Z0-9_.]", "_",$_FILES['userfile']['name']);
-    $file_name = CFile::uploadFile($_FILES['userfile']['tmp_name'], $file, $dir, $aTypeUpload);
+    // remove special char
+    $file_name = CFile::removeSpecialChar($_FILES['userfile']['name']); 
+    
+    // do upload
+    $file_name = CFile::uploadFile($_FILES['userfile']['tmp_name'], $file_name, $dir, $aTypeUpload);
+    
+    
     if ($file_name == 'none') {
         $result = array('status' => 'error', 'msg' => 'This file cannot be accepted to upload');
         echo json_encode($result);

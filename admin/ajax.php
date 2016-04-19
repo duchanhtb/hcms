@@ -86,16 +86,16 @@ class ajax {
         $eq = Input::get('eq', 'int', 0);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfoAdmin($page);
-        $position_info = $pageInfo['position'];
-        if ($position_info) {
-            $position_info = json_decode($position_info, true);
-            if (isset($position_info[$pos][$eq])) {
-                unset($position_info[$pos][$eq]);
+        $position = $pageInfo->position;
+        if ($position) {
+            $position = json_decode($position, true);
+            if (isset($position[$pos][$eq])) {
+                unset($position[$pos][$eq]);
             }
         }
-        $position_info[$pos] = array_values($position_info[$pos]);
-        $miniPage->position = json_encode($position_info);
-        $miniPage->update($pageInfo['id'], array('position'));
+        $position[$pos] = array_values($position[$pos]);
+        $miniPage->position = json_encode($position);
+        $miniPage->update($pageInfo->id, array('position'));
         echo 'ss';
     }
 
@@ -109,7 +109,7 @@ class ajax {
         $page = Input::get('page', 'txt', '');
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfoAdmin($page);
-        $page_id = $pageInfo['id'];
+        $page_id = $pageInfo->id;
         $pos_update = json_encode($_POST['position']);
         $miniPage->position = $pos_update;
         $miniPage->update($page_id, array('position'));

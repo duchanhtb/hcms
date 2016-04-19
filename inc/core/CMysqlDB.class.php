@@ -5,7 +5,7 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
 class CMysqlDB {
 
@@ -20,7 +20,6 @@ class CMysqlDB {
 
     /**
      * @Desc constructor function
-     * 
      */
     function CMysqlDB($db_info) {
         $this->db = $db_info;
