@@ -546,14 +546,16 @@ class CmsTable extends Base {
                                     if (count($arrImage) == 0) {
                                         $url = ADMIN_FOLDER . "/images/noimage.jpg";
                                     } else {
-                                        foreach ($arrImage as $k => $v) {
-                                            $url = $v[$value['table']['images_url']];
+                                        foreach ($arrImage as $image) {      
+                                            $images_url = $value['table']['images_url'];
+                                            $id_field = $this->idField;
+                                            $url = $image->$images_url;
                                             if (file_exists('..' . $url)) {
-                                                $stickytooltip .= "<div id=\"sticky_" . $v[$this->idField] . "\" class=\"atip\"><img src=" . base_url() . $url . " class=\"sticky_images\" /></div>";
+                                                $stickytooltip .= "<div id=\"sticky_" . $image->$id_field . "\" class=\"atip\"><img src=" . base_url() . $url . " class=\"sticky_images\" /></div>";
                                             }
                                             $small = getThumbnail('thumb-150', $url);
-                                            $img_delete = '<div class="rwmb-image-bar"><a href="javascript:voiid(0)" class="rwmb-delete-file" onclick="deleteFileUpload(' . $v[$this->idField] . ',\'' . $f . '\')">×</a></div>';
-                                            $title .= "<div class='wrap_images' id='img_" . $v[$this->idField] . "' ><a href='#' data-tooltip=\"sticky_" . $v[$this->idField] . "\"><img src=" . $small . " class='image_review' width='50' />" . $img_delete . "</div></div>";
+                                            $img_delete = '<div class="rwmb-image-bar"><a href="javascript:voiid(0)" class="rwmb-delete-file" onclick="deleteFileUpload(' . $image->$id_field . ',\'' . $f . '\')">×</a></div>';
+                                            $title .= "<div class='wrap_images' id='img_" . $image->$id_field . "' ><a href='#' data-tooltip=\"sticky_" . $image->$id_field . "\"><img src=" . $small . " class='image_review' width='50' />" . $img_delete . "</div></div>";
                                         }
                                     }
                                     break;
@@ -1139,12 +1141,14 @@ class CmsTable extends Base {
                         $url = ADMIN_FOLDER . "/images/noimage.jpg";
                     } else {
                         $row[$key] = '';
-                        foreach ($arrImage as $k => $v) {
-                            $url = $v[$value['table']['images_url']];
+                        foreach ($arrImage as $image) {
+                            $images_url = $value['table']['images_url'];
+                            $id_field = $this->idField;
+                            $url = $image->$images_url;
                             $small = getThumbnail('thumb-150', $url);
-                            $img_delete = '<div class="rwmb-image-bar"><a href="javascript:void(0)" class="rwmb-delete-file" onclick="deleteFileUpload(' . $v[$this->idField] . ',\'' . $f . '\')">×</a></div>';
+                            $img_delete = '<div class="rwmb-image-bar"><a href="javascript:void(0)" class="rwmb-delete-file" onclick="deleteFileUpload(' . $image->$id_field . ',\'' . $f . '\')">×</a></div>';
                             if ($small) {
-                                $html_img.= "<li id=\"img_" . $v[$this->idField] . "\"><img height=\"100\" class='image_review'  src=\"" . $small . "\">" . $img_delete . "</li>";
+                                $html_img.= "<li id=\"img_" . $image->$id_field . "\"><img height=\"100\" class='image_review'  src=\"" . $small . "\">" . $img_delete . "</li>";
                             }
                         }
                     }

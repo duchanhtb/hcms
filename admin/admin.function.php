@@ -179,19 +179,19 @@ function show_admin_menu() {
 function show_admin_content() {
     global $arrMenu;
     /*     * ************* content admin ***************** */
-    
+
     $func = Input::get('f', 'txt', '');
-    if($func == ''){
+    if ($func == '') {
         redirect("index.php?f=home");
     }
-    
+
     $html = '';
     if ($func && file_exists(ADMIN_PATH . "include/$func.php")) {
-        
+
         // include file
         include_once(ADMIN_PATH . "include/$func.php");
         $func_info = getSubArrayValue($arrMenu, 'id', $func);
-        
+
         switch ($func) {
             case 'options':
                 $cmsOptions = new cmsOptions($of_options);
@@ -225,11 +225,11 @@ function show_admin_content() {
             case 'changepass':
                 $html .= $html_changepass;
                 break;
-            
+
             case 'restrict':
                 $html .= $html_restrict;
                 break;
-            
+
             default:
                 if (isset($func_info['table']) && $func_info['table'] != '') {
                     $func_table = explode(":", $func_info['table']);
@@ -252,7 +252,7 @@ function show_admin_content() {
  * @return true|false
  */
 function getAdminTitle($arrConfig) {
-    $f = Input::get('f','txt','');
+    $f = Input::get('f', 'txt', '');
     if ($f) {
         foreach ($arrConfig as $key => $value) {
             if (isset($value['id']) && $f == $value['id']) {
@@ -262,7 +262,6 @@ function getAdminTitle($arrConfig) {
     }
     return 'HCMS';
 }
-
 
 /**
  * @Desc get current address
@@ -280,10 +279,8 @@ function getAddress() {
  * @return string
  */
 function getIP() {
-    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : getenv('REMOTE_ADDR');    
+    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : getenv('REMOTE_ADDR');
 }
-
-
 
 /**
  * @Desc convert string to price
@@ -309,37 +306,26 @@ function price($str) {
 }
 
 /**
- * @Desc I don't remember
- * @param string $date: 
- * @param int $num_day:
- * @param string $format:
- * @return date time
- */
-function cal_date($date, $num_day, $format = 'Y-m-d H:i:s') {
-    $newdate = strtotime($num_day . ' day', strtotime($date));
-    $newdate = date($format, $newdate);
-    return $newdate;
-}
-
-/**
  * @Desc get images table
  * @param string $table_info: table infomation
  * @param int $rid: record id
  * @return array
  */
-function getImagesTable($table_info, $rid) {
-    if (!$rid) {
+function getImagesTable($table_info, $record_id) {
+    if (!$record_id) {
         return false;
     }
-    global $oDb;
+
     $table_name = $table_info['table_name'];
     $primary_key = $table_info['primary_key'];
-    $url = $table_info['images_url'];
+    $images_url = $table_info['images_url'];
     $relate_id = $table_info['relate_id'];
-    $sql = "SELECT `$primary_key`, `$url`  FROM  `$table_name` WHERE `$relate_id` = $rid ";
-    $query = $oDb->query($sql);
-    $result = $oDb->fetchAll($query);
-    return $result;
+
+    return DB::for_table($table_name)
+                    ->select($primary_key)
+                    ->select($images_url)
+                    ->where_equal($relate_id, $record_id)
+                    ->find_many();
 }
 
 /**
@@ -347,23 +333,26 @@ function getImagesTable($table_info, $rid) {
  * @param string $str: the input string
  * @return int (with comma)
  */
-function deleteImagesTable($table_info, $id) {
-    if (!$id) {
+function deleteImagesTable($table_info, $record_id) {
+    if (!$record_id) {
         return;
     }
-    global $oDb;
     $table_name = $table_info['table_name'];
     $primary_key = $table_info['primary_key'];
-    $url = $table_info['images_url'];
-    $sql = "SELECT `$primary_key`, `$url` FROM  `$table_name` WHERE `$primary_key` = $id ";
-    $query = $oDb->query($sql);
-    $images = $oDb->fetchArray($query);
-    $image_path = ROOT_PATH . trim($images[$url], '.');
+    $images_url = $table_info['images_url'];
+
+    $image = DB::for_table($table_name)
+            ->select($primary_key)
+            ->select($images_url)
+            ->where_equal($primary_key, $record_id)
+            ->find_one();
+
+    $image_path = ROOT_PATH . trim($image->$images_url, '.');
 
     // delete origin images
     if (@file_exists($image_path)) {
         @unlink($image_path);
-        deleteMedia(trim($images[$url], '.'));
+        deleteMedia(trim($image->$images_url, '.'));
     }
     // delete thumbnail
     global $imagesSize;
@@ -376,66 +365,9 @@ function deleteImagesTable($table_info, $id) {
     }
 
     // delete in database
-    $sql = "DELETE FROM `$table_name` WHERE `$table_name`.`$primary_key` = $id LIMIT 1 ";
-    $oDb->query($sql);
+    $image->delete();
     return true;
 }
-
-
-
-/**
- * @Desc get list category (with dash before sub category name)
- * @param 
- * @return array
- */
-function getCategory() {
-    global $oDb;
-    $arr_category = array();
-    $arr_category[0] = 'Trang chủ';
-
-    $sql = "SELECT `id`, `name`, `parent_id` FROM t_category WHERE 1 ";
-    $sql .= 'ORDER BY `name` ASC ';
-
-    $rs = $oDb->query($sql);
-    $allCat = $oDb->fetchAll($rs);
-    foreach ($allCat as $key => $value) {
-        if ($value['parent_id'] == 0) {
-            $name = $value['name'];
-            $id = $value['id'];
-            $arr_category[$id] = $name;
-
-            // sub1
-            foreach ($allCat as $key1 => $value1) {
-                if ($value1['parent_id'] == $value['id']) {
-                    $name = '-----' . $value1['name'];
-                    $id = $value1['id'];
-                    $arr_category[$id] = $name;
-
-                    // sub2
-                    foreach ($allCat as $key2 => $value2) {
-                        if ($value2['parent_id'] == $value1['id']) {
-                            $name = '----------' . $value2['name'];
-                            $id = $value2['id'];
-                            $arr_category[$id] = $name;
-
-                            // sub3
-                            foreach ($allCat as $key3 => $value3) {
-                                if ($value3['parent_id'] == $value2['id']) {
-                                    $name = '---------------' . $value3['name'];
-                                    $id = $value3['id'];
-                                    $arr_category[$id] = $name;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return $arr_category;
-}
-
-
 
 /**
  * @Desc get class for admin menu, class="mnu_select tooltip" or class="tooltip"  
@@ -454,16 +386,15 @@ function getClassMenu($menu) {
         $class_tooltip = 'tooltip';
         $title_tooltip = 'title="&ldquo;  ' . $menu['desc'] . '&bdquo;"';
     }
-    
-    $class_name = $menu_select." ".$class_tooltip;
-    
+
+    $class_name = $menu_select . " " . $class_tooltip;
+
     if ($class_name) {
         return "class='$class_name' $title_tooltip";
     } else {
         return '';
     }
 }
-
 
 /**
  * @Desc get max value of primary key
@@ -524,18 +455,18 @@ if (!function_exists('bytesToSize')) {
  * @return int (with comma)
  */
 function downloadImagesFromHTML($html) {
-    include_once(INC_PATH.'lib/simple_html_dom.php');
-    
+    include_once(INC_PATH . 'lib/simple_html_dom.php');
+
     $html = str_get_html($html);
-    
-    foreach($html->find('img') as $e){
-        $src =  $e->src;
+
+    foreach ($html->find('img') as $e) {
+        $src = $e->src;
         // check if image exists on this hosting
         if (strpos($src, base_url()) === false) {
-            
+
             $file_name = CFile::getFileName($src);
             $file_name = CFile::removeSpecialChar($file_name);
-            
+
             $type = Input::get('f', 'txt', 'media');
             $dir = "../uploads/images/" . $type . "/" . date('Y_m_d') . '/';
 
@@ -545,21 +476,20 @@ function downloadImagesFromHTML($html) {
             }
 
             // download file
-            $file_path = trim($dir, '.') . $file_name;            
+            $file_path = trim($dir, '.') . $file_name;
             CFile::downloadFile($src, ROOT_PATH . $file_path);
 
             // insert to the media
             insertMedia($file_path);
 
             // update dom attribute
-            $e->src = base_url(). trim($file_path, '/');
+            $e->src = base_url() . trim($file_path, '/');
         }
     }
-    
+
     $content = $html->save();
     return $content;
 }
-
 
 /**
  * @Desc remove commar and dot in string
@@ -567,7 +497,7 @@ function downloadImagesFromHTML($html) {
  * @return int (without comma, dots)
  */
 function cleanNumber($a) {
-    $a = str_replace( ',', '', $a );
-    $a = str_replace( '.', '', $a );
+    $a = str_replace(',', '', $a);
+    $a = str_replace('.', '', $a);
     return $a;
 }

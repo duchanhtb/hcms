@@ -83,6 +83,12 @@ $column = array(
 );
 
 
+/**
+ * @Desc count product in category
+ * @param $id: category ID
+ * @param string $act action type
+ * @return int
+ */
 function countProduct($id, $act = 'list'){
     global $tbl_prefix;
     $html = '';
@@ -110,4 +116,59 @@ function countProduct($id, $act = 'list'){
             break;
     }
     return $html;
+}
+
+
+
+
+/**
+ * @Desc get list category (with dash before sub category name)
+ * @param 
+ * @return array
+ */
+function getCategory() {
+    global $oDb;
+    $arr_category = array();
+    $arr_category[0] = 'Trang chủ';
+
+    $sql = "SELECT `id`, `name`, `parent_id` FROM t_category WHERE 1 ";
+    $sql .= 'ORDER BY `name` ASC ';
+
+    $rs = $oDb->query($sql);
+    $allCat = $oDb->fetchAll($rs);
+    foreach ($allCat as $key => $value) {
+        if ($value['parent_id'] == 0) {
+            $name = $value['name'];
+            $id = $value['id'];
+            $arr_category[$id] = $name;
+
+            // sub1
+            foreach ($allCat as $key1 => $value1) {
+                if ($value1['parent_id'] == $value['id']) {
+                    $name = '-----' . $value1['name'];
+                    $id = $value1['id'];
+                    $arr_category[$id] = $name;
+
+                    // sub2
+                    foreach ($allCat as $key2 => $value2) {
+                        if ($value2['parent_id'] == $value1['id']) {
+                            $name = '----------' . $value2['name'];
+                            $id = $value2['id'];
+                            $arr_category[$id] = $name;
+
+                            // sub3
+                            foreach ($allCat as $key3 => $value3) {
+                                if ($value3['parent_id'] == $value2['id']) {
+                                    $name = '---------------' . $value3['name'];
+                                    $id = $value3['id'];
+                                    $arr_category[$id] = $name;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $arr_category;
 }
