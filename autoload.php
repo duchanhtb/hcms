@@ -6,10 +6,8 @@
 $autoLoad = array(
     'core/Base.class.php',
     'core/Db.class.php',
-    'core/Cms.class.php',
-    'core/CMysqlDB.class.php',
-    'core/Images.class.php',
-    'core/Memcache.class.php',
+    'core/Cms.class.php',    
+    'core/Images.class.php',    
     'core/Module.class.php',
     'core/Xtemplate.class.php',
     'core/Input.class.php',

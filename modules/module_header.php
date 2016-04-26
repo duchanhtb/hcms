@@ -10,7 +10,7 @@ if (!defined('ALLOW_ACCESS'))
  */
 class module_header extends Module {
 
-    function module_header() {
+    function __construct() {
         $this->tpl = 'header.html';
         parent::module();
     }

@@ -27,7 +27,7 @@ if (!defined('ALLOW_ACCESS'))
   - combobox
   - combobox:relate:int
   - checkbox:relate:int
-  - checkbox:relate:table  
+  - checkbox:relate:table
   - datetime:current
   - map
   Attribute
@@ -54,16 +54,15 @@ if (!defined('ALLOW_ACCESS'))
   getCategory($value, $action)
  */
 
-
-
 /**
-* @desc core class that interactive with database and render html for add from, edit form and list data
-*/
+ * @desc core class that interactive with database and render html for add from, edit form and list data
+ */
 class CmsTable extends Base {
 
     public $name = "Bản ghi";
     public $column = array(); // array field config
     public $idField = null; // primary key
+    public $pk = null; // primary key
     public $action = array(); // add, edit, addForm, editForm 
     public $showAddButton = true;
     public $rop = 50; // row per page
@@ -85,7 +84,6 @@ class CmsTable extends Base {
      * @return nothing
      */
     public function __construct($table, $column, $idField) {
-        global $oDb;
         $this->mylevel = (int) $_SESSION['admin']['level'];
         $this->pk = $idField;
         $this->fields = array();
@@ -96,11 +94,11 @@ class CmsTable extends Base {
         foreach ($column as $k => $v) {
             if ($v['type'] == 'input:multiimages')
                 continue;
-            
-            if($v['type'] == 'input:function' || $v['type'] == 'checkbox:relate:table'){
+
+            if ($v['type'] == 'input:function' || $v['type'] == 'checkbox:relate:table') {
                 continue;
             }
-            
+
             $this->fields[] = $k;
             $this->$k = '';
         }
@@ -115,22 +113,25 @@ class CmsTable extends Base {
      * @return HTML
      */
     public function showList() {
-        global $oDb;
         $html = '';
         $list_field = '';
+
+
+        $cmsTable = DB::for_table($this->table)->select($this->idField);
         foreach ($this->column as $field => $info) {
             if (isset($info['table']) && count($info['table']) > 0)
                 continue;
-            
-            if($info['type'] == 'input:function' || $info['type'] == 'checkbox:relate:table'){
+
+            if ($info['type'] == 'input:function' || $info['type'] == 'checkbox:relate:table') {
                 continue;
             }
-            $list_field .= "`$field`,";
+            $cmsTable = $cmsTable->select($field);
         }
-        $list_field .= " `$this->idField` ";
-        $strQuery = "select $list_field from " . $this->table;
+
+
         if (isset($_REQUEST['search-input']) && $_REQUEST['search-input'] != "") {
             $keyword = htmlspecialchars(addslashes($_REQUEST['search-input']));
+            
             $_SESSION['search-input'] = $keyword;
             if ($_REQUEST['search-column'] != "") {
                 $column_attr = array();
@@ -138,37 +139,30 @@ class CmsTable extends Base {
                     if ($column_name == $_REQUEST['search-column'])
                         $column_attr = $attr;
                 }
-                if ($column_attr != NULL && isset($column_attr['data'])) {
+                if ($column_attr != NULL && isset($column_attr['data'])) {                    
                     foreach ($column_attr['data'] as $key => $value) {
                         if (strtolower($keyword) == strtolower(trim($value, '-'))) {
-                            $where = " where `" . $this->idField . "`='" . (int) $keyword . "' OR `" . $_REQUEST['search-column'] . "` = " . $key;
+                            $cmsTable = $cmsTable->where_raw('(`' . $this->idField . '` = ? OR `' . $_REQUEST['search-column'] . '` = ?)', array($keyword, $keyword));
                             break;
                         } else {
-                            $where = " where `" . $this->idField . "`='" . (int) $keyword . "' OR `" . $_REQUEST['search-column'] . "` like '%" . $keyword . "%' ";
+                            $cmsTable = $cmsTable->where_raw('(`' . $this->idField . '` = ? OR `' . $_REQUEST['search-column'] . '` like %?%)', array($keyword, $keyword));
                         }
                     }
-                } if($column_attr != NULL && isset($column_attr['relate'])){
-                    $dataRelate = $this->getIdFromRelateTable($column_attr['relate'], $keyword);
-                    if(count($dataRelate) > 0 ){
-                        $wh = '';
-                        foreach($dataRelate as $dr){
-                            $wh .= "OR `" . $_REQUEST['search-column'] . "` like '%" . $dr . "%' ";
-                        }
-                        if($wh){
-                            $where = " where (".trim($wh,"OR").")";
-                        }
+                } if ($column_attr != NULL && isset($column_attr['relate'])) {                       
+                    $wh_relate = $this->getIdFromRelateTable($column_attr['relate'], $keyword);
+                    if ($wh_relate) {
+                        $cmsTable = $cmsTable->where_raw($wh_relate);
                     }
-                }else {
-                    $where = " where `" . $this->idField . "`='" . (int) $keyword . "' OR `" . $_REQUEST['search-column'] . "` like '%" . $keyword . "%' ";
+                } else {           
+                    $cmsTablem = $cmsTable->where_like($_REQUEST['search-column'], "%$keyword%");
+                    //$cmsTable = $cmsTable->where_raw("(`" . $this->idField . "` = ? OR `" . $_REQUEST['search-column'] . "` LIKE %?%)", array($keyword, $keyword));
                 }
             } else {
-                $where = " where `" . $this->idField . "`='%" . (int) $keyword . "%' ";
+                $cmsTable = $cmsTable->where_like($this->idField, "%$keyword%");
             }
-            $strQuery .= $where;
         }
         if ($this->suffix_sql) {
-            $strQuery = (strpos($strQuery, 'where') > 0 ) ? $strQuery : ($strQuery . ' where 1 ');
-            $strQuery .= $this->suffix_sql;
+            $cmsTable = $cmsTable->raw_query($this->suffix_sql);
         }
 
         if (isset($_POST['orderby']) && $_POST['orderby'] != "") {
@@ -195,7 +189,15 @@ class CmsTable extends Base {
             $_SESSION[$this->table . "-page"]['order_dir'] = $order_dir;
         }
 
-        $strQuery .= " order by `" . trim($order) . "` " . $order_dir;
+        switch (strtoupper($order_dir)) {
+            case "ASC":
+                $cmsTable = $cmsTable->order_by_asc(trim($order));
+                break;
+
+            case "DESC":
+                $cmsTable = $cmsTable->order_by_desc(trim($order));
+                break;
+        }
         //tinh so trang
         $page = isset($_POST['current_page']) ? intval($_POST['current_page']) : 0;
         if ($page == 0) {
@@ -203,14 +205,14 @@ class CmsTable extends Base {
         }
         $_SESSION[$this->table . "-page"]['page'] = $page;
 
-        $limit = ($page - 1) * $this->rop;
+        $offset = ($page - 1) * $this->rop;
 
-        $data = $oDb->query($strQuery . " limit " . (int) $limit . "," . $this->rop);
-        $data_total = $oDb->query($strQuery);
+        $totalRow = $cmsTable->count();
 
-
-        $totalRow = $oDb->numRows($data_total);
-
+        $data = $cmsTable
+                ->limit($this->rop)
+                ->offset($offset)
+                ->find_many();
         $totalPage = (int) ($totalRow / $this->rop);
         if ($totalRow % $this->rop > 0) {
             $totalPage++;
@@ -320,12 +322,11 @@ class CmsTable extends Base {
                 } else {
                     $save_icon = "";
                 }
-                if($value['type'] == 'input:function'){
+                if ($value['type'] == 'input:function') {
                     $html.= "<th><a href='javascript:void(0);'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
-                }else{
+                } else {
                     $html.= "<th><a href='javascript:order(\"" . $key . "\",\"" . $dir . "\");'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
                 }
-                
             }
         }
         $html.= "</tr>";
@@ -390,19 +391,19 @@ class CmsTable extends Base {
     public function printRow($data) {
         $html = '';
         $f = Input::get('f', 'txt', '');
-        global $oDb;
-        if (@$oDb->numRows($data) > 0) {
+        if (count($data) > 0) {
             $count = 0;
             $stickytooltip = '';
-            while ($item = $oDb->fetchArray($data)) {
+            foreach ($data as $item) {
                 $count++;
+                $idField = $this->idField;
                 if ($count % 2 == 0) {
                     $html.= "<tr>";
                 } else {
                     $html.= "<tr>";
                 }
                 if ($this->mylevel > 1) {
-                    $html.= "<td class='check-cols'><input type='checkbox' name='idItem' class='idItem' value='" . $item[$this->idField] . "' /></td>";
+                    $html.= "<td class='check-cols'><input type='checkbox' name='idItem' class='idItem' value='" . $item->$idField . "' /></td>";
                 } else {
                     $html.= "<td class='check-cols'></td>";
                 }
@@ -411,8 +412,8 @@ class CmsTable extends Base {
                 foreach ($this->column as $key => $value) {
                     if (isset($value['show_on_list']) && $value['show_on_list'] == true) {
                         if (isset($value['relate']) && $value['relate'] != "") {
-                            
-                            switch($value['type']){
+
+                            switch ($value['type']) {
                                 case "checkbox:relate:table":
                                     $relate = explode(":", $value['relate']);
                                     $relateTable = $relate[0];
@@ -423,48 +424,51 @@ class CmsTable extends Base {
                                     $table1 = explode(".", $relateField1[1]);
                                     $table2 = explode(".", $relateField2[1]);
                                     
-                                    $relate_query = "SELECT * FROM $relateTable WHERE `$field1` = ".$item[$this->idField];
-                                    $relate_rc = $oDb->query($relate_query);
-                                    $relate_arr = $oDb->fetchAll($relate_rc);
-                                    $list_id = '';
-                                    foreach($relate_arr as $k=>$v){
-                                        $list_id .= $v[$field2].',';
+                                    $relate_arr = DB::for_table($relateTable)
+                                            ->where_equal($field1, $item->$idField)
+                                            ->find_many();
+                                    $arr_list_id = array();
+                                    foreach ($relate_arr as $v) {
+                                        $arr_list_id[] = $v->$field2;
                                     }
-                                    $list_id = trim($list_id,',');
-                                    if ($list_id) {
-                                        $relate_rs = $oDb->query("select * from " . $table2[0] . " where " . $table2[1] . " IN ($list_id)");
-                                        if ($oDb->numRows($relate_rs) == 0) {
+                                    if ($arr_list_id && count($arr_list_id) > 0) {
+                                        $arrRelate = DB::for_table($table2[0])
+                                                ->where_in($table2[1], $arr_list_id)
+                                                ->find_many();
+
+                                        if (!$arrRelate) {
                                             $title = trans('unknow');
                                         } else {
-                                            
-                                            $arrRelate = $oDb->fetchAll($relate_rs);
                                             $title = '';
+                                            $relateTitle = $table2[2];
                                             foreach ($arrRelate as $relate) {
-                                                $title .= '<p>&#8226; ' . htmlspecialchars(stripslashes($relate[$table2[2]])) . '</p>';
+                                                $title .= '<p>&#8226; ' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</p>';
                                             }
                                             $title = trim($title, ',&nbsp;');
                                         }
                                     } else {
                                         $title = trans('unknow');
                                     }
-                                    
+
                                     break;
-                                
+
                                 default :
                                     $relate = explode(".", $value['relate']);
                                     $relateTable = $relate[0];
                                     $relateTitle = $relate[1];
                                     $relateField = $relate[2];
-                                    $list_id = str_replace('::', ',', trim($item[$key], ':'));
+                                    $list_id = str_replace('::', ',', trim($item->$key, ':'));
                                     if ($list_id) {
-                                        $relate_rs = $oDb->query("select * from " . $relateTable . " where " . $relateField . " IN ($list_id)");
-                                        if ($oDb->numRows($relate_rs) == 0) {
+                                        $arr_list_id = explode(',', $list_id);
+                                        $arrRelate = DB::for_table($relateTable)
+                                                ->where_in($relateField, $arr_list_id)
+                                                ->find_many();
+                                        if (!$arrRelate) {
                                             $title = trans('unknow');
                                         } else {
-                                            $arrRelate = $oDb->fetchAll($relate_rs);
                                             $title = '';
                                             foreach ($arrRelate as $relate) {
-                                                $title .= '<p>&#8226; ' . htmlspecialchars(stripslashes($relate[$relateTitle])) . '</p>';
+                                                $title .= '<p>&#8226; ' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</p>';
                                             }
                                             $title = trim($title, ',&nbsp;');
                                         }
@@ -476,15 +480,15 @@ class CmsTable extends Base {
                         } else {
                             switch ($value['type']) {
                                 case "checkbox":
-                                    if ((int) $item[$key] == 1) {
+                                    if ((int) $item->$key == 1) {
                                         if (($value['editable'] == true) && ($this->mylevel > 1)) {
-                                            $title = "<a href='javascript:switchval(\"" . $key . "\",\"" . $item[$this->idField] . "\",0);' id='$key-" . $item[$this->idField] . "' class='active-link'><img src='images/check.png' title='" . htmlspecialchars($value['label']) . "'></a>";
+                                            $title = "<a href='javascript:switchval(\"" . $key . "\",\"" . $item->$idField . "\",0);' id='$key-" . $item->$idField . "' class='active-link'><img src='images/check.png' title='" . htmlspecialchars($value['label']) . "'></a>";
                                         } else {
                                             $title = '<img src="images/check.png" title="' . htmlspecialchars($value['label']) . '">';
                                         }
                                     } else {
                                         if (($value['editable'] == true) && ($this->mylevel > 1)) {
-                                            $title = "<a href='javascript:switchval(\"" . $key . "\",\"" . $item[$this->idField] . "\",1);' id='$key-" . $item[$this->idField] . "' class='unactive-link'><img src='images/uncheck.png' title='" . htmlspecialchars($value['unlabel']) . "'></a>";
+                                            $title = "<a href='javascript:switchval(\"" . $key . "\",\"" . $item->$idField . "\",1);' id='$key-" . $item->$idField . "' class='unactive-link'><img src='images/uncheck.png' title='" . htmlspecialchars($value['unlabel']) . "'></a>";
                                         } else {
                                             $title = '<img src="images/uncheck.png" title="' . htmlspecialchars($value['unlabel']) . '">';
                                         }
@@ -495,12 +499,12 @@ class CmsTable extends Base {
                                     $title = '---';
                                     $tmp = '';
                                     foreach ($value['data'] as $k => $v) {
-                                        if ($item[$key] == $k) {
+                                        if ($item->$key == $k) {
                                             $tmp = $v;
                                         }
                                     }
                                     if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
-                                        $title = '<a href="javascript:edit(\'' . $item[$this->idField] . '\');">' . stripslashes(strip_tags($tmp)) . "</a>";
+                                        $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . stripslashes(strip_tags($tmp)) . "</a>";
                                     } else {
                                         $title = stripslashes(strip_tags($tmp));
                                     }
@@ -510,29 +514,29 @@ class CmsTable extends Base {
                                     $function = $value['function'];
                                     if (!function_exists($function)) {
                                         $title = "Function <strong>$function</strong> does not exists";
-                                    } else if (isset($item[$key]) && $item[$key] != '') {
-                                        $title = $function($item[$key], 'list');
+                                    } else if (isset($item->$key) && $item->$key != '') {
+                                        $title = $function($item->$key, 'list');
                                     } else {
-                                        $title = $function($item[$this->idField], 'list');
+                                        $title = $function($item->$idField, 'list');
                                     }
 
                                     break;
 
                                 case "input:image":
-                                    $url = ($item[$key] != "") ? $item[$key] : base_url() . ADMIN_FOLDER . "/images/noimage.jpg";
+                                    $url = ($item->$key != "") ? $item->$key : base_url() . ADMIN_FOLDER . "/images/noimage.jpg";
                                     if (@file_exists('..' . $url)) {
-                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item[$this->idField] . $key . "\"><img src=" . getThumbnail('thumb-150', $url) . " class='image_review' width='100' /></a>";
-                                        $stickytooltip .= "<div id=\"sticky_" . $item[$this->idField] . $key . "\" class=\"atip\"><img src=" . getThumbnail('origin', $url) . " class=\"sticky_images\" /></div>";
+                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item->$idField . $key . "\"><img src=" . getThumbnail('thumb-150', $url) . " class='image_review' width='100' /></a>";
+                                        $stickytooltip .= "<div id=\"sticky_" . $item->$idField . $key . "\" class=\"atip\"><img src=" . getThumbnail('origin', $url) . " class=\"sticky_images\" /></div>";
                                     } else if (strpos('http', $url) === false) {
-                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item[$this->idField] . $key . "\"><img src=" . getThumbnail('thumb-150', $url) . " class='image_review' width='100' /></a>";
+                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item->$idField . $key . "\"><img src=" . getThumbnail('thumb-150', $url) . " class='image_review' width='100' /></a>";
                                     } else {
-                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item[$this->idField] . $key . "\"><img src=" . base_url(). $url . " class='image_review' width='100' /></a>";
+                                        $title = "<a href='#' data-tooltip=\"sticky_" . $item->$idField . $key . "\"><img src=" . base_url() . $url . " class='image_review' width='100' /></a>";
                                     }
                                     break;
 
                                 case "input:file":
-                                    if (isset($item[$key]) && $item[$key] != '') {
-                                        $title = CFile::getFilename($item[$key]);
+                                    if (isset($item->$key) && $item->$key != '') {
+                                        $title = CFile::getFilename($item->$key);
                                     } else {
                                         $title = 'not found';
                                     }
@@ -542,11 +546,11 @@ class CmsTable extends Base {
 
                                 case "input:multiimages":
                                     $title = '';
-                                    $arrImage = getImagesTable($value['table'], $item[$this->idField]);
+                                    $arrImage = getImagesTable($value['table'], $item->$idField);
                                     if (count($arrImage) == 0) {
                                         $url = ADMIN_FOLDER . "/images/noimage.jpg";
                                     } else {
-                                        foreach ($arrImage as $image) {      
+                                        foreach ($arrImage as $image) {
                                             $images_url = $value['table']['images_url'];
                                             $id_field = $this->idField;
                                             $url = $image->$images_url;
@@ -565,19 +569,19 @@ class CmsTable extends Base {
                                         $class = "";
                                         $size = 100;
                                         $width = "width:80px;";
-                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item[$key]) . '" /> VNĐ';
+                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> VNÐ';
                                     } else {
                                         if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
-                                            $title = '<a href="javascript:edit(\'' . $item[$this->idField] . '\');">' . price($item[$key]) . "</a>";
+                                            $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . price($item->$key) . "</a>";
                                         } else {
-                                            $title = stripslashes(strip_tags($item[$key]));
+                                            $title = stripslashes(strip_tags($item->$key));
                                         }
                                     }
                                     break;
 
 
                                 case "input:attribute":
-                                    $attribute = unserialize($item[$key]);
+                                    $attribute = unserialize($item->$key);
                                     $title = '';
                                     if ($attribute && count($attribute) > 0) {
                                         foreach ($attribute as $att_value) {
@@ -589,11 +593,11 @@ class CmsTable extends Base {
                                 case "textarea:noeditor":
                                     $class = isset($class) ? $class : '';
                                     if (isset($value['editable']) && ($value['editable'] == true) && ($this->mylevel > 1)) {
-                                        $title = '<textarea name="' . $key . '[]" ' . $class . ' style="resize:vertical; ">' . stripslashes(htmlspecialchars(trim($item[$key]))) . '</textarea>';
-                                    } else if(isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)){
-                                        $title = '<a href="javascript:edit(\'' . $item[$this->idField] . '\');">' . stripslashes(strip_tags($item[$key])) . "</a>";
-                                    }else{
-                                        $title = stripslashes(strip_tags($item[$key]));
+                                        $title = '<textarea name="' . $key . '[]" ' . $class . ' style="resize:vertical; ">' . stripslashes(htmlspecialchars(trim($item->$key))) . '</textarea>';
+                                    } else if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
+                                        $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . stripslashes(strip_tags($item->$key)) . "</a>";
+                                    } else {
+                                        $title = stripslashes(strip_tags($item->$key));
                                     }
                                     break;
 
@@ -604,18 +608,18 @@ class CmsTable extends Base {
                                             $size = 10;
                                             $width = "width:80px;";
                                             $class = "input-number";
-                                            $item[$key] = price($item[$key]);
+                                            $item->$key = price($item->$key);
                                         } else {
                                             $class = "";
                                             $size = 255;
                                             $width = "width:200px;";
                                         }
-                                        $title = '<input type="text" name="' . $key . '[]" class="' . $key . ' ' . $class . '" style="' . $width . '" maxlength="' . $size . '" value="' . stripslashes(htmlspecialchars(trim($item[$key]))) . '" />';
+                                        $title = '<input type="text" name="' . $key . '[]" class="' . $key . ' ' . $class . '" style="' . $width . '" maxlength="' . $size . '" value="' . stripslashes(htmlspecialchars(trim($item->$key))) . '" />';
                                     } else {
                                         if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
-                                            $title = '<a href="javascript:edit(\'' . $item[$this->idField] . '\');">' . stripslashes(strip_tags($item[$key])) . "</a>";
+                                            $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . stripslashes(strip_tags($item->$key)) . "</a>";
                                         } else {
-                                            $title = stripslashes(strip_tags($item[$key]));
+                                            $title = stripslashes(strip_tags($item->$key));
                                         }
                                     }
                                     break;
@@ -641,39 +645,39 @@ class CmsTable extends Base {
      * @return array
      */
     public function getRow($id) {
-        global $oDb;
-        $list_field = '';
+        $row = DB::for_table($this->table)
+                ->select($this->idField);
+
         foreach ($this->column as $field => $info) {
             if (isset($info['table']) && count($info['table']) > 0)
                 continue;
-            
-            if($info['type'] == 'input:function' || $info['type'] == 'checkbox:relate:table'){
+
+            if ($info['type'] == 'input:function' || $info['type'] == 'checkbox:relate:table') {
                 continue;
             }
-            
-            $list_field .= "`$field`,";
+            $row = $row->select($field);
         }
-        $list_field .= " `$this->idField` ";
-        $strSql = "SELECT $list_field FROM " . $this->table . " where `" . $this->idField . "` IN('" . $id . "')";
-        $rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-        return $rs;
+        $row = $row->where_equal($this->idField, $id)
+                ->find_one();
+
+        return $row;
     }
 
     /**
      * @desc controler function, this function will call other functions base on $_POST['action']
      * @return nothing
      */
-    public function eventHander() {        
-        global $oDb;
+    public function eventHander() {
         $html = '';
         $action = isset($_POST['action']) ? $_POST['action'] : '';
         switch ($action) {
             case "del":
-                //array_map("addSlash", $_POST['listID']);
-                $_POST['listID'] = $this->addSlashToListKey($_POST['listID']);
-                $strSql = "delete from " . $this->table . " where `" . $this->idField . "` in (" . $_POST['listID'] . ")";
-                $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                
+                $arr_list_ids = explode(',', $_POST['listID']);
+
+                $deleteTable = ORM::for_table($this->table)
+                        ->where_in($this->idField, $arr_list_ids)
+                        ->delete_many();
+
                 $_SESSION[$this->table . "-page"]['page'] = 1;
                 $html.= "<script>window.location.href='index.php?f=" . htmlspecialchars($_GET['f']) . "';</script>";
                 break;
@@ -737,7 +741,7 @@ class CmsTable extends Base {
      * @return HTML
      */
     public function viewAddForm($msg = null) {
-        global $oDb;
+
         admin_register_script('jquery-maskedinput', admin_url() . 'js/jquery.maskedinput-1.0.js', false, true);
         admin_register_script('jquery-metadata', admin_url() . 'js/jquery.metadata.js', false, true);
         admin_register_script('jquery-validate', admin_url() . 'js/jquery.validate.js', false, true);
@@ -757,12 +761,12 @@ class CmsTable extends Base {
             if (isset($value['separator']) && $value['separator'] != "") {
                 $html.= "<tr><td colspan=2><div class='add-bar'><span>" . $value['separator'] . "</span></div></td></tr>";
             }
-            
+
             $hidden_row = '';
-            if($value['type'] == 'input:hidden'){
+            if ($value['type'] == 'input:hidden') {
                 $hidden_row = 'style="display:none"';
             }
-            $html.= "<tr ".$hidden_row.">";
+            $html.= "<tr " . $hidden_row . ">";
             $html.= "<td width='15%'>" . $value['title'] . "</td>";
 
             //validate
@@ -796,18 +800,18 @@ class CmsTable extends Base {
                     break;
                 case "input:image":
                     admin_register_script('ajax-upload', admin_url() . 'js/ajaxupload.js', false, true);
-                    if($default_val == ''){
+                    if ($default_val == '') {
                         $img_default = 'images/noimage.jpg';
                     }
-                    
+
                     $f = Input::get('f', 'txt', 'media');
-                    $input = '<input type="text" value="'.$default_val.'" name="' . $key . '" class="' . $class . ' input-image" id="' . $key . '" /> 
+                    $input = '<input type="text" value="' . $default_val . '" name="' . $key . '" class="' . $class . ' input-image" id="' . $key . '" /> 
                                     [<a href="#" class="' . $key . ' btnUpload" id="btnUpload' . $key . '">' . trans('select_images') . '</a>]
                                     <span>' . trans('or') . '</span>
                                     [<a href="javascript:void(0)" onclick="popitup(\'browser.php?view=grid&search-type=image&f=' . $f . '&inputId=' . $key . '\')" class="' . $key . '" id="btnUpload' . $key . '">' . trans('select_from_library') . '</a>]
                                     <br/>
                              <div class="wrap-images">
-                                <img class="image_review" src="'.$img_default.'" width="100" />
+                                <img class="image_review" src="' . $img_default . '" width="100" />
                                 <div class="rwmb-image-bar"><a onclick="deleteDefaultImages(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
                              </div>
                              <br/>
@@ -864,13 +868,13 @@ class CmsTable extends Base {
                 case "textarea":
                     admin_register_script('ckeditor', admin_url() . 'editor/ckeditor/ckeditor.js');
                     admin_register_script('ckfinder', admin_url() . 'editor/ckfinder/ckfinder.js');
-                    
+
                     if (!isset($value['row']) || (int) $value['rows'] == 0) {
                         $rows = 10;
                     } else {
                         $rows = (int) $value['row'];
                     }
-                    
+
                     $input = '<textarea name="' . $key . '" id="' . $key . '" rows="' . $rows . '" class="' . $class . ' txa" cols="60">' . $default_val . '</textarea>';
                     $input .= '
                     <script type="text/javascript">
@@ -907,15 +911,19 @@ class CmsTable extends Base {
                     $relateTitle = $relate[1]; // title related
                     $relateField = $relate[2]; // field related
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "select * from " . $relateTable . " " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    while ($relate = $oDb->fetchArray($relate_rs)) {
-                        $input .= '<option value="' . $relate[$relateField] . '">' . htmlspecialchars(stripslashes($relate[$relateTitle])) . '</option>';
+
+                    $arrRelate = DB::for_table($relateTable);
+                    if ($suffix_query) {
+                        $arrRelate = $relateTable->raw_query($suffix_query);
+                    }
+                    $arrRelate = $arrRelate->find_many();
+                    foreach ($arrRelate as $relate) {
+                        $input .= '<option value="' . $relate->$relateField . '">' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</option>';
                     }
                     $input .= "</select>";
                     break;
-                
-                
+
+
                 case "combobox":
                     if (isset($value['required']) && $value['required'] != "") {
                         $class = "{min:1,messages:{min:'" . addslashes($value['required']) . "'}}";
@@ -936,26 +944,32 @@ class CmsTable extends Base {
                     $relateTitle = $relate[1]; // title related, example name of category
                     $relateField = $relate[2]; // field related, example id of category
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "SELECT $relateField, $relateTitle FROM " . $relateTable . " " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    $relateData = $oDb->fetchAll($relate_rs);
+
+                    $relateData = DB::for_table($relateTable)
+                            ->select($relateField)
+                            ->select($relateTitle);
+                    if ($suffix_query) {
+                        $relateData = $relateData->raw_query($suffix_query);
+                    }
+
+                    $relateData = $relateData->find_many();
+
                     $num_col = $this->getCheckboxCol(count($relateData));
-                    for($i = 0; $i < $num_col ; $i++){
-                        $withPercent = floor(100/$num_col);
-                        $input .= '<div class="inline-block v-alin-top" style="width: '.$withPercent.'%">';
-                        
-                        $recordBreak = ceil(count($relateData)/$num_col);
-                        for($n = $i*$recordBreak; $n < ($i+1)* $recordBreak ; $n++){
-                            if(isset($relateData[$n])){
-                                $relate  = $relateData[$n];
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate[$relateField] . '" />' . htmlspecialchars(stripslashes($relate[$relateTitle])) . '<br>';
+                    for ($i = 0; $i < $num_col; $i++) {
+                        $withPercent = floor(100 / $num_col);
+                        $input .= '<div class="inline-block v-alin-top" style="width: ' . $withPercent . '%">';
+                        $recordBreak = ceil(count($relateData) / $num_col);
+                        for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
+                            if (isset($relateData[$n])) {
+                                $relate = $relateData[$n];
+                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '<br>';
                             }
                         }
                         $input .= '</div>';
                     }
                     $input .= '<p>&nbsp;</p>';
                     break;
-                    
+
                 case "checkbox:relate:table":
                     $input = "";
                     $relate = explode(":", $value['relate']);
@@ -964,24 +978,35 @@ class CmsTable extends Base {
                     $relateField2 = explode("=", $relate[2]);
                     $field1 = $relateField1[0];
                     $field2 = $relateField2[0];
-                    
+
                     $table1 = explode(".", $relateField1[1]);
                     $table2 = explode(".", $relateField2[1]);
-                    
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "SELECT `$table2[1]`, `$table2[2]` FROM " . $table2[0] . " ORDER BY `$table2[2]` " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    $relateData = $oDb->fetchAll($relate_rs);
+
+                    $field_value = $table2[1];
+                    $field_title = $table2[2];
+                    $relateData = DB::for_table($table2[0])
+                            ->select($field_value)
+                            ->select($field_title);
+
+                    if ($suffix_query) {
+                        $relateData = $relateData->raw_query($suffix_query);
+                    }
+
+                    $relateData = $relateData
+                            ->order_by_asc($field_title)
+                            ->find_many();
+
                     $num_col = $this->getCheckboxCol(count($relateData));
-                    for($i = 0; $i < $num_col ; $i++){
-                        $withPercent = floor(100/$num_col);
-                        $input .= '<div class="inline-block v-alin-top" style="width: '.$withPercent.'%">';
-                        
-                        $recordBreak = ceil(count($relateData)/$num_col);
-                        for($n = $i*$recordBreak; $n < ($i+1)* $recordBreak ; $n++){
-                            if(isset($relateData[$n])){
-                                $relateRow  = $relateData[$n];
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow[$table2[1]] . '" />' . htmlspecialchars(stripslashes($relateRow[$table2[2]])) . '<br>';
+                    for ($i = 0; $i < $num_col; $i++) {
+                        $withPercent = floor(100 / $num_col);
+                        $input .= '<div class="inline-block v-alin-top" style="width: ' . $withPercent . '%">';
+
+                        $recordBreak = ceil(count($relateData) / $num_col);
+                        for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
+                            if (isset($relateData[$n])) {
+                                $relateRow = $relateData[$n];
+                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '<br>';
                             }
                         }
                         $input .= '</div>';
@@ -1026,7 +1051,6 @@ class CmsTable extends Base {
      * @return HTML
      */
     public function viewEditForm($id = null, $msg = null) {
-        global $oDb;
 
         admin_register_script('jquery-maskedinput', admin_url() . 'js/jquery.maskedinput-1.0.js', false, true);
         admin_register_script('jquery-metadata', admin_url() . 'js/jquery.metadata.js', false, true);
@@ -1041,7 +1065,9 @@ class CmsTable extends Base {
         } else {
             $editID = $_POST['listID'];
         }
-        $row = $oDb->fetchArray($this->getRow($editID));
+        $idField = $this->idField;
+
+        $row = $this->getRow($editID);
         $html.= '<h2 class="broad-title">' . $this->name . '</h2>';
         if ($msg != null) {
             $html.= $msg;
@@ -1050,7 +1076,7 @@ class CmsTable extends Base {
         $html.= '<div class="add-bar"><span>' . trans('edit') . ' ' . $this->name . '</span></div>';
         $html.= "<form name='frm' id='frm' action='index.php?f=" . htmlspecialchars($_GET['f']) . "' method='post'>";
         $html.= "<input type='hidden' name='action' value='cedit' />";
-        $html.= "<input type='hidden' name='listID' value='" . $row[$this->idField] . "' />";
+        $html.= "<input type='hidden' name='listID' value='" . $row->$idField . "' />";
         $html.= "<input type='hidden' name='search-input' value='" . @$_REQUEST['search-input'] . "' />";
         $html.= "<input type='hidden' name='search-column' value='" . @$_REQUEST['search-column'] . "' />";
         $html.= "<div class='table-list table-form'><table>";
@@ -1066,22 +1092,22 @@ class CmsTable extends Base {
             if (isset($value['separator']) && $value['separator'] != "") {
                 $html.= "<tr><td colspan=2><div class='add-bar'><span>" . $value['separator'] . "</span></div></td></tr>";
             }
-            
+
             $hidden_row = '';
-            if($value['type'] == 'input:hidden'){
+            if ($value['type'] == 'input:hidden') {
                 $hidden_row = 'style="display:none"';
             }
-            
-            $html.= "<tr ".$hidden_row.">";            
+
+            $html.= "<tr " . $hidden_row . ">";
             $html.= "<td width='15%'>" . $value['title'] . "</td>";
             switch ($value['type']) {
                 case "input:text":
-                    $input = '<input type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row[$key])) . '"/>';
+                    $input = '<input type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '"/>';
                     break;
 
                 case "input:function":
                     $function = $value['function'];
-                    $data_value = isset($row[$key]) ? $function($row[$key], 'edit') : '';
+                    $data_value = isset($row->$key) ? $function($row->$key, 'edit') : '';
                     if (function_exists($function)) {
                         $input = '<input type="hidden" name="' . $key . '" value="' . $data_value . '" />';
                         $input .= $function($data_value, 'edit');
@@ -1091,7 +1117,7 @@ class CmsTable extends Base {
                     break;
 
                 case "input:text:readonly":
-                    $input = '<input readonly="" style="background-color: silver;" type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row[$key])) . '"/>';
+                    $input = '<input readonly="" style="background-color: silver;" type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '"/>';
                     break;
 
                 case "input:password":
@@ -1103,31 +1129,31 @@ class CmsTable extends Base {
                     admin_register_script('ajax-upload', admin_url() . 'js/ajaxupload.js', false, true);
 
                     $f = Input::get('f', 'txt', 'media');
-                    if ($row[$key] == "") {
+                    if ($row->$key == "") {
                         $url = ADMIN_FOLDER . "/images/noimage.jpg";
                     } else {
-                        $url = $row[$key];
+                        $url = $row->$key;
                     }
-                    $input = '<input type="text" class="' . $class . ' input-image" id="' . $key . '"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row[$key])) . '" /> 
-							 [<a href="#" class="' . $key . ' btnUpload" id="btnUpload' . $key . '">' . trans('select_images') . '</a>]
-							 <span>' . trans('or') . '</span>
-							 [<a href="javascript:void(0)" onclick="popitup(\'browser.php?view=grid&search-type=image&f=' . $f . '&inputId=' . $key . '\')" class="' . $key . '" id="btnUpload' . $key . '">' . trans('select_from_library') . '</a>] 
-							 <br/>
-                             <div class="wrap-images">
-                                <img class="image_review" src="' . getThumbnail('thumb-150', $url) . '" width="100" />
-                                <div class="rwmb-image-bar"><a onclick="deleteDefaultImages(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
-                             </div>
-                             <br/>
-                             <span  class="lblUpload" id="lblUpload' . $key . '"></span>';
+                    $input = '<input type="text" class="' . $class . ' input-image" id="' . $key . '"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> 
+						 [<a href="#" class="' . $key . ' btnUpload" id="btnUpload' . $key . '">' . trans('select_images') . '</a>]
+						 <span>' . trans('or') . '</span>
+						 [<a href="javascript:void(0)" onclick="popitup(\'browser.php?view=grid&search-type=image&f=' . $f . '&inputId=' . $key . '\')" class="' . $key . '" id="btnUpload' . $key . '">' . trans('select_from_library') . '</a>] 
+						 <br/>
+						 <div class="wrap-images">
+							<img class="image_review" src="' . getThumbnail('thumb-150', $url) . '" width="100" />
+							<div class="rwmb-image-bar"><a onclick="deleteDefaultImages(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
+						 </div>
+						 <br/>
+						 <span  class="lblUpload" id="lblUpload' . $key . '"></span>';
                     break;
 
                 case "input:file":
-                    if ($row[$key] == "") {
+                    if ($row->$key == "") {
                         $file = trans('no_file');
                     } else {
-                        $file = $row[$key];
+                        $file = $row->$key;
                     }
-                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row[$key])) . '" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">Chọn file</a>]&nbsp;&nbsp;(<a href="upload-file.php?ext=1" target="_blank" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file">' . getFileName($file) . '</em>';
+                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">Ch?n file</a>]&nbsp;&nbsp;(<a href="upload-file.php?ext=1" target="_blank" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file">' . getFileName($file) . '</em>';
                     break;
 
                 case "input:multiimages":
@@ -1136,11 +1162,11 @@ class CmsTable extends Base {
 
                     unset($_SESSION['multiimages'][$key]); // delete session                         
                     $html_img = '';
-                    $arrImage = getImagesTable($value['table'], $row[$this->idField]);
+                    $arrImage = getImagesTable($value['table'], $row->$idField);
                     if (count($arrImage) == 0) {
                         $url = ADMIN_FOLDER . "/images/noimage.jpg";
                     } else {
-                        $row[$key] = '';
+                        $row->$key = '';
                         foreach ($arrImage as $image) {
                             $images_url = $value['table']['images_url'];
                             $id_field = $this->idField;
@@ -1153,23 +1179,23 @@ class CmsTable extends Base {
                         }
                     }
                     $input = '<ul id="thumbnails">
-                                    <li>
-                                        <div id="drop"><a>' . trans('select_images') . '</a>
-                        				    <input type="file" name="userfile" multiple />
-                        			    </div>
-                                    </li>
-                                    ' . $html_img . '
-                                   </ul>
-                                <div style="clear: both;"></div>';
+								<li>
+									<div id="drop"><a>' . trans('select_images') . '</a>
+										<input type="file" name="userfile" multiple />
+									</div>
+								</li>
+								' . $html_img . '
+							   </ul>
+							<div style="clear: both;"></div>';
                     break;
 
                 case "input:price":
-                    $input = '<input type="hidden" id="' . $key . '" name="' . $key . '" value="' . htmlspecialchars(stripslashes(price($row[$key]))) . '" rel="' . htmlspecialchars(stripslashes(price($row[$key]))) . '">
-                              <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row[$key]))) . '" rel="' . htmlspecialchars(stripslashes(price($row[$key]))) . '" /> VNĐ';
+                    $input = '<input type="hidden" id="' . $key . '" name="' . $key . '" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '">
+						  <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '" /> VNÐ';
                     break;
 
                 case "input:attribute":
-                    $attribute = unserialize($row[$key]);
+                    $attribute = unserialize($row->$key);
                     $attribute_html = '';
                     if (!$attribute || count($attribute) <= 0) {
                         $attribute[] = array(
@@ -1180,28 +1206,28 @@ class CmsTable extends Base {
                     foreach ($attribute as $att_value) {
                         $attribute_html .=
                                 '<div class="attribute">
-                                <div class="rwmb-image-bar"><a onclick="deleteAttribute(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
-                                <div class="attr-name">    
-                                    <label>' . trans('name') . ':</label>
-                                    <input type="text" name="' . $key . '_name[]" value="' . $att_value['name'] . '" placeholder="' . trans('placeholder_att_name') . '" />
-                                </div>
-                                <div class="attr-value">
-                                    <label>' . trans('value') . ':</label>
-                                    <textarea name="' . $key . '_value[]" placeholder="' . trans('placeholder_att_value') . '">' . $att_value['value'] . '</textarea>
-                                </div>
-                                <div class="clear"></div>
-                              </div>';
+							<div class="rwmb-image-bar"><a onclick="deleteAttribute(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
+							<div class="attr-name">    
+								<label>' . trans('name') . ':</label>
+								<input type="text" name="' . $key . '_name[]" value="' . $att_value['name'] . '" placeholder="' . trans('placeholder_att_name') . '" />
+							</div>
+							<div class="attr-value">
+								<label>' . trans('value') . ':</label>
+								<textarea name="' . $key . '_value[]" placeholder="' . trans('placeholder_att_value') . '">' . $att_value['value'] . '</textarea>
+							</div>
+							<div class="clear"></div>
+						  </div>';
                     }
 
                     $input = '<div class="wrap-attribute">
-                                  ' . $attribute_html . '
-                             </div>
-                             <button type="button" class="attr-button" onclick="addAttribute()">' . trans('add') . '</button>
-                             <div class="clear"></div>';
+							  ' . $attribute_html . '
+						 </div>
+						 <button type="button" class="attr-button" onclick="addAttribute()">' . trans('add') . '</button>
+						 <div class="clear"></div>';
                     break;
 
                 case "input:int10":
-                    $input = '<input type="text" name="' . $key . '" style="width:100px;" class="' . $class . ' input-number" maxlength="10" value="' . (int) $row[$key] . '" />';
+                    $input = '<input type="text" name="' . $key . '" style="width:100px;" class="' . $class . ' input-number" maxlength="10" value="' . (int) $row->$key . '" />';
                     break;
 
                 case "textarea":
@@ -1213,26 +1239,26 @@ class CmsTable extends Base {
                     } else {
                         $rows = (int) $value['row'];
                     }
-                    $input = '<textarea name="' . $key . '" class="' . $class . ' txa" rows="' . $rows . '" cols="60">' . htmlspecialchars(stripslashes(stripslashes(stripslashes(stripslashes($row[$key]))))) . '</textarea>';
+                    $input = '<textarea name="' . $key . '" class="' . $class . ' txa" rows="' . $rows . '" cols="60">' . htmlspecialchars(stripslashes(stripslashes(stripslashes(stripslashes($row->$key))))) . '</textarea>';
                     $input .= '
-                    <script type="text/javascript">
-                        //<![CDATA[
-                    	var editor = CKEDITOR.replace("' . $key . '");
-                         CKFinder.SetupCKEditor( editor, { 
-                                BasePath : "editor/ckfinder/", 
-                                RememberLastFolder : false
-                         }) ;
-                        //]]>                                
-                    </script>';
+				<script type="text/javascript">
+					//<![CDATA[
+					var editor = CKEDITOR.replace("' . $key . '");
+					 CKFinder.SetupCKEditor( editor, { 
+							BasePath : "editor/ckfinder/", 
+							RememberLastFolder : false
+					 }) ;
+					//]]>                                
+				</script>';
                     break;
 
                 case "textarea:noeditor":
                     $rows = isset($value['row']) ? (int) $value['row'] : "8";
-                    $input = '<textarea name="' . $key . '" class="' . $class . ' txa" rows="' . $rows . '" cols="60" style="resize: vertical;">' . htmlspecialchars(stripslashes($row[$key])) . '</textarea>';
+                    $input = '<textarea name="' . $key . '" class="' . $class . ' txa" rows="' . $rows . '" cols="60" style="resize: vertical;">' . htmlspecialchars(stripslashes($row->$key)) . '</textarea>';
                     break;
 
                 case "checkbox":
-                    if ((int) $row[$key] == 1) {
+                    if ((int) $row->$key == 1) {
                         $check = "checked=''";
                     } else {
                         $check = "";
@@ -1252,16 +1278,19 @@ class CmsTable extends Base {
                     $relateTitle = $relate[1];
                     $relateField = $relate[2];
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "select * from " . $relateTable . " " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    
-                    while ($relate = $oDb->fetchArray($relate_rs)) {
-                        if ($relate[$relateField] == $row[$key]) {
+
+                    $relateData = DB::for_table($relateTable);
+                    if ($suffix_query) {
+                        $relateData = $relateData->raw_query($suffix_query);
+                    }
+                    $relateData = $relateData->find_many();
+                    foreach ($relateData as $relate) {
+                        if ($relate->$relateField == $row->$key) {
                             $check = "selected class='optSelected'";
                         } else {
                             $check = "";
                         }
-                        $input .= '<option value="' . $relate[$relateField] . '" ' . $check . ' >' . htmlspecialchars(stripslashes($relate[$relateTitle])) . '</option>';
+                        $input .= '<option value="' . $relate->$relateField . '" ' . $check . ' >' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</option>';
                     }
                     $input .= "</select>";
                     break;
@@ -1274,7 +1303,7 @@ class CmsTable extends Base {
                     }
                     $input = '<select name="' . $key . '" class="' . $class . '" >';
                     foreach ($value['data'] as $k => $v) {
-                        if ($row[$key] == $k) {
+                        if ($row->$key == $k) {
                             $check = "selected class='optSelected'";
                         } else {
                             $check = "";
@@ -1291,33 +1320,40 @@ class CmsTable extends Base {
                     $relateTitle = $relate[1]; // title related, example name of category
                     $relateField = $relate[2]; // field related, example id of category
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "SELECT $relateField, $relateTitle FROM " . $relateTable . " " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    $relateData = $oDb->fetchAll($relate_rs);
+
+                    $relateData = DB::for_table($relateTable)
+                            ->select($relateField)
+                            ->select($relateTitle);
+
+                    if ($suffix_query) {
+                        $relateData = $relateData->raw_query($suffix_query);
+                    }
+                    $relateData = $relateData->find_many();
+
                     $num_col = $this->getCheckboxCol(count($relateData));
-                    for($i = 0; $i < $num_col ; $i++){
-                        $withPercent = floor(100/$num_col);
-                        $input .= '<div class="inline-block v-alin-top" style="width: '.$withPercent.'%">';
-                        
-                        $recordBreak = ceil(count($relateData)/$num_col);
-                        for($n = $i*$recordBreak; $n < ($i+1)* $recordBreak ; $n++){
-                            if(isset($relateData[$n])){
-                                $relate  = $relateData[$n];
-                                $hasKey = explode($relate[$relateField], $row[$key]);
+                    for ($i = 0; $i < $num_col; $i++) {
+                        $withPercent = floor(100 / $num_col);
+                        $input .= '<div class="inline-block v-alin-top" style="width: ' . $withPercent . '%">';
+
+                        $recordBreak = ceil(count($relateData) / $num_col);
+                        for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
+                            if (isset($relateData[$n])) {
+                                $relate = $relateData[$n];
+                                $hasKey = explode($relate->$relateField, $row->$key);
                                 if (count($hasKey) > 1) {
                                     $check = "checked=''";
                                 } else {
                                     $check = "";
                                 }
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate[$relateField] . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relate[$relateTitle])) . '<br>';
+                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '<br>';
                             }
                         }
                         $input .= '</div>';
                     }
                     $input .= '<p>&nbsp;</p>';
                     break;
-                    
-                    
+
+
                 case "checkbox:relate:table":
                     $input = "";
                     $relate = explode(":", $value['relate']);
@@ -1326,30 +1362,46 @@ class CmsTable extends Base {
                     $relateField2 = explode("=", $relate[2]);
                     $field1 = $relateField1[0];
                     $field2 = $relateField2[0];
-                    
+
                     $table1 = explode(".", $relateField1[1]);
                     $table2 = explode(".", $relateField2[1]);
-                    
+
                     $suffix_query = isset($value['suffix_query']) ? $value['suffix_query'] : "";
-                    $strSql = "SELECT `$table2[1]`, `$table2[2]` FROM " . $table2[0] . " ORDER BY `$table2[2]` " . $suffix_query;
-                    $relate_rs = $oDb->query($strSql) or die("Lỗi MySql: " . $strSql);
-                    $relateData = $oDb->fetchAll($relate_rs);
+
+                    $field_value = $table2[1];
+                    $field_title = $table2[2];
+                    $relateData = DB::for_table($table2[0])
+                            ->select($field_value)
+                            ->select($field_title);
+
+                    if ($suffix_query) {
+                        $relateData = $relateData->raw_query($suffix_query);
+                    }
+
+                    $relateData = $relateData
+                            ->order_by_asc($field_title)
+                            ->find_many();
+
                     $num_col = $this->getCheckboxCol(count($relateData));
-                    for($i = 0; $i < $num_col ; $i++){
-                        $withPercent = floor(100/$num_col);
-                        $input .= '<div class="inline-block v-alin-top" style="width: '.$withPercent.'%">';
-                        
-                        $recordBreak = ceil(count($relateData)/$num_col);
-                        for($n = $i*$recordBreak; $n < ($i+1)* $recordBreak ; $n++){
-                            if(isset($relateData[$n])){
-                                $relateRow  = $relateData[$n];
-                                $sqlRelateTable = "SELECT * FROM $relateTable WHERE `$relateField1[0]` = ".$row[$this->pk]." AND `$relateField2[0]` = ".$relateRow[$table2[1]];
-                                if ($this->checkRecordExists($sqlRelateTable)) {
+                    for ($i = 0; $i < $num_col; $i++) {
+                        $withPercent = floor(100 / $num_col);
+                        $input .= '<div class="inline-block v-alin-top" style="width: ' . $withPercent . '%">';
+
+                        $recordBreak = ceil(count($relateData) / $num_col);
+                        for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
+                            if (isset($relateData[$n])) {
+                                $relateRow = $relateData[$n];
+                                $pk = $this->pk;
+                                $check_exists = DB::for_table($relateTable)
+                                        ->where_equal($relateField1[0], $row->$pk)
+                                        ->where_equal($relateField2[0], $relateRow->$field_value)
+                                        ->find_one();
+                                if ($check_exists) {
                                     $check = "checked=''";
                                 } else {
                                     $check = "";
                                 }
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow[$table2[1]] . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relateRow[$table2[2]])) . '<br>';
+                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '<br>';
                             }
                         }
                         $input .= '</div>';
@@ -1362,11 +1414,11 @@ class CmsTable extends Base {
                     admin_register_script('jquery-ui', 'js/jquery-ui.min.js', false, true);
                     admin_register_script('jquery-ui-timepicker-addon', 'js/jquery-ui-timepicker-addon.min.js', false, true);
 
-                    $input = '<input type="text" class="' . $class . ' inputdate" name="' . $key . '" value="' . $row[$key] . '" />';
+                    $input = '<input type="text" class="' . $class . ' inputdate" name="' . $key . '" value="' . $row->$key . '" />';
                     break;
 
                 case "map":
-                    $map_pos = explode(":", $row[$key]);
+                    $map_pos = explode(":", $row->$key);
                     $x = $map_pos[0];
                     $y = $map_pos[1];
                     if (($x == "") || ($y == "")) {
@@ -1377,16 +1429,16 @@ class CmsTable extends Base {
                             $y = 105.81503391265869;
                         }
                     }
-                    $input = '<input type="hidden" name="' . $key . '" id="' . $key . '" value="' . $row[$key] . '" /><a href="javascript:void(0);" class="maplink" rel="' . $key . '" x="' . $x . '" y="' . $y . '">' . trans('marked') . ' <span style="color: #777;">(' . $x . ',' . $y . ')</span></a>';
+                    $input = '<input type="hidden" name="' . $key . '" id="' . $key . '" value="' . $row->$key . '" /><a href="javascript:void(0);" class="maplink" rel="' . $key . '" x="' . $x . '" y="' . $y . '">' . trans('marked') . ' <span style="color: #777;">(' . $x . ',' . $y . ')</span></a>';
                     break;
 
                 case "input:hidden":
-                    $hidden_value = ($row[$key] != '') ? $row[$key] : $value['std'];
+                    $hidden_value = ($row->$key != '') ? $row->$key : $value['std'];
                     $input = '<input type="hidden" name="' . $key . '" id="' . $key . '" value="' . $hidden_value . '" />';
                     break;
 
                 default:
-                    $input = '<input type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row[$key])) . '" />';
+                    $input = '<input type="text" name="' . $key . '" class="' . $class . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" />';
                     break;
             }
             $txt_sufixtitle = isset($value['sufix_title']) ? $value['sufix_title'] : "";
@@ -1404,28 +1456,31 @@ class CmsTable extends Base {
      * @return nothing
      */
     function doAdd() {
-        global $oDb;
         $html = '';
         $column = "";
         $data = "";
         $count = 0;
         $update_ordering = false;
-        
+
+        $record = DB::for_table($this->table)->create();
+
         foreach ($this->column as $key => $value) {
             if ($value['type'] == 'input:multiimages') {
                 continue;
             }
-            
-            if($value['type'] == 'checkbox:relate:table'){
+
+            if ($value['type'] == 'checkbox:relate:table') {
                 continue;
             }
 
             if ($key == 'ordering') {
                 $update_ordering = true;
             }
-            
+
             if (isset($value['unique']) && $value['unique'] == true) {
-                $checkuni_rs = $oDb->query("select * from " . $this->table . " where " . $key . "='" . addslashes($_POST[$key]) . "'");
+                $checkuni_rs = DB::for_table($this->table)
+                        ->where_equal($key, addslashes($_POST[$key]))
+                        ->find_one();
                 $label = $value['title'];
             }
             $arr_data = isset($_POST[$key]) ? $_POST[$key] : "";
@@ -1456,39 +1511,40 @@ class CmsTable extends Base {
                 if (function_exists($function)) {
                     $function($_POST[$key], 'doAdd');
                 }
-            } else if($value['type'] == 'textarea' && get_option('download-external-images')){
+            } else if ($value['type'] == 'textarea' && get_option('download-external-images')) {
                 $data_item = downloadImagesFromHTML($_POST[$key]);
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : '';
             }
-            $this->$key = $data_item;
+            $record->$key = $data_item;
             $count++;
         }
-        
+
         if (isset($value['unique']) && $value['unique'] == true) {
-            if ($oDb->numRows($checkuni_rs) > 0) {
+            if ($checkuni_rs) {
                 $this->viewAddForm("<div class='red'>" . trans('msg_exists', array($label)) . "</div>");
             }
-        } else {            
-            $chk = $this->insert();
-            
+        } else {
+            $record->save();
+            $chk = $record->id();
+
             // update relation table
             foreach ($this->column as $key => $value) {
-                if($value['type'] == 'checkbox:relate:table'){
-                    $this->updateRelationTable($chk ,$key, $value);
+                if ($value['type'] == 'checkbox:relate:table') {
+                    $this->updateRelationTable($chk, $key, $value);
                     continue;
                 }
             }
-            
+
             // update media info
             $this->updateMedia($chk);
-            
-            
+
+
             foreach ($this->column as $field => $field_info) {
                 // update ordering = id insert if ordering field exists // HanhND    
                 if ($field == 'ordering') {
-                    $sql = "UPDATE $this->table SET `$field` = $chk WHERE " . $this->pk . " = $chk ";
-                    $oDb->query($sql);
+                    $record->ordering = $chk;
+                    $record->save();
                 }
 
                 // update relation table for multiimages
@@ -1500,21 +1556,29 @@ class CmsTable extends Base {
 
                     $arrImg = isset($_SESSION['multiimages'][$field]) ? $_SESSION['multiimages'][$field] : NULL;
                     if (is_array($arrImg) && count($arrImg) > 0) {
-                        $list_table_id = implode(",", $arrImg);
-                        $sql_update = " UPDATE `$table_name` SET `$relate_id` = $id  WHERE `$primary_key` IN($list_table_id) ";
-                        echo $sql_update;
-                        $oDb->query($sql_update);
+
+                        foreach ($arrImg as $img_id) {
+                            $imgRow = DB::for_table($table_name)
+                                    ->where_equal($primary_key, $img_id)
+                                    ->find_one();
+
+                            if (!$imgRow)
+                                continue;
+
+                            $imgRow->$relate_id = $id;
+                            $imgRow->save();
+                        }
                     }
                     unset($_SESSION['multiimages'][$field]);
                 }
             } // end foreach
             $html.= "<script>window.location.href='index.php?f=" . htmlspecialchars($_GET['f']) . "';</script>";
         }
-               
-        
+
+
         // reload cache 
         cacheSetting(true);
-        
+
         return $html;
     }
 
@@ -1523,21 +1587,28 @@ class CmsTable extends Base {
      * @return noghing
      */
     function doEdit() {
-        global $oDb;
         $html = '';
         $column = "";
         $data = "";
         $count = 0;
-        $id = $_POST['listID'];
+        $id = (int) $_POST['listID'];
+
+        $record = DB::for_table($this->table)
+                ->where_equal($this->pk, $id)
+                ->find_one();
+
         foreach ($this->column as $key => $value) {
             if ($value['type'] == 'input:multiimages') {
                 continue;
             }
-            if($value['type'] == 'checkbox:relate:table'){
+            if ($value['type'] == 'checkbox:relate:table') {
                 continue;
             }
             if (isset($value['unique']) && $value['unique'] == true) {
-                $checkuni_rs = $oDb->query("select * from " . $this->table . " where `" . $key . "` ='" . addslashes($_POST[$key]) . "' and " . $this->idField . "<>'" . $id . "'");
+                $checkuni_rs = DB::for_table($this->table)
+                        ->where_equal($key, addslashes($_POST[$key]))
+                        ->where_not_equal($this->idField, $id)
+                        ->find_one();
                 $label = $value['title'];
             }
             $arr_data = isset($_POST[$key]) ? $_POST[$key] : "";
@@ -1550,8 +1621,9 @@ class CmsTable extends Base {
             } else if ($value['type'] == "input:price" || $value['type'] == 'input:int10') {
                 $data_item = cleanNumber($_POST[$key]);
             } else if ($value['type'] == "input:password" && $_POST[$key] != '') {
-                $check_rs = $oDb->query("select * from " . $this->table . " where `" . $this->idField . "` = '" . $id . "'");
-                $check = $oDb->fetchArray($check_rs);
+                $check_rs = DB::for_table($this->table)
+                        ->where_equal($this->idField, $id)
+                        ->find_one();
                 $newval = md5(md5(md5($_POST[$key])));
                 if ($check[$key] != $_POST[$key]) {
                     $data_item = $newval;
@@ -1573,29 +1645,30 @@ class CmsTable extends Base {
                 if (function_exists($function)) {
                     $function($_POST[$key], 'doEdit');
                 }
-            } else if($value['type'] == 'textarea' && get_option('download-external-images')){
-                $data_item = downloadImagesFromHTML($_POST[$key]);            
+            } else if ($value['type'] == 'textarea' && get_option('download-external-images')) {
+                $data_item = downloadImagesFromHTML($_POST[$key]);
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : "";
             }
 
-            $this->$key = $data_item;
+            $record->$key = $data_item;
             $count++;
         }
 
-        if (isset($checkuni_rs) && (int) $oDb->numRows($checkuni_rs) > 0) {
+        if ($checkuni_rs) {
             $this->viewEditForm($id, "<div class='red'>" . trans('msg_exists', array($label)) . "</div>");
         } else {
-            $chk = $this->update($id, $this->fields);
-            
+            // save data
+            $record->save();
+
             // update relation table
             foreach ($this->column as $key => $value) {
-                if($value['type'] == 'checkbox:relate:table'){
-                    $this->updateRelationTable($id ,$key, $value);
+                if ($value['type'] == 'checkbox:relate:table') {
+                    $this->updateRelationTable($id, $key, $value);
                     continue;
                 }
             }
-            
+
             // update object_id for t_media in the database
             $this->updateMedia($id);
             foreach ($this->column as $field => $field_info) {
@@ -1607,27 +1680,26 @@ class CmsTable extends Base {
                     $relate_id = $table_info['relate_id'];
                     $arrImg = isset($_SESSION['multiimages'][$field]) ? $_SESSION['multiimages'][$field] : NULL;
                     if (is_array($arrImg) && count($arrImg) > 0) {
-                        $list_table_id = implode(",", $arrImg);
-                        $sql_update = " UPDATE `$table_name` SET `$relate_id` = $id  WHERE `$primary_key` IN($list_table_id) ";
-                        $oDb->query($sql_update);
+                        foreach ($arrImg as $img_id) {
+                            $imgRow = DB::for_table($table_name)
+                                    ->where_equal($primary_key, $img_id)
+                                    ->find_one();
+                            if (!$imgRow)
+                                continue;
+
+                            $imgRow->$relate_id = $id;
+                            $imgRow->save();
+                        }
                     }
                     unset($_SESSION['multiimages'][$field]);
                 }
             } // end foreach
 
-            $redirect = "index.php?f=" . htmlspecialchars($_GET['f']);
-            if (trim($_REQUEST['search-input']) != '') {
-                $redirect .= "&search-input=" . $_REQUEST['search-input'];
-            }
-            if (trim($_REQUEST['search-column']) != '') {
-                $redirect .= "&search-column=" . $_REQUEST['search-column'];
-            }
             $html.= "<script>window.location.href='index.php?f=" . htmlspecialchars($_GET['f']) . "';</script>";
         }// end else
-
         // reload cache 
         cacheSetting(true);
-        
+
         return $html;
     }
 
@@ -1636,25 +1708,40 @@ class CmsTable extends Base {
      * @return nothing
      */
     function saveField() {
-        global $oDb;
         $html = '';
-        
+
         $fields = explode(",", $_POST['field']);
-        foreach ($fields as $field){
+        if (!$fields)
+            return '';
+
+        // set data for variable
+        $f = Input::get('f', 'txt', '');
+        $search_input = Input::get('search-input', 'txt', '');
+        $search_column = Input::get('search-column', 'txt', '');
+
+        foreach ($fields as $field) {
             $column = $this->column;
             $listID = explode(',', $_POST['listID']);
             $listVal = $_POST[$field];
             for ($i = 1; $i < count($listID); $i++) {
-                if($column[$field]['type'] == 'input:price' || $column[$field]['type'] == 'input:int10'){
-                    $this->$field = str_replace(',', '', str_replace('.', '', $listVal[$i - 1]));
+
+                $tableRow = DB::for_table($this->table)
+                        ->where_equal($this->pk, $listID[$i])
+                        ->find_one();
+
+                if (!$tableRow)
+                    continue;
+
+                if ($column[$field]['type'] == 'input:price' || $column[$field]['type'] == 'input:int10') {
+                    $tableRow->$field = str_replace(',', '', str_replace('.', '', $listVal[$i - 1]));
                 } else {
-                    $this->$field = $listVal[$i - 1];
+                    $tableRow->$field = $listVal[$i - 1];
                 }
-                $this->update($listID[$i], array($field));
+                $tableRow->save();
             }
         }
 
-        $redirect = "index.php?f=" . htmlspecialchars($_GET['f']) . "&search-input=" . $_REQUEST['search-input'] . "&search-column=" . $_REQUEST['search-column'];
+        $redirect = "index.php?f=" . htmlspecialchars($f) . "&search-input=" . $search_input . "&search-column=" . $search_column;
         $html.= "<script>window.location.href='$redirect';</script>";
 
         return $html;
@@ -1666,26 +1753,30 @@ class CmsTable extends Base {
      * @return nothing
      */
     function switchval() {
-        global $oDb;
-        $html = '';
-        $this->$_POST['field'] = (int) $_POST['singleval'];
-        $this->update((int) $_POST['singleid'], array($_POST['field']));
-        $html.= "<script>window.location.href='index.php?f=" . htmlspecialchars($_GET['f']) . "&search-input=" . $_REQUEST['search-input'] . "&search-column=" . $_REQUEST['search-column'] . "';</script>";
-        
+        $field = Input::get('field', 'txt', '');
+        $singleid = Input::get('singleid', 'int', 0);
+        $singleval = Input::get('singleval', 'int', 0);
+        $f = Input::get('f', 'txt', '');
+        $search_input = Input::get('search-input', 'txt', '');
+        $search_column = Input::get('search-column', 'txt', '');
+
+        if (!$singleid)
+            return '';
+        $record = DB::for_table($this->table)
+                ->where_equal($this->pk, $singleid)
+                ->find_one();
+
+        if ($record) {
+            $record->$field = $singleval;
+            $record->save();
+        }
+
+        $html = "<script>window.location.href='index.php?f=" . htmlspecialchars($f) . "&search-input=" . $search_input . "&search-column=" . $search_column . "';</script>";
+
         // reload cache 
         cacheSetting(true);
-        
-        return $html;
-    }
 
-    /**
-     * @desc add slash for list key
-     * @param string $str
-     * @return string
-     */
-    function addSlashToListKey($str) {
-        $str = str_replace(",", "','", $str);
-        return "'" . $str . "'";
+        return $html;
     }
 
     /**
@@ -1694,79 +1785,100 @@ class CmsTable extends Base {
      * @return nothing
      */
     function updateMedia($object_id) {
-        global $oDb;
-        $Media = new Media();
-        $table = $Media->table;
+        $miniMedia = new Media();
+        $table = $miniMedia->table;
         if (isset($_SESSION['media']) && count($_SESSION['media']) > 0) {
-            $list_id = implode(',', $_SESSION['media']);
-            $sql = "UPDATE $table SET `object_id` = '$object_id' WHERE id IN($list_id) ";
-            $oDb->query($sql);
+            $arr_list_id = $_SESSION['media'];
+            $arrMedia = DB::for_table($table)
+                    ->where_in('id', $arr_list_id)
+                    ->find_many();
+            if (!$arrMedia) {
+                unset($_SESSION['media']);
+                return;
+            }
+
+            foreach ($arrMedia as $media) {
+                $media->object_id = $object_id;
+                $media->save();
+            }
         }
         unset($_SESSION['media']);
     }
-    
-    
-    
+
     /**
      * @desc get primary key from ralate table
      * @param string $relate: table, field, id. Example: t_news_category.name.id
      * @return id
      */
-    function getIdFromRelateTable($relate, $keyword){
-        global $oDb;
-        $relateInfo = explode('.', $relate);
+    function getIdFromRelateTable($relate, $keyword) {
+        $relate = explode(":", $relate);
+        $relateTable = $relate[0];
+        
+        $relateField1 = explode("=", $relate[1]);
+        $relateField2 = explode("=", $relate[2]);
+        
+        $field1 = $relateField1[0];
+        $field2 = $relateField2[0];
+        
+        $table1 = explode(".", $relateField1[1]);
+        $table2 = explode(".", $relateField2[1]);
+        
+        
+        
         $result = array();
-        if($keyword){
-            $sql = "SELECT * FROM ".$relateInfo[0]." WHERE `".$relateInfo[1]."` LIKE '%".strtolower($keyword)."%' ";
-            $rc = $oDb->query($sql);
-            $rs = $oDb->fetchArray($rc);
-            $result[] = $rs[$relateInfo[2]];
+        if ($keyword) {            
+            // get from category
+            $table2_data = DB::for_table($table2[0])
+                    ->where_like($table2[2], "%$keyword%")
+                    ->find_many();
+            $field_id = $table2[1];
+            
+            $arr2 = false;
+            foreach ($table2_data as $data2) {
+                $arr2[] = $data2->$field_id;
+            }
+            if(!$arr2) return false;
+            
+            $table_relate_data = DB::for_table($relateTable)
+                    ->where_in($field2, $arr2)
+                    ->find_many();
+            
+            if($table_relate_data){
+                foreach($table_relate_data as $data_relate){
+                    $arrRelate[] = $data_relate->$field1;
+                }
+            }
+            
+            if($arrRelate){
+                $wh = $table1[1] .' IN ('. implode(',', $arrRelate).') ';
+                return $wh;
+            }      
         }
-        return $result;
+        return false;
     }
-    
-    
-    
+
     /**
      * @desc get checkbox col for checkbox:relate:int
      * @param int $recordNumber: total record number
      * @return int
      */
-    function getCheckboxCol($recordNumber, $maxCol = 3){
-        if($recordNumber >= 15){
+    function getCheckboxCol($recordNumber, $maxCol = 3) {
+        if ($recordNumber >= 15) {
             return $maxCol;
         }
-        if($recordNumber >= 10){
+        if ($recordNumber >= 10) {
             return 2;
         }
         return 1;
     }
-    
-    
-    /**
-     * @desc check result with sql statement
-     * @param string $sql: sql
-     * @return boolean
-     */
-    function checkRecordExists($sql){
-        global $oDb;
-        $rc = $oDb->query($sql);
-        if($oDb->numRows($rc)){
-            return true;
-        }
-        
-        return false;
-    }
-    
-    
+
     /**
      * @desc update relation table
      * @param string $key: field in $_POST
      * @param array $value: array field relate infomation
      * @return nothing
      */
-    function updateRelationTable($id , $key, $value){
-        global $oDb;
+    function updateRelationTable($id, $key, $value) {
         $relate = explode(":", $value['relate']);
         $relateTable = $relate[0];
         $relateField1 = explode("=", $relate[1]);
@@ -1776,19 +1888,23 @@ class CmsTable extends Base {
 
         $table1 = explode(".", $relateField1[1]);
         $table2 = explode(".", $relateField2[1]);
-        
-        
-        if($id && is_array($_POST[$key]) && count($_POST[$key])){ // update
+
+
+        if ($id && is_array($_POST[$key]) && count($_POST[$key])) { // update
             // delete old data
-            $sql = "DELETE FROM $relateTable WHERE `$field1` = $id ";
-            $oDb->query($sql);
-            foreach($_POST[$key] as $postValue){
-                $sqlInsert = "INSERT INTO `$relateTable` (`$field1`, `$field2`) VALUES ('$id', '$postValue')";
-                $oDb->query($sqlInsert);
+            $tableRow = DB::for_table($relateTable)->where_equal($field1, $id);
+            $tableRow->delete();
+
+            foreach ($_POST[$key] as $postValue) {
+                $tableRow = DB::for_table($relateTable)->create();
+                $tableRow->$field1 = $id;
+                $tableRow->$field2 = $postValue;
+                $tableRow->save();
             }
         }
-    } // end function
+    }
 
-    
-    
-} // end class
+// end function
+}
+
+// end class

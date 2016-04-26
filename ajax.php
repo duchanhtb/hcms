@@ -94,20 +94,23 @@ class ajax {
 
 
             $Contact = new Contact();
-            $Contact->fullname = $fullname;
-            $Contact->company = $company;
-            $Contact->address = $address;
-            $Contact->email = $email;
-            $Contact->phone = $phone;
-            $Contact->mobile = $mobile;
-            $Contact->yahoo = $yahoo;
-            $Contact->skype = $skype;
-            $Contact->fax = $fax;
-            $Contact->title = $title;
-            $Contact->content = $content;
-            $Contact->date = date('Y-m-d H:i:s', time());
-            $Contact->status = 1;
-            $id = $Contact->insert();
+            $contactRecord = DB::for_table($Contact->table)->create();
+            
+            $contactRecord->fullname = $fullname;
+            $contactRecord->company = $company;
+            $contactRecord->address = $address;
+            $contactRecord->email = $email;
+            $contactRecord->phone = $phone;
+            $contactRecord->mobile = $mobile;
+            $contactRecord->yahoo = $yahoo;
+            $contactRecord->skype = $skype;
+            $contactRecord->fax = $fax;
+            $contactRecord->title = $title;
+            $contactRecord->content = $content;
+            $contactRecord->date = date('Y-m-d H:i:s', time());
+            $contactRecord->status = 1;
+            $contactRecord->save();
+            $id = $contactRecord->id();
             if ($id > 0) {
                 $html_sendmail = '
                 <div>

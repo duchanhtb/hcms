@@ -10,11 +10,13 @@ include('config.php');
 $hash = Input::get('hash', 'txt', '');
 $id = Input::get('id', 'txt', '');
 if ($id && $hash) {
-    global $mt_prefix, $oDb;
+    global $mt_prefix;
     $id = alphaID($id, true, 5);
-    $admin_rs = $oDb->query("select * from " . $mt_prefix . "admin where `id`= $id");
-    $admin = $oDb->fetchArray($admin_rs);
-    $code_compare = md5('HCMS_' . $admin['email']);
+    $admin = DB::for_table($mt_prefix.'admin')
+            ->where_equal('id', $id)
+            ->find_one();
+    
+    $code_compare = md5('HCMS_' . $admin->email);
 
     if ($hash == $code_compare) {
         $_SESSION['hcms_resetpass'] = $admin;
@@ -28,6 +30,7 @@ if ($id && $hash) {
 }
 
 if ($_POST) {
+    global $mt_prefix;
     if ($_POST['txtNewspas'] && $_POST['txtRenewspas']) {
         $admin = $_SESSION['hcms_resetpass'];
         $password = $_POST['txtNewspas'];
@@ -36,10 +39,11 @@ if ($_POST) {
         if ($password != $repassword) {
             $msg = '<p class="msg error">' . trans('msg_wrong_password') . '</p>';
         } else {
-            $id = $admin['id'];
-            global $mt_prefix, $oDb;
+            $id = $admin->id;                        
             $pass = md5(md5(md5($password)));
-            $admin_rs = $oDb->query("UPDATE " . $mt_prefix . "admin SET `pass`='" . $pass . "' WHERE id = $id");
+            $admin = DB::for_table($mt_prefix.'admin')->find_one($id);
+            $admin->pass = $pass;
+            $admin->save();
             $msg = '<p class="msg info">' . trans('msg_change_passsword_ss') . '</p>';
             // delete session
             unset($_SESSION['hcms_resetpass']);

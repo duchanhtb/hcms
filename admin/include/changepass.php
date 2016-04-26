@@ -5,32 +5,37 @@ if (!defined('ALLOW_ACCESS'))
 
 /**
  * @author duchanh
- * @copyright 2012
+ * @copyright 2015
  */
-global $oDb, $mt_prefix;
+global $mt_prefix;
 
 $err_msg = '';
 if (isset($_POST['pwdOld']) && $_POST['pwdOld'] != "") {
-    if ($_SESSION['admin']['id'] != 0) {
-        if ($_POST['pwdNew'] != $_POST['pwdNew_cf']) {
-            $err_msg = "<strong><font color='red'>" . trans('new_password_not_match') . "</font></strong>";
-        } else {
-            $pass = md5(md5(md5($_POST['pwdOld'])));
-            $new_pass = md5(md5(md5($_POST['pwdNew'])));
-            $admin_rs = $oDb->query("select * from " . $mt_prefix . "admin where `name`='" . addslashes($_SESSION['admin']['name']) . "' and `pass`='" . $pass . "'");
-            if ((int) $oDb->numRows($admin_rs) > 0) {
-                //thanh cong
-                $oDb->query("update " . $mt_prefix . "admin set `pass`='" . $new_pass . "' where `id`='" . $_SESSION['admin']['id'] . "'");
-                $err_msg = "<strong><font color='green'>" . trans('password_has_been_changed') . "</font></strong>";
-            } else {
-                //mat khau cu khong dung
-                $err_msg = "<strong><font color='red'>" . trans('old_password_incorrect') . "</font></strong>";
-            }
-        }
-    } else {
+    if ((int)$_SESSION['admin']['id'] <= 0) {
         @header("Location: login.php");
         die;
     }
+    
+    if ($_POST['pwdNew'] != $_POST['pwdNew_cf']) {
+        $err_msg = "<strong><font color='red'>" . trans('new_password_not_match') . "</font></strong>";
+    } else {
+        $pass = md5(md5(md5($_POST['pwdOld'])));
+        $new_pass = md5(md5(md5($_POST['pwdNew'])));
+        $admin = DB::for_table($mt_prefix.'admin')
+                ->where_equal('name', addslashes($_SESSION['admin']['name']))
+                ->where_equal('pass', $pass)
+                ->find_one();
+        if ($admin) {
+            $admin->pass = $new_pass;
+            $admin->save();
+            // sucsess            
+            $err_msg = "<strong><font color='green'>" . trans('password_has_been_changed') . "</font></strong>";
+        } else {
+            // wrong password
+            $err_msg = "<strong><font color='red'>" . trans('old_password_incorrect') . "</font></strong>";
+        }
+    }
+    
 }
 $f = Input::get('f', 'txt', '');
 

@@ -104,9 +104,8 @@ if(strpos(strtolower($sitePath),"hcms.com") > 0 ){
 
 
 
-/* global $oDb, load MysqlDb class
+/* Setting DB connection class
 ----------------------------------------------------*/
-$oDb = new CMysqlDB( $dbinfo );
 DB::config($dbinfo);
 
 /* Config language

@@ -85,7 +85,7 @@ function compressHtml($html) {
  * @return array
  */
 function getLanguage() {
-    global $lang, $oDb;
+    global $lang;
     $cur_lang = $_SESSION['language'];
     if (is_array($lang) && count($lang) > 0) {
         return $lang;
@@ -317,7 +317,7 @@ function paging($current_page, $total_page, $linkpage, $class = 'paging') {
     if ($total_page <= 10) {
         if ($current_page > 1) {
             $data .= '<li class="btn-back"><a href="' . $linkpage . ($current_page - 1) .
-                    '">&lt;&lt; ' . $lang['next'] . '</a></li>';
+                    '">&lt;&lt; ' . $lang['previous'] . '</a></li>';
         }
 
         for ($i = 1; $i <= $total_page; $i++) {
@@ -682,16 +682,17 @@ function insertMedia($path, $object_id = '0', $object_type = '', $other_info = '
     $other_info['name'] = $file_info['basename'];
 
     $Media = new Media();
-    $Media->path = $path;
-    $Media->object_id = $object_id;
-    $Media->object_type = $object_type;
-    $Media->type = mime_content_type(ROOT_PATH . $path);
-    $Media->other_info = json_encode($other_info);
-    $Media->date = date('Y-m-d H:i:s');
-    $Media->user_id = $_SESSION['admin']['id'];
-    $Media->username = $_SESSION['admin']['name'];
+    $mediaRecord = DB::for_table($Media->table)->create();
+    $mediaRecord->path = $path;
+    $mediaRecord->object_id = $object_id;
+    $mediaRecord->object_type = $object_type;
+    $mediaRecord->type = mime_content_type(ROOT_PATH . $path);
+    $mediaRecord->other_info = json_encode($other_info);
+    $mediaRecord->date = date('Y-m-d H:i:s');
+    $mediaRecord->user_id = @$_SESSION['admin']['id'];
+    $mediaRecord->username = @$_SESSION['admin']['name'];
 
-    $id = $Media->insert();
+    $id = $mediaRecord->save();
     $_SESSION['media'][] = $id; // add to session, using this session to update object_id in the table
     return $id;
 }

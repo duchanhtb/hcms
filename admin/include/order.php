@@ -128,6 +128,7 @@ function order($id, $act = 'list') {
             break;
         default:
             $miniCart = new Cart();
+            
             $miniCart->read($id);
             $list_id_json = $miniCart->list_product;
             $arrListId = json_decode($list_id_json, true);

@@ -6,5 +6,5 @@
  */
 define('ALLOW_ACCESS', TRUE);
 include('config.php');
-$_SESSION['admin'] = array();
+unset($_SESSION['admin']);
 @header("Location: login.php");

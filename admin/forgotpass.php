@@ -6,9 +6,8 @@
 define('ALLOW_ACCESS', TRUE);
 include('config.php');
 
-
-$email = isset($_POST['txtEmail']) ? addslashes($_POST['txtEmail']) : '';
-$code = isset($_POST['security_code']) ? addslashes($_POST['security_code']) : '';
+$email = Input::get('txtEmail', 'txt', '');
+$code = Input::get('security_code', 'txt', '');
 $msg = "";
 
 if (isset($_SESSION['numError']) && ((int) $_SESSION['numError'] > 2) && ($_SESSION['security_code'] != $code)) {
@@ -27,36 +26,37 @@ if (isset($_SESSION['numError']) && ((int) $_SESSION['numError'] > 2) && ($_SESS
 }
 
 function resetPass($email) {
-    global $mt_prefix, $oDb;
-    $admin_rs = $oDb->query("select * from " . $mt_prefix . "admin where `email`='" . addslashes($email) . "'");
-    if ((int) $oDb->numRows($admin_rs) > 0) {
+    global $mt_prefix;
+    $admin = DB::for_table($mt_prefix.'admin')
+            ->where_equal('email', $email)
+            ->find_one();
+    if ($admin) {
         $host = $_SERVER['HTTP_HOST'];
-        $admin = $oDb->fetchArray($admin_rs);
-        $id = $admin['id'];
-        $email = $admin['email'];
-        $username = $admin['name'];
+        $id = $admin->id;
+        $email = $admin->email;
+        $username = $admin->name;
         $link_getpass = admin_url() . "resetpass.php?id=" . alphaID($id, false, 5) . '&hash=' . md5('HCMS_' . $email);
         $content = "<h3>" . trans('hello') .": ". $username."!</h3><p style='line-height: 20px; font-size: 14px;'>" . trans('msg_mail_content_link', array($host)) . "</p>";
         $content.= "<a href=" . $link_getpass . ">$link_getpass</a>";   
         
         $to = array(
-            'name' => $admin['name'],
+            'name' => $username,
             'email' => $email
         );
 
 
         try {
             $subject = trans('msg_mail_content_info') . ' ' . $host;
-            $content = @eregi_replace("[\]", '', $content);
-            sendMail($to, false, $subject, $content);
+            //$content = @preg_replace("[\]", '', $content);
+            $ok = sendMail($to, false, $subject, $content);            
          
         } catch (Exception $e) {
             return $e;
         }
         return true;
-    } else {
-        return false;
     }
+    
+    return false;
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

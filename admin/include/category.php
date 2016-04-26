@@ -10,16 +10,7 @@ if (!defined('ALLOW_ACCESS'))
 
 global $tbl_prefix;
 
-$column = array( 
-    "product_num" => array(
-        "title"         => "Số lượng SP",
-        "type"          => "input:function",
-        "function"      => 'countProduct',
-        "editable"      => false,
-        "searchable"    => false,
-        "sufix_title"   => "",
-        "show_on_list"  => true
-    ),
+$column = array(     
     "name" => array(
         "title"         => "Tên danh mục",
         "type"          => "textarea:noeditor",
@@ -71,6 +62,15 @@ $column = array(
         "searchable"    => true,
         "sufix_title"   => ""
     ),
+    "product_num" => array(
+        "title"         => "Số lượng SP",
+        "type"          => "input:function",
+        "function"      => 'countProduct',
+        "editable"      => false,
+        "searchable"    => false,
+        "sufix_title"   => "",
+        "show_on_list"  => true
+    ),
     "status" => array(
         "title"         => "Hiển thị",
         "type"          => "checkbox",
@@ -109,10 +109,10 @@ function countProduct($id, $act = 'list'){
             return 0;
             break;
         case "edit":
-            return Db::for_table($table)->where_in('category_id', $arrIn)->count();
+            return '<center>'.Db::for_table($table)->where_in('category_id', $arrIn)->count().'</center>';
             break;
         default:
-            return Db::for_table($table)->where_in('category_id', $arrIn)->count();          
+            return '<center>'.Db::for_table($table)->where_in('category_id', $arrIn)->count().'</center>';          
             break;
     }
     return $html;
@@ -126,41 +126,43 @@ function countProduct($id, $act = 'list'){
  * @param 
  * @return array
  */
-function getCategory() {
-    global $oDb;
-    $arr_category = array();
-    $arr_category[0] = 'Trang chủ';
+function getCategory() {    
+    global $tbl_prefix;
+    $table = $tbl_prefix.'category';
+    $arr_category = array(0 => trans('home'));    
 
-    $sql = "SELECT `id`, `name`, `parent_id` FROM t_category WHERE 1 ";
-    $sql .= 'ORDER BY `name` ASC ';
-
-    $rs = $oDb->query($sql);
-    $allCat = $oDb->fetchAll($rs);
-    foreach ($allCat as $key => $value) {
-        if ($value['parent_id'] == 0) {
-            $name = $value['name'];
-            $id = $value['id'];
+    $categories = DB::for_table($table)
+            ->select('id')
+            ->select('name')
+            ->select('parent_id')
+            ->order_by_asc('name')
+            ->find_many();
+    
+    foreach ($categories as $category) {
+        if ($category->parent_id == 0) {
+            $name = $category->name;
+            $id = $category->id;
             $arr_category[$id] = $name;
 
             // sub1
-            foreach ($allCat as $key1 => $value1) {
-                if ($value1['parent_id'] == $value['id']) {
-                    $name = '-----' . $value1['name'];
-                    $id = $value1['id'];
+            foreach ($categories as $sub1_category) {
+                if ($sub1_category->parent_id == $category->id) {
+                    $name = '-----' . $sub1_category->name;
+                    $id = $sub1_category->id;
                     $arr_category[$id] = $name;
 
                     // sub2
-                    foreach ($allCat as $key2 => $value2) {
-                        if ($value2['parent_id'] == $value1['id']) {
-                            $name = '----------' . $value2['name'];
-                            $id = $value2['id'];
+                    foreach ($categories as $sub2_category) {
+                        if ($sub2_category->parent_id == $sub1_category->id) {
+                            $name = '----------' . $sub2_category->name;
+                            $id = $sub2_category->id;
                             $arr_category[$id] = $name;
 
                             // sub3
-                            foreach ($allCat as $key3 => $value3) {
-                                if ($value3['parent_id'] == $value2['id']) {
-                                    $name = '---------------' . $value3['name'];
-                                    $id = $value3['id'];
+                            foreach ($categories as $sub3_category) {
+                                if ($sub3_category->parent_id == $sub2_category->id) {
+                                    $name = '---------------' . $sub3_category->name;
+                                    $id = $sub3_category->id;
                                     $arr_category[$id] = $name;
                                 }
                             }

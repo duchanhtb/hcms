@@ -5,10 +5,9 @@
  */
 define('ALLOW_ACCESS', TRUE);
 include('config.php');
-
-$user = isset($_POST['txtName']) ? addslashes($_POST['txtName']) : '';
-$pass = isset($_POST['pwdPass']) ? addslashes($_POST['pwdPass']) : '';
-$code = isset($_POST['security_code']) ? addslashes($_POST['security_code']) : '';
+$user = Input::get('txtName', 'txt', '');
+$pass = Input::get('pwdPass', 'txt', '');
+$code = Input::get('security_code', 'txt', '');
 $msg = "";
 if (isset($_SESSION['numError']) && ((int) $_SESSION['numError'] > 2) && ($_SESSION['security_code'] != $code)) {
     $msg = '<p class="msg error">' . trans('msg_wrong_captcha') . '</p>';
@@ -34,26 +33,25 @@ if (isset($_SESSION['numError']) && ((int) $_SESSION['numError'] > 2) && ($_SESS
 }
 
 function LoginAdmin($user, $pass_in) {
-    global $mt_prefix, $oDb;
+    global $mt_prefix;
     $pass = md5(md5(md5($pass_in)));
-    $admin_rs = $oDb->query("SELECT * FROM " . $mt_prefix . "admin WHERE `name`='" . addslashes($user) . "' AND `pass`='" . $pass . "'");
-    if ((int) $oDb->numRows($admin_rs) > 0) {
-        $admin = $oDb->fetchArray($admin_rs);
-        $_SESSION['admin']['id'] = (int) $admin['id'];
-        $_SESSION['admin']['name'] = $admin['name'];
-        $_SESSION['admin']['level'] = (int) $admin['level'];
-        $_SESSION['admin']['last_login_time'] = $admin['last_login_time'];
+    $admin = DB::for_table($mt_prefix."admin")
+            ->where_equal('name', $user)
+            ->where_equal('pass', $pass)
+            ->find_one();
+    if ($admin) {
+        $_SESSION['admin']['id'] = (int)$admin->id;
+        $_SESSION['admin']['name'] = $admin->name;
+        $_SESSION['admin']['level'] = (int) $admin->level;
+        $_SESSION['admin']['last_login_time'] = $admin->last_login_time;
 
         // update time and ip login
-        $last_login_time = date("Y-m-d H:i:s", time());
-        $last_login_ip = getUserIp();
-        $sql = " UPDATE " . $mt_prefix . "admin SET `last_login_time` = '$last_login_time', `last_login_ip` = '$last_login_ip' WHERE `id` = ".$admin['id'];
-        $oDb->query($sql);
-
+        $admin->last_login_time = date("Y-m-d H:i:s", time());
+        $admin->last_login_ip = getUserIp();
+        $admin->save();
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

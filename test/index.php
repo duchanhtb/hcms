@@ -3,10 +3,5 @@
 define('ALLOW_ACCESS', TRUE);
 include('../config.php');
 
-
-
-$a = CFile::getFileDir(MODULE_PATH);
+$a = DB::for_table('t_category')->where_like('name', '%gia đình%')->find_many();
 var_dump($a);
-
-$b = list_module();
-var_dump($b);

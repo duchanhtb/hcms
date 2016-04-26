@@ -345,8 +345,13 @@ class cms {
         return $arrPost;
     }
 
+    
+    /**
+     * @Desc rewrite url to variable $_REQUEST. Example http://abc.com/news/some-text-here/TUVX.html
+     * $_REQUEST['page'] = news, $_REQUEST['id'] = TUVX
+     * @return nothing
+     */
     public static function cmsRewrite() {
-
         // set page request
         $current_link = str_replace(base_url(), '', curPageURL());
         if ($current_link && substr($current_link, strlen($current_link) - 4, 4) == 'html') {
@@ -371,24 +376,24 @@ class cms {
         //var_dump($_REQUEST);
     }
 
-// end function
 
+    /**
+     * @Desc show log sql in the footer of CMS
+     * @return nothing
+     */
     function showLogSql() {
-        global $oDb;
         $show_query = Input::get('query', 'int', 0);
         if ($show_query)
             $_SESSION['query'] = $show_query;
 
         if (SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)) {
-            $arrLogQuery = array_merge($oDb->listQuery, DB::get_query_log());
+            $arrLogQuery = DB::get_query_log();
             echo '<pre>';
             foreach ($arrLogQuery as $query) {
                 echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">' . trim($query) . '</p>';
             }
             echo '</pre>';
         }
-        if ($oDb)
-            @$oDb->close();
     }
 
 }

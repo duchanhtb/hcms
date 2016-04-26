@@ -59,40 +59,42 @@ $column = array(
   -------------------------------------------------------------------------- */
 
 function getNewsCategory() {
-    global $oDb;
-    $arr_category = array();
-    $arr_category[0] = 'Trang chủ';
+    global $tbl_prefix;
+    $table = $tbl_prefix.'news_category';
+    $arr_category = array(0 => trans('home'));    
 
-    $sql = "SELECT `id`, `name`, `parent_id` FROM t_news_category WHERE 1 ";
-    $sql .= 'ORDER BY `parent_id` ASC ';
-
-    $rs = $oDb->query($sql);
-    $allCat = $oDb->fetchAll($rs);
-    foreach ($allCat as $key => $value) {
-        if ($value['parent_id'] == 0) {
-            $name = '----' . $value['name'];
-            $id = $value['id'];
+    $categories = DB::for_table($table)
+            ->select('id')
+            ->select('name')
+            ->select('parent_id')
+            ->order_by_asc('parent_id')
+            ->find_many();
+    
+    foreach ($categories as $category) {
+        if ($category->parent_id == 0) {
+            $name = $category->name;
+            $id = $category->id;
             $arr_category[$id] = $name;
 
             // sub1
-            foreach ($allCat as $key1 => $value1) {
-                if ($value1['parent_id'] == $value['id']) {
-                    $name = '---------' . $value1['name'];
-                    $id = $value1['id'];
+            foreach ($categories as $sub1_category) {
+                if ($sub1_category->parent_id == $category->id) {
+                    $name = '-----' . $sub1_category->name;
+                    $id = $sub1_category->id;
                     $arr_category[$id] = $name;
 
                     // sub2
-                    foreach ($allCat as $key2 => $value2) {
-                        if ($value2['parent_id'] == $value1['id']) {
-                            $name = '------------' . $value2['name'];
-                            $id = $value2['id'];
+                    foreach ($categories as $sub2_category) {
+                        if ($sub2_category->parent_id == $sub1_category->id) {
+                            $name = '----------' . $sub2_category->name;
+                            $id = $sub2_category->id;
                             $arr_category[$id] = $name;
 
                             // sub3
-                            foreach ($allCat as $key3 => $value3) {
-                                if ($value3['parent_id'] == $value2['id']) {
-                                    $name = '----------------' . $value3['name'];
-                                    $id = $value3['id'];
+                            foreach ($categories as $sub3_category) {
+                                if ($sub3_category->parent_id == $sub2_category->id) {
+                                    $name = '---------------' . $sub3_category->name;
+                                    $id = $sub3_category->id;
                                     $arr_category[$id] = $name;
                                 }
                             }

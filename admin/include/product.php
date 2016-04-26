@@ -27,6 +27,8 @@ $column = array(
     "cat_id" => array(
         "title"         => "Danh mục",
         "type"          => "checkbox:relate:table",
+                                    // $table_relaet       $field1      $table1           $field2         $table2
+        //"relate"        => "t_product_relationship  :  product_id=  t_product.id  :   category_id=  t_category.id.name",        
         "relate"        => "t_product_relationship:product_id=t_product.id:category_id=t_category.id.name",
         "editable"      => false,
         "searchable"    => true,

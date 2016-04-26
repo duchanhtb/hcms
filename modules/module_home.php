@@ -10,7 +10,7 @@ if (!defined('ALLOW_ACCESS'))
  */
 class module_home extends Module {
 
-    function module_home() {
+    function __construct() {
         $this->tpl = 'home.html';
         parent::module();
     }

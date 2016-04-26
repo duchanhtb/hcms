@@ -106,12 +106,11 @@ if ($_FILES['userfile']['name'] != 'none' && $_FILES['userfile']['name'] != '') 
                     $images_url = $table_info['images_url'];
                     $relate_id = $table_info['relate_id'];
                     // insert to db
-                    $base = new Base();
-                    $base->table = $table_name;
-                    $base->pk = $primary_key;
-                    $base->fields = array($images_url);
-                    $base->$images_url = trim($file_upload, '.');
-                    $id = $base->insert();
+                    
+                    $tableRecord = DB::for_table($table_name)->create();
+                    $tableRecord->$images_url = trim($file_upload, '.');
+                    $tableRecord->save();
+                    $id = $tableRecord->id();
                     $arrId = isset($_SESSION['multiimages'][$image_field]) ? $_SESSION['multiimages'][$image_field] : array();
 
                     $arrId[] = $id;

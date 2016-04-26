@@ -9,7 +9,7 @@ if (!defined('ALLOW_ACCESS'))
  */
 class module_footer extends Module {
 
-    function module_footer() {
+    function __construct() {
         $this->tpl = 'footer.html';
         parent::module();
     }

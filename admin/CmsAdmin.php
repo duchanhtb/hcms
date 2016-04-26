@@ -15,7 +15,7 @@ class CmsAdmin {
      * @param nothing
      * @return nothing
      */
-    function CmsAdmin() {
+    function __construct() {
 
         /* main style for admin
           ------------------------------------------------- */

@@ -10,7 +10,7 @@ if (!defined('ALLOW_ACCESS'))
  */
 class new_detail extends Module {
 
-    function new_detail() {
+    function __construct() {
         $this->tpl = 'new_detail.html';
         parent::module();
     }

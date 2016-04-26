@@ -8,7 +8,7 @@ if (!defined('ALLOW_ACCESS'))
  * @copyright 2015
  * @desc class render html admin media
  */
-class Media extends Base {
+class Media extends Base{
 
     var $id = '';
     var $pk = 'id';
@@ -169,20 +169,7 @@ class Media extends Base {
         return $html_option;
     }
 
-    /**
-     * @desc get media by condition input
-     * @param string $con: sql condition
-     * @param string $sort: sort field
-     * @param string $order: direction DESC|ASC
-     * @param $page: current page
-     * @param $num_page: number return records 
-     * @return array
-     */
-    public function getMedia($con = '', $sort = 'id', $order = 'DESC', $page = 1, $num_page = 50) {
-        $page = ($page >= 1 ) ? $page : 1;
-        $start_row = ($page - 1) * $num_page;
-        return $this->get('*', $con, "$sort $order", $start_row, $num_page);
-    }
+    
 
     /**
      * @desc get src of file, return images url if that is images, return icon url if that is other type
@@ -224,12 +211,8 @@ class Media extends Base {
      * @return string
      */
     public function getMediaHtml($path, $thumb = 'thumb-150') {
-        $arrFileExt = $this->arrFileExt;
-        $other_info = $this->other_info;
         $html = '';
-
-        $arrFileExt = $this->arrFileExt;
-
+        $arrFileExt = $this->arrFileExt;                
         $icon_file = "fileicon";
         $pathinfo = pathinfo($path);
         $ext = $pathinfo['extension'];
@@ -280,58 +263,60 @@ class Media extends Base {
             $this->deleteMedia();
         }
 
-        global $oDb;
-        $con = "";
+        $arrMedia = DB::for_table($this->table);
         $q = Input::get('q', 'txt', '');
         // search query
         if ($q) {
             $this->q = $q;
-            $con = " AND `path` LIKE '%$q%' ";
+            $arrMedia = $arrMedia->where_like('path', "%$q%");
         }
         $search_type = Input::get('search-type', 'txt', 'all');
         if ($search_type != 'all') {
             switch ($search_type) {
                 case "images":
                 case "image":
-                    $con .= " AND `type` LIKE 'image%' ";
+                    $arrMedia  = $arrMedia->where_like('type', 'image%');
                     break;
 
                 default:
-                    $con .= " AND `type` NOT LIKE 'image%' ";
+                    $arrMedia  = $arrMedia->where_not_like('type', 'image%');
                     break;
             }
         }
 
         $search_date = Input::get('search-date', 'txt', 'all');
         if ($search_date != 'all') {
-            $con .= " AND `date` LIKE '%$search_date%'  ";
+            $arrMedia = $arrMedia->where_like('date', "%$search_date%");
         }
-
-        $strQuery = "SELECT * FROM $this->table WHERE 1 " . $con;
 
         $orderby = Input::get('orderby', 'txt', 'id');
         $orderby_dir = Input::get('orderby_dir', 'txt', 'DESC');
+        switch (strtoupper($orderby_dir)){
+            case "ASC":
+                $arrMedia = $arrMedia->order_by_asc($orderby);
+                break;
+            
+            case "DESC":
+                $arrMedia = $arrMedia->order_by_desc($orderby);
+                break;
+        }
 
-        $strQuery .= " ORDER BY `$orderby` $orderby_dir ";
-
-        $page = isset($_REQUEST['current_page']) ? intval($_REQUEST['current_page']) : 0;
-
+        $page = Input::get('current_page', 'txt', 0);
         if ($page == 0) {
             $page = isset($_SESSION["media-info"]['page']) ? (int) $_SESSION["media-info"]['page'] : 1;
         }
         $_SESSION["media-info"]['page'] = $page;
 
-        $limit = ($page - 1) * $this->rop;
-
-        $data = $oDb->query($strQuery . " limit " . (int) $limit . "," . $this->rop);
-
-        $arrMedia = $oDb->fetchAll($data);
+        $offset = ($page - 1) * $this->rop;
+        
+        $totalRow = $arrMedia->count();
+        $arrMedia = $arrMedia
+                ->limit($this->rop)
+                ->offset($offset)
+                ->find_many();
+        
         $this->arrMedia = $arrMedia;
-
-        $data_total = $oDb->query($strQuery);
-
-        $totalRow = $oDb->numRows($data_total);
-
+        
         $totalPage = (int) ($totalRow / $this->rop);
         if ($totalRow % $this->rop > 0) {
             $totalPage++;
@@ -601,36 +586,36 @@ class Media extends Base {
         if (count($arrMedia) <= 0) {
             $html .= '<tr><td align="center" colspan="100"><p style="text-align:center;">' . trans('file_not_found') . '</p></td></tr>';
         } else {
-            foreach ($arrMedia as $key => $value) {
-                $link_detail = curPageURL() . '&id=' . $value['id'];
-                $media_info = json_decode($value['other_info'], true);
+            foreach ($arrMedia as $value) {
+                $link_detail = curPageURL() . '&id=' . $value->id;
+                $media_info = json_decode($value->other_info, true);
                 if (isset($media_info['wh'])) {
                     $text_wh = ' / ' . str_replace('x', ' x ', $media_info['wh']);
                 } else {
                     $text_wh = '';
                 }
                 $html .=
-                        '<tr id="media-' . $value['id'] . '">
-                                <td class="check-cols"><input type="checkbox" name="idItem" class="idItem" value="' . $value['id'] . '" /></td>
-                                <td><a href="javascript:void(0)" onclick="showModel(' . $value['id'] . ')"><img src="' . $this->getSrcMediaIcon($value['path']) . '" width="65" /></a></td>
+                        '<tr id="media-' . $value->id . '">
+                                <td class="check-cols"><input type="checkbox" name="idItem" class="idItem" value="' . $value->id . '" /></td>
+                                <td><a href="javascript:void(0)" onclick="showModel(' . $value->id . ')"><img src="' . $this->getSrcMediaIcon($value->path) . '" width="65" /></a></td>
                                 <td class="media-file">
                                     <strong>' . $media_info['name'] . '</strong>
                                     <p><strong>(' . bytesToSize($media_info['size']) . ')</strong> / ' . strtoupper($media_info['ext']) . $text_wh . '</p>
                                     <p class="media-action">
                                     ';
                 if ((int) @$_SESSION['admin']['level'] >= 3) :
-                    $html .= '<span><a href="javascript:void(0)" onclick="deleteMedia(\'' . $value['id'] . '\')" style="color: red;">' . trans('remove_permanently') . '</a></span>
+                    $html .= '<span><a href="javascript:void(0)" onclick="deleteMedia(\'' . $value->id . '\')" style="color: red;">' . trans('remove_permanently') . '</a></span>
                                         <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>';
                 endif;
-                $html .= '<span><a href="javascript:void(0)" onclick="showModel(' . $value['id'] . ')">' . trans('view') . '</a> </span>
+                $html .= '<span><a href="javascript:void(0)" onclick="showModel(' . $value->id . ')">' . trans('view') . '</a> </span>
                                     </p>
                                 </td>
-                                <!--<td>' . $value['object_id'] . '</td>-->
-                                <td>' . $this->getObjectType($value['object_type']) . '</td>
-                                <td>' . $value['username'] . '</td>
-                                <td>' . date('H:i - d/m/Y', strtotime($value['date'])) . '</td>
+                                <!--<td>' . $value->object_id . '</td>-->
+                                <td>' . $this->getObjectType($value->object_type) . '</td>
+                                <td>' . $value->username . '</td>
+                                <td>' . date('H:i - d/m/Y', strtotime($value->date)) . '</td>
                             </tr>';
-                $html_model .= $this->renderModel($value['id']);
+                $html_model .= $this->renderModel($value->id);
             }
         }
         $html .= '</tbody>
@@ -651,14 +636,13 @@ class Media extends Base {
         if ($id <= 0) {
             exit;
         }
-
-        $this->read($id);
-        $path = $this->path;
+        $media = DB::for_table($this->table)->find_one($id);        
+        $path = $media->path;
         $html_media = $this->getMediaHtml($path, 'full');
-        $type = $this->type;
+        $type = $media->type;
         $full_path = base_url() . $path;
-        $other_info = json_decode($this->other_info, true);
-        $date = $this->date;
+        $other_info = json_decode($media->other_info, true);
+        $date = $media->date;
 
         $img_next = '<img src="' . base_url() . '/' . ADMIN_FOLDER . '/images/media_icon_next.png' . '" height="20">';
         $img_prev = '<img src="' . base_url() . '/' . ADMIN_FOLDER . '/images/media_icon_prev.png' . '" height="20">';
@@ -669,7 +653,7 @@ class Media extends Base {
 
         $arrMedia = $this->arrMedia;
         foreach ($arrMedia as $key => $value) {
-            if ($value['id'] == $id) {
+            if ($value->id == $id) {
                 break;
             }
         }
@@ -677,22 +661,22 @@ class Media extends Base {
         if (count($arrMedia) > 1) {
             if ($key == 0) {
                 $prev_media = '<button disabled="" class="model-prev disable" title="' . trans('previous') . '">' . $img_prev . '</button>';
-                $next_media = '<button onclick="showModel(' . $arrMedia[$key + 1]['id'] . ')" class="model-next" title="' . trans('next') . '">' . $img_next . '</button>';
+                $next_media = '<button onclick="showModel(' . $arrMedia[$key + 1]->id . ')" class="model-next" title="' . trans('next') . '">' . $img_next . '</button>';
 
                 $html_prev_modal = '<a href="#" class="arrow-prev-modal bg-none"></a>';
-                $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]['id'] . ')"></a>';
+                $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]->id . ')"></a>';
             } elseif ($key == (count($arrMedia) - 1)) {
-                $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]['id'] . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
+                $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]->id . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
                 $next_media = '<button disabled="" class="model-next disable" title="Sau">' . $img_next . '</button>';
 
-                $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]['id'] . ')"></a>';
+                $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]->id . ')"></a>';
                 $html_next_modal = '<a href="#" class="arrow-next-modal bg-none"></a>';
             } else {
-                $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]['id'] . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
-                $next_media = '<button onclick="showModel(' . $arrMedia[$key + 1]['id'] . ')" class="model-next" title="' . trans('next') . '">' . $img_next . '</button>';
+                $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]->id . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
+                $next_media = '<button onclick="showModel(' . $arrMedia[$key + 1]->id . ')" class="model-next" title="' . trans('next') . '">' . $img_next . '</button>';
 
-                $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]['id'] . ')"></a>';
-                $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]['id'] . ')"></a>';
+                $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]->id . ')"></a>';
+                $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]->id . ')"></a>';
             }
         } else {
             $prev_media = '<button disabled="" class="model-prev disable" title="' . trans('previous') . '">' . $img_prev . '</button>';
