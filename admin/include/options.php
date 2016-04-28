@@ -204,7 +204,7 @@ $of_options[] = array('name' => trans('Màu sắc'),
 
 $of_options[] = array('name' => trans('Màu'),
     'type' => 'info',
-    'std' => trans('Color'),
+    'std' => trans('Hình nền, Màu nền'),
 );
 
 $of_options[] = array('name' => trans('Màu nền website'),
@@ -213,6 +213,27 @@ $of_options[] = array('name' => trans('Màu nền website'),
     'id' => 'body-background-color',
 );
 
+$of_options[] = array('name' => trans('Hình nền website'),
+    'type' => 'media',
+    'std' => '',
+    'id' => 'body-background-image',
+);
+$of_options[] = array('name' => trans('Lặp hình'),
+    'type' => 'select',
+    'std' => 'none',
+    'options' => array(
+        'no' => trans('Không'),
+        'yes' => trans('Có'),
+        'x' => trans('Chiều X'),
+        'y' => trans('Chiều Y'),
+    ),
+    'id' => 'body-background-repeat',
+);
+
+$of_options[] = array('name' => trans('Màu Chữ'),
+    'type' => 'info',
+    'std' => trans('Màu chữ'),
+);
 $of_options[] = array('name' => trans('Màu chữ'),
     'type' => 'color',
     'std' => '#555555',

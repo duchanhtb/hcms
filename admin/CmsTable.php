@@ -1621,7 +1621,7 @@ class CmsTable extends Base {
             } else if ($value['type'] == "input:price" || $value['type'] == 'input:int10') {
                 $data_item = cleanNumber($_POST[$key]);
             } else if ($value['type'] == "input:password" && $_POST[$key] != '') {
-                $check_rs = DB::for_table($this->table)
+                $check = DB::for_table($this->table)
                         ->where_equal($this->idField, $id)
                         ->find_one();
                 $newval = md5(md5(md5($_POST[$key])));
@@ -1655,7 +1655,7 @@ class CmsTable extends Base {
             $count++;
         }
 
-        if ($checkuni_rs) {
+        if (isset($checkuni_rs) && $checkuni_rs) {
             $this->viewEditForm($id, "<div class='red'>" . trans('msg_exists', array($label)) . "</div>");
         } else {
             // save data

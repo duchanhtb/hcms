@@ -1053,6 +1053,29 @@ function cms_header() {
     if (get_option('body-background-color') != '') {
         $body_inline_css .= "\tbackground-color: " . get_option("body-background-color") . ";" . PHP_EOL;
     }
+    if (get_option('body-background-image') != '') {
+        $body_inline_css .= "\tbackground-image: url('" . base_url().get_option("body-background-image") . "');" . PHP_EOL;
+        $repeat = get_option('body-background-repeat');
+        switch ($repeat){
+            case 'x':
+                $body_inline_css .= "\tbackground-repeat: repeat-x;" . PHP_EOL;
+                break;
+            
+            case 'y':
+                $body_inline_css .= "\tbackground-repeat: repeat-y;" . PHP_EOL;
+                break;
+            
+            case 'yes':
+                $body_inline_css .= "\tbackground-repeat: repeat;" . PHP_EOL;
+                break;
+            
+            case 'no':
+                $body_inline_css .= "\tbackground-attachment: fixed;" . PHP_EOL;
+                $body_inline_css .= "\tbackground-repeat: no-repeat;" . PHP_EOL;
+            default :
+                break;
+        }
+    }
     if (get_option('primary-color') != '') {
         $body_inline_css .= "\tcolor: " . get_option("primary-color") . ";" . PHP_EOL;
     }

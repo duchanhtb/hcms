@@ -61,10 +61,13 @@ class Page extends Base {
         if ($page) {
             $position = $page->position;
             $parentPage = $this->getParent($allPage, $page->parent);
-            $parent_position = $parentPage->position;
-            $pos = json_decode($position, true);
-            $pos_parent = json_decode($parent_position, true);
+            $pos_parent = array();
+            if($parentPage){
+                $parent_position = $parentPage->position;
+                $pos_parent = json_decode($parent_position, true);
+            }
             
+            $pos = json_decode($position, true);            
             $new_post = array_merge_recursive((array) $pos_parent, (array) $pos);
             $page->position = $new_post;
 

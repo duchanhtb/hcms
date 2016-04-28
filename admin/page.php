@@ -20,14 +20,14 @@ $cms = new Cms();
 $miniPage = new Page();
 
 $miniPage->read($id);
-$position = $miniPage->name;
-$position = json_decode($position->position, true);
+$page = $miniPage->name;
+$position = json_decode($miniPage->position, true);
 ?>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <title><?php echo $admin_title; ?> - Module - Administration</title>
+        <title><?php echo strtoupper($page); ?> - Module - Administration</title>
         <script type="text/javascript" src="<?php echo admin_url(); ?>js/jquery-1.7.min.js"></script>
         <script type="text/javascript" src="<?php echo admin_url(); ?>js/cookie.js"></script>        
         <script type="text/javascript" src="<?php echo admin_url(); ?>js/custom.page.js"></script>
