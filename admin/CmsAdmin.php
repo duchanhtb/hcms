@@ -47,6 +47,11 @@ class CmsAdmin {
           ------------------------------------------------- */
         admin_register_script('stickytooltip', admin_url() . 'js/stickytooltip.js', false, true);
 
+        
+        /* jquery.browser
+          ------------------------------------------------- */
+        admin_register_script('jquery-browser', admin_url() . 'js/jquery.browser.min.js', false, true);
+        
         /* Main custom js
           ------------------------------------------------- */
         admin_register_script('main-script', admin_url() . 'js/main.js', false, true);
@@ -61,7 +66,12 @@ class CmsAdmin {
      * @return nothing
      */
     function run() {
+        
         $content = $this->adminContent();
+        
+        // render debug bar if CMS_DEBUG is true
+        $this->adminDebug();
+        
         $header = $this->adminHeader();
         $footer = $this->adminFooter();
 
@@ -127,6 +137,18 @@ class CmsAdmin {
         </table>';
 
         return $html;
+    }
+    
+    
+    /**
+     * @desc render Debug Bar html
+     * @param nothing
+     * @return nothing
+     */
+    function adminDebug(){
+        if(CMS_DEBUG){
+            include(ROOT_PATH.'debug.php');
+        }
     }
 
 }

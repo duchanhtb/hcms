@@ -52,12 +52,18 @@ class Page extends Base {
      * @return array
      */
     function getPageInfo($name) {
-        $page = DB::for_table($this->table)
-                ->where_equal('name', $name)
-                ->find_one();
-
-        $allPage = $this->getAll();
-
+        global $allPage;        
+        if(!$allPage) $allPage = $this->getAll();
+        $page = false;
+        
+        foreach($allPage as $aPage){
+            if($aPage->name == $name){
+                $page = $aPage;
+                break;
+            }
+        }
+        
+        
         if ($page) {
             $position = $page->position;
             $parentPage = $this->getParent($allPage, $page->parent);
@@ -66,8 +72,9 @@ class Page extends Base {
                 $parent_position = $parentPage->position;
                 $pos_parent = json_decode($parent_position, true);
             }
-            
-            $pos = json_decode($position, true);            
+            $pos = false;
+            if($position) $pos = @json_decode($position, true);
+             
             $new_post = array_merge_recursive((array) $pos_parent, (array) $pos);
             $page->position = $new_post;
 

@@ -75,7 +75,7 @@ class Cart extends Base {
      * @return none
      */
     function sendMailCart() {
-        $xtpl = new XTemplate('html_sendmail_cart.html');
+        $xtpl = new XTemplate(ROOT_PATH.'skin/default/layout/html_sendmail_cart.html');
 
         $arrayInput = array(
             "fullname",

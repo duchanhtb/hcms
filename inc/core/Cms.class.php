@@ -216,7 +216,7 @@ class cms {
         $page = Input::get("page", "txt", $this->default_page);
         $miniPage = new Page();
         $pageInfo = $miniPage->getPageInfo($page);
-        if ($pageInfo->layout) {
+        if ($pageInfo && $pageInfo->layout) {
             $pathPath = pathinfo($pageInfo->layout);
             $this->layout = $pathPath['filename'];
         }
@@ -266,10 +266,13 @@ class cms {
                 }
                 $html = str_replace('<!--' . $key . '-->', $html_pos, $html);
             }
+            
+            // check debug status
+            $this->cmsDebug();
 
             $skin_path = base_url() . SKIN_FOLDER . '/' . $this->skin . '/';
             $html = str_replace('{skin_path}', $skin_path, $html);
-            $html = str_replace('{cms_header}', cms_header(), $html);
+            $html = str_replace('{cms_header}', cms_header(), $html);            
             $html = str_replace('{cms_footer}', cms_footer(), $html);
             $html = str_replace('{link_home}', base_url(), $html);
             $html = str_replace('{cur_page}', curPageUrl(), $html);
@@ -291,9 +294,6 @@ class cms {
         } else {
             show_404_page();
         }
-
-        // if setting, show log sql
-        $this->showLogSql();
     }
 
     /**
@@ -345,55 +345,53 @@ class cms {
         return $arrPost;
     }
 
-    
     /**
      * @Desc rewrite url to variable $_REQUEST. Example http://abc.com/news/some-text-here/TUVX.html
      * $_REQUEST['page'] = news, $_REQUEST['id'] = TUVX
      * @return nothing
      */
     public static function cmsRewrite() {
-        // set page request
+        // set page request        
+        if(isset($_GET['page'])){
+            return;
+        }
+        
         $current_link = str_replace(base_url(), '', curPageURL());
+        $current_link = preg_replace('/\?.*/', '', $current_link);
+        
         if ($current_link && substr($current_link, strlen($current_link) - 4, 4) == 'html') {
             $current_link = trim($current_link, '/');
 
             $pathinfo = pathinfo($current_link);
             if (!$pathinfo['dirname'] || $pathinfo['dirname'] == '.') {
-                $_REQUEST['page'] = $pathinfo['filename'];
+                $_GET['page'] = $pathinfo['filename'];
             } else {
 
                 $dirname = explode('/', $pathinfo['dirname']);
                 if (isset($dirname[0]) && $dirname[0] != '')
-                    $_REQUEST['page'] = $dirname[0];
+                    $_GET['page'] = $dirname[0];
                 if (isset($dirname[1]) && $dirname[1] != '')
-                    $_REQUEST['alias'] = $dirname[1];
-
+                    $_GET['alias'] = $dirname[1];
 
                 $id = $pathinfo['filename'];
-                $_REQUEST['id'] = alphaID($id, true);
+                $_GET['id'] = alphaID($id, true);
             }
+        }else {
+            $_GET['page'] = trim($current_link, '/');
         }
-        //var_dump($_REQUEST);
     }
-
-
+    
+    
     /**
-     * @Desc show log sql in the footer of CMS
+     * @desc render Debug Bar html
+     * @param nothing
      * @return nothing
      */
-    function showLogSql() {
-        $show_query = Input::get('query', 'int', 0);
-        if ($show_query)
-            $_SESSION['query'] = $show_query;
-
-        if (SHOW_QUERY_INFO == 'on' || (isset($_SESSION['query']) && $_SESSION['query'] == 1)) {
-            $arrLogQuery = DB::get_query_log();
-            echo '<pre>';
-            foreach ($arrLogQuery as $query) {
-                echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">' . trim($query) . '</p>';
-            }
-            echo '</pre>';
+    public function cmsDebug(){
+        if(CMS_DEBUG){
+            include(ROOT_PATH.'debug.php');
         }
     }
 
 }
+// end class

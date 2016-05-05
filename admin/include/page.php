@@ -87,7 +87,7 @@ function pageAction($id, $act){
         
         case "add":
         case "edit":
-            return '<img src="images/icon-module.png" alt="add module">';
+            return 'Không cần điền';
             break;
     }
 }

@@ -24,9 +24,10 @@ class DB extends ORM {
 
         self::configure(array(
             'connection_string' => 'mysql:host=' . $dbInfo['dbHost'] . ';dbname=' . $dbInfo['dbName'] . ';charset=' . self::CHARSET,
-            'username' => $dbInfo['dbUser'],
-            'password' => $dbInfo['dbPass'],
-            'logging' => true
+            'username'  => $dbInfo['dbUser'],
+            'password'  => $dbInfo['dbPass'],
+            'logging'   => true,
+            'logger'    => 'cmsLogQuery'
         ));
     }
 

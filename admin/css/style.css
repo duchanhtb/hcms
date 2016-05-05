@@ -1296,3 +1296,7 @@ ul#search-google-content li a em.info{
 .ui-widget button{
     font-family: Arial, sans-serif !important;
 }
+ul.phpdebugbar-widgets-list li.phpdebugbar-widgets-list-item{
+    line-height: 2.0;
+    font-size: 14px;
+}

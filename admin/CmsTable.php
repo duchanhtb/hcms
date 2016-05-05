@@ -1469,7 +1469,7 @@ class CmsTable extends Base {
                 continue;
             }
 
-            if ($value['type'] == 'checkbox:relate:table') {
+            if ($value['type'] == 'checkbox:relate:table' || $value['type'] == 'input:function') {
                 continue;
             }
 
@@ -1601,7 +1601,7 @@ class CmsTable extends Base {
             if ($value['type'] == 'input:multiimages') {
                 continue;
             }
-            if ($value['type'] == 'checkbox:relate:table') {
+            if ($value['type'] == 'checkbox:relate:table' || $value['type'] == 'input:function') {
                 continue;
             }
             if (isset($value['unique']) && $value['unique'] == true) {

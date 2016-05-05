@@ -67,7 +67,7 @@ function admin_register_script($handle, $src, $ver = false, $in_footer = false) 
  * @return footer html
  */
 function admin_header() {
-    global $admin_style, $admin_script, $admin_title;
+    global $admin_style, $admin_script, $admin_title, $admin_html_header;
     $arrScriptGlobal = array(
         'type' => Input::get('f', 'txt', 'media'),
         'base_url' => base_url(),
@@ -106,6 +106,12 @@ function admin_header() {
             $html .= '<script src="' . $script['src'] . '" type="text/javascript" name="' . $handle . '"></script>' . PHP_EOL;
         }
     }
+    
+    if($admin_html_header){
+        $html.= PHP_EOL;
+        $html .= $admin_html_header.PHP_EOL;
+    }
+    
     $html .='
     </head>
     <body>';
@@ -119,7 +125,7 @@ function admin_header() {
  * @return footer html
  */
 function admin_footer() {
-    global $admin_script;
+    global $admin_script, $admin_html_footer;
     $html = '';
     if ($admin_script && count($admin_script) >= 0) {
         foreach ($admin_script as $handle => $script) {
@@ -128,6 +134,11 @@ function admin_footer() {
             $ver = (isset($style['ver']) && $style['ver'] != '') ? '?ver=' . $style['ver'] : '';
             $html .= '<script src="' . $script['src'] . '" type="text/javascript" name="' . $handle . '"></script>' . PHP_EOL;
         }
+    }
+    
+    if($admin_html_footer){
+        $html.= PHP_EOL;
+        $html .= $admin_html_footer.PHP_EOL;
     }
 
     $html .= '

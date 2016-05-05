@@ -178,7 +178,7 @@ $(function () {
                 $('.select_wrapper').each(function () {
                     $(this).prepend('<span>' + $(this).find('.select option:selected').text() + '</span>');
                 });
-                $('.select').live('change', function () {
+                $('.select').on('change', function () {
                     $(this).prev('span').replaceWith('<span>' + $(this).find('option:selected').text() + '</span>');
                 });
                 $('.select').bind($.browser.msie ? 'click' : 'change', function (event) {
@@ -198,7 +198,7 @@ $(function () {
     $(".slide_body").hide();
 
     //Switch the "Open" and "Close" state per click then slide up/down (depending on open/close state)
-    $(".slide_edit_button").live('click', function () {
+    $(".slide_edit_button").on('click', function () {
         /*
          //display as an accordion
          $(".slide_header").removeClass("active");	
@@ -221,13 +221,13 @@ $(function () {
         return true;
     }
 
-    $('.of-slider-title').live('keyup', function () {
+    $('.of-slider-title').on('keyup', function () {
         update_slider_title(this);
     });
 
 
     //Remove individual slide
-    $('.slide_delete_button').live('click', function () {
+    $('.slide_delete_button').on('click', function () {
         // event.preventDefault();
         var agree = confirm("Are you sure you wish to delete this slide?");
         if (agree) {
@@ -246,7 +246,7 @@ $(function () {
     });
 
     //Add new slide
-    $(".slide_add_button").live('click', function () {
+    $(".slide_add_button").on('click', function () {
         var slidesContainer = $(this).prev();
         var sliderId = slidesContainer.attr('id');
 
@@ -314,7 +314,7 @@ $(function () {
 
     /**	Ajax Backup & Restore MOD */
     //backup button
-    $('#of_backup_button').live('click', function () {
+    $('#of_backup_button').on('click', function () {
 
         var answer = confirm("Click OK to backup your current saved options.")
 
@@ -361,7 +361,7 @@ $(function () {
     });
 
     //restore button
-    $('#of_restore_button').live('click', function () {
+    $('#of_restore_button').on('click', function () {
 
         var answer = confirm("'Warning: All of your current options will be replaced with the data from your last backup! Proceed?")
 
@@ -408,7 +408,7 @@ $(function () {
     });
 
     /**	Ajax Transfer (Import/Export) Option */
-    $('#of_import_button').live('click', function () {
+    $('#of_import_button').on('click', function () {
 
         var answer = confirm("Click OK to import options.")
 
@@ -456,7 +456,7 @@ $(function () {
     });
 
     /** AJAX Save Options */
-    $('#of_save').live('click', function () {
+    $('#of_save').on('click', function () {
 
         var nonce = $('#security').val();
 

@@ -22,17 +22,14 @@ define("SKIN_FOLDER", 'skin');
 // define module folder
 define("MODULE_FOLDER", 'modules');
 
+// define Module PATH
+define("MODULE_PATH", ROOT_PATH . MODULE_FOLDER . DS);
+
 // define cache folder
 define("CACHE_FOLDER", 'cache');
 
 // define set cache status (on/off)
 define("CACHE_STATUS", 'off');
-
-// define Module PATH
-define("MODULE_PATH", ROOT_PATH . MODULE_FOLDER . DS);
-
-// calculator query in class database
-define("SHOW_QUERY_INFO", "off");
 
 // define string encode password
 define('PASS_ENDCODE', 'HANHCMS');

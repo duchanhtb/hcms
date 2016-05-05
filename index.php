@@ -18,4 +18,3 @@ $cms->run();
 
 $end_time = microtime(true);
 $total_time = ($end_time - $start_time);
-echo '<p style="text-align:left; padding: 0 10px; margin: 5px 0px; font-size:14px;">Time executed: <strong style="color:red; ">'.$total_time.'</strong> seconds</p>';
