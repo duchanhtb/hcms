@@ -131,7 +131,7 @@ class CmsTable extends Base {
 
         if (isset($_REQUEST['search-input']) && $_REQUEST['search-input'] != "") {
             $keyword = htmlspecialchars(addslashes($_REQUEST['search-input']));
-            
+
             $_SESSION['search-input'] = $keyword;
             if ($_REQUEST['search-column'] != "") {
                 $column_attr = array();
@@ -139,7 +139,7 @@ class CmsTable extends Base {
                     if ($column_name == $_REQUEST['search-column'])
                         $column_attr = $attr;
                 }
-                if ($column_attr != NULL && isset($column_attr['data'])) {                    
+                if ($column_attr != NULL && isset($column_attr['data'])) {
                     foreach ($column_attr['data'] as $key => $value) {
                         if (strtolower($keyword) == strtolower(trim($value, '-'))) {
                             $cmsTable = $cmsTable->where_raw('(`' . $this->idField . '` = ? OR `' . $_REQUEST['search-column'] . '` = ?)', array($keyword, $keyword));
@@ -148,12 +148,12 @@ class CmsTable extends Base {
                             $cmsTable = $cmsTable->where_raw('(`' . $this->idField . '` = ? OR `' . $_REQUEST['search-column'] . '` like %?%)', array($keyword, $keyword));
                         }
                     }
-                } if ($column_attr != NULL && isset($column_attr['relate'])) {                       
+                } if ($column_attr != NULL && isset($column_attr['relate'])) {
                     $wh_relate = $this->getIdFromRelateTable($column_attr['relate'], $keyword);
                     if ($wh_relate) {
                         $cmsTable = $cmsTable->where_raw($wh_relate);
                     }
-                } else {           
+                } else {
                     $cmsTablem = $cmsTable->where_like($_REQUEST['search-column'], "%$keyword%");
                     //$cmsTable = $cmsTable->where_raw("(`" . $this->idField . "` = ? OR `" . $_REQUEST['search-column'] . "` LIKE %?%)", array($keyword, $keyword));
                 }
@@ -423,7 +423,7 @@ class CmsTable extends Base {
                                     $field2 = $relateField2[0];
                                     $table1 = explode(".", $relateField1[1]);
                                     $table2 = explode(".", $relateField2[1]);
-                                    
+
                                     $relate_arr = DB::for_table($relateTable)
                                             ->where_equal($field1, $item->$idField)
                                             ->find_many();
@@ -534,13 +534,17 @@ class CmsTable extends Base {
                                     }
                                     break;
 
-                                case "input:file":
+                                case "input:file":                                    
                                     if (isset($item->$key) && $item->$key != '') {
-                                        $title = CFile::getFilename($item->$key);
+                                        $filename = CFile::getFileName($item->$key);
                                     } else {
-                                        $title = 'not found';
+                                        $filename = trans('unknow');
                                     }
-
+                                    if ($filename && isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
+                                        $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . stripslashes(strip_tags($filename)) . "</a>";
+                                    } else {
+                                        $title = stripslashes(strip_tags($filename));
+                                    }
                                     break;
 
 
@@ -569,7 +573,9 @@ class CmsTable extends Base {
                                         $class = "";
                                         $size = 100;
                                         $width = "width:80px;";
-                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> VNÐ';
+                                        $currency = isset($value['currency']) ? $value['currency'] : '';
+                                        
+                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> <span class="currency">'.$currency.'</span>';
                                     } else {
                                         if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
                                             $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . price($item->$key) . "</a>";
@@ -799,7 +805,9 @@ class CmsTable extends Base {
                     $input = '<input type="password" name="' . $key . '" class="' . $class . '" />';
                     break;
                 case "input:image":
+                    // register cscript
                     admin_register_script('ajax-upload', admin_url() . 'js/ajaxupload.js', false, true);
+
                     if ($default_val == '') {
                         $img_default = 'images/noimage.jpg';
                     }
@@ -819,7 +827,12 @@ class CmsTable extends Base {
                     break;
 
                 case "input:file":
-                    $input = '<input type="text" name="' . $key . '" class="' . $class . ' input-file" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">' . trans('select_file') . '</a>]&nbsp;&nbsp;(<a href="upload-file.php?ext=1" target="_blank" title="' . trans('msg_allow_filetype') . '">?</a>)<br/><em class="file"></em>';
+                    admin_register_script('ajaxupload', admin_url(). 'js/ajaxupload.js', false, true);
+                    admin_register_script('simplemodal', admin_url(). 'js/jquery.simplemodal.js', false, true);
+                    admin_register_style('simplemodal', admin_url(). 'css/simple-modal.css', false, true);
+                    admin_register_style('custom-modal', admin_url(). 'css/custom-modal.css', false, true);
+                    
+                    $input = '<input type="text" name="' . $key . '" class="' . $class . ' input-file" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">' . trans('select_file') . '</a>]&nbsp;&nbsp;(<a href="ajax.php?cmd=modal_file_upload" class="ajax-modal" title="' . trans('msg_allow_filetype') . '">?</a>)<br/><em class="file"></em>';
                     break;
 
                 case "input:multiimages":
@@ -829,17 +842,19 @@ class CmsTable extends Base {
                     unset($_SESSION['multiimages'][$key]);
                     $input = '<ul id="thumbnails">
                                 <li>
-                                    <div id="drop"><a>' . trans('select_images') . '</a>
-                        				<input type="file" name="userfile" multiple />
-                        			</div>
+                                    <div id="drop">
+                                        <a href="javascript:void(0)">' . trans('select_images') . '</a>
+                                        <input type="file" name="userfile" multiple />
+                                    </div>
                                 </li>   
                              </ul>
                              <div style="clear: both;"></div>';
                     break;
 
                 case "input:price":
+                    $currency = isset($value['currency']) ? $value['currency'] : '';
                     $input = '<input type="hidden" id="' . $key . '" name="' . $key . '"  value="' . $default_val . '" >
-                              <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="0" /> VNĐ';
+                              <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="0" /> '.$currency;
                     break;
 
                 case "input:attribute":
@@ -1125,7 +1140,7 @@ class CmsTable extends Base {
                     break;
 
                 case "input:image":
-
+                    // register script
                     admin_register_script('ajax-upload', admin_url() . 'js/ajaxupload.js', false, true);
 
                     $f = Input::get('f', 'txt', 'media');
@@ -1148,12 +1163,18 @@ class CmsTable extends Base {
                     break;
 
                 case "input:file":
+                    // register script and style
+                    admin_register_script('ajaxupload', 'js/ajaxupload.js', false, true);
+                    admin_register_script('simplemodal', admin_url(). 'js/jquery.simplemodal.js', false, true);
+                    admin_register_style('simplemodal', admin_url(). 'css/simple-modal.css', false, true);
+                    admin_register_style('custom-modal', admin_url(). 'css/custom-modal.css', false, true);
+                    
                     if ($row->$key == "") {
                         $file = trans('no_file');
                     } else {
-                        $file = $row->$key;
+                        $file = htmlspecialchars(stripslashes($row->$key));
                     }
-                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">Ch?n file</a>]&nbsp;&nbsp;(<a href="upload-file.php?ext=1" target="_blank" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file">' . getFileName($file) . '</em>';
+                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> [<a href="javascript:void(0)" class="browse ' . $key . '" id="btnUpload' . $key . '">'. trans('select_file')  .'</a>]&nbsp;&nbsp;(<a href="ajax.php?cmd=modal_file_upload" class="ajax-modal" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file"><a target="_blank" href="'.  base_url().$file.'">' . CFile::getFileName($file) . '</a></em>';
                     break;
 
                 case "input:multiimages":
@@ -1179,19 +1200,21 @@ class CmsTable extends Base {
                         }
                     }
                     $input = '<ul id="thumbnails">
-								<li>
-									<div id="drop"><a>' . trans('select_images') . '</a>
-										<input type="file" name="userfile" multiple />
-									</div>
-								</li>
-								' . $html_img . '
-							   </ul>
-							<div style="clear: both;"></div>';
+                                    <li>
+                                        <div id="drop">
+                                            <a href="javascript:void(0)">' . trans('select_images') . '</a>
+                                            <input type="file" name="userfile" multiple />
+                                        </div>
+                                    </li>
+                                    ' . $html_img . '
+                               </ul>
+                            <div style="clear: both;"></div>';
                     break;
 
                 case "input:price":
+                    $currency = isset($value['currency']) ? $value['currency'] : '';
                     $input = '<input type="hidden" id="' . $key . '" name="' . $key . '" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '">
-						  <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '" /> VNÐ';
+						  <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '" /> '.$currency;
                     break;
 
                 case "input:attribute":
@@ -1813,46 +1836,47 @@ class CmsTable extends Base {
     function getIdFromRelateTable($relate, $keyword) {
         $relate = explode(":", $relate);
         $relateTable = $relate[0];
-        
+
         $relateField1 = explode("=", $relate[1]);
         $relateField2 = explode("=", $relate[2]);
-        
+
         $field1 = $relateField1[0];
         $field2 = $relateField2[0];
-        
+
         $table1 = explode(".", $relateField1[1]);
         $table2 = explode(".", $relateField2[1]);
-        
-        
-        
+
+
+
         $result = array();
-        if ($keyword) {            
+        if ($keyword) {
             // get from category
             $table2_data = DB::for_table($table2[0])
                     ->where_like($table2[2], "%$keyword%")
                     ->find_many();
             $field_id = $table2[1];
-            
+
             $arr2 = false;
             foreach ($table2_data as $data2) {
                 $arr2[] = $data2->$field_id;
             }
-            if(!$arr2) return false;
-            
+            if (!$arr2)
+                return false;
+
             $table_relate_data = DB::for_table($relateTable)
                     ->where_in($field2, $arr2)
                     ->find_many();
-            
-            if($table_relate_data){
-                foreach($table_relate_data as $data_relate){
+
+            if ($table_relate_data) {
+                foreach ($table_relate_data as $data_relate) {
                     $arrRelate[] = $data_relate->$field1;
                 }
             }
-            
-            if($arrRelate){
-                $wh = $table1[1] .' IN ('. implode(',', $arrRelate).') ';
+
+            if ($arrRelate) {
+                $wh = $table1[1] . ' IN (' . implode(',', $arrRelate) . ') ';
                 return $wh;
-            }      
+            }
         }
         return false;
     }

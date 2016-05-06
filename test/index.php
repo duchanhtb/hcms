@@ -3,5 +3,8 @@
 define('ALLOW_ACCESS', TRUE);
 include('../config.php');
 
-$a = DB::for_table('t_category')->where_like('name', '%gia đình%')->find_many();
-var_dump($a);
+$path = 'E:\Dropbox\www\cms\uploads\media\2015_10_09/chrysanthemum.jpg';
+
+$folder = CFile::getRelativePath($path);
+var_dump($folder);
+var_dump(ROOT_PATH);

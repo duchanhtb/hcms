@@ -56,6 +56,7 @@ $column = array(
     "price" => array(
         "title"         => "Giá",
         "type"          => "input:price",
+        "currency"      => "VNĐ",
         "required"      => "Nhâp giá sản phẩm",
         "searchable"    => true,
         "editable"      => true,

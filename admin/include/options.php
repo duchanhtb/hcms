@@ -139,7 +139,7 @@ $of_options[] = array('name' => trans('Logo'),
 $of_options[] = array('name' => trans('Logo'),
     'type' => 'media',
     'id' => 'logo',
-    'std' => 'admin/images/example_logo.gif',
+    'std' => 'admin/images/admin-logo.jpg',
     'desc' => trans('Kích thước tốt nhất 200x50px'),
 );
 

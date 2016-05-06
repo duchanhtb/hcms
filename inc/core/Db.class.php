@@ -23,11 +23,13 @@ class DB extends ORM {
     public static function config($dbInfo) {
 
         self::configure(array(
-            'connection_string' => 'mysql:host=' . $dbInfo['dbHost'] . ';dbname=' . $dbInfo['dbName'] . ';charset=' . self::CHARSET,
+            'connection_string' => 'mysql:host=' . $dbInfo['dbHost'] . ';dbname=' . $dbInfo['dbName'] . ';charset=' . self::CHARSET, // host;name;charset
             'username'  => $dbInfo['dbUser'],
             'password'  => $dbInfo['dbPass'],
-            'logging'   => true,
-            'logger'    => 'cmsLogQuery'
+            'logging'   => true, // enable loging
+            'logger'    => 'cmsLogQuery', // custom functon loging
+            'caching'   => true, // enable caching sql
+            'caching_auto_clear'    => true // auto clear caching
         ));
     }
 

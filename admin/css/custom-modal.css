@@ -1,0 +1,62 @@
+/* Overlay */
+#contact-overlay {
+    background-color:#000;
+}
+.simplemodal-container{
+    background-color:#fff;
+    border-radius: 5px;
+}
+.simplemodal-container a.modal-close,
+.simplemodal-container a.modal-close:link,
+.simplemodal-container a.modal-close:active, 
+.simplemodal-container a.modal-close:visited{
+    background-color: #fff;
+    border-radius: 20px;
+    color: #000;
+    display: block;
+    font-family: tahoma;
+    font-size: 1.2em;
+    font-weight: bold;
+    height: 20px;
+    line-height: 18px;
+    position: absolute;
+    right: -12px;
+    text-align: center;
+    text-decoration: none;
+    top: -14px;
+    width: 20px;
+}
+#wrap_ajax-modal{
+    height: 400px;
+    overflow: scroll;
+    max-width: 100%;
+    overflow-x: hidden;
+    background-color: #fff;
+    border: 1px solid #ebeff9;
+    min-width: 500px;
+}
+table#table-ajax-modal{   
+    width: 100%;    
+    font-size: 14px;
+}
+
+table#table-ajax-modal th{
+    background-color: #6b90da;
+    padding: 10px 0px;
+    color: #fff;
+    border-right: 1px solid #ccc;
+}
+table#table-ajax-modal td {
+    border-bottom: 1px solid #ebeff9;
+    border-right: 1px solid #ebeff9;
+    border-left: 1px solid #ebeff9;
+    color: #141823;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.3em 30px 0.3em 0;
+}
+
+table#table-ajax-modal td img{
+    max-width: 50px;
+}

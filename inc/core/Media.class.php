@@ -852,7 +852,7 @@ class Media extends Base{
 
         if (is_array($arrMenu) && count($arrMenu) > 0) {
             foreach ($arrMenu as $key => $value) {
-                if ($value['id'] == $obj_type) {
+                if (isset($value['id']) && $value['id'] == $obj_type) {
                     return $value['name'];
                 }
             }

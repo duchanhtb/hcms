@@ -66,8 +66,30 @@ class ajax {
                 $this->reload_media_content();
                 break;
             
+            case "modal_file_upload":
+                $this->modal_file_upload();
+                break;
+            
             
         }
+    }
+    
+    
+    /**
+     * @desc render html that display file type allow upload
+     * @return echo "html"
+     */
+    function modal_file_upload(){
+        include_once(INC_PATH . "core/CFile.class.php");
+        
+        $html =  '<div id="wrap_ajax-modal"><table id="table-ajax-modal">';
+        $html .= '<tr class="header"><th>'.trans('file_type').'</th><th>&nbsp;</th></tr>';
+        foreach (CFile::$file_type_allowed as $ext => $icon){
+            $html .= '<tr><td>*.'.$ext.'</td><td><img src="'.  admin_url().'images/media/'.$icon.'"></td></tr>';
+        }
+        $html .= '</table></div>';
+        
+        echo $html;
     }
 
     

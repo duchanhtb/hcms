@@ -13,9 +13,10 @@ CKEDITOR.editorConfig = function( config ) {
     config.filebrowserBrowseUrl      =  admin_url + 'browser.php?view=grid&search-type=file';
     config.filebrowserImageBrowseUrl =  admin_url + 'browser.php?view=grid&search-type=image';
     config.filebrowserFlashBrowseUrl =  admin_url + 'browser.php?view=grid&search-type=flash';
-    config.filebrowserUploadUrl      =  admin_url + 'upload.php?type='+type;
-    config.filebrowserImageUploadUrl =  admin_url + 'upload.php?type='+type;
-    config.filebrowserFlashUploadUrl =  admin_url + 'upload.php?type='+type;
+    config.filebrowserUploadUrl      =  admin_url + 'upload-handler.php?type=' + type;
+    config.filebrowserImageUploadUrl =  admin_url + 'upload-handler.php?type=' + type;
+    config.filebrowserFlashUploadUrl =  admin_url + 'upload-handler.php?type=' + type;
+    
     
     config.filebrowserWindowWidth = '800';
     config.filebrowserWindowHeight = '600';

@@ -698,7 +698,7 @@ img.image_review {
     font-weight: bold;
     background: #000;
     position: absolute;
-    top: 8px;
+    top: 5px;
     right: 6px;
     padding: 0 5px;
     display: none;
@@ -1280,6 +1280,9 @@ ul#search-google-content li a em.info{
 .gimage-fail{
     background: url('../images/icon-failed.png') center center no-repeat;
 }
+.currency{
+    float: right;
+}
 
 /** custom css for datetimepicker **/
 #ui-datepicker-div{
@@ -1298,5 +1301,5 @@ ul#search-google-content li a em.info{
 }
 ul.phpdebugbar-widgets-list li.phpdebugbar-widgets-list-item{
     line-height: 2.0;
-    font-size: 14px;
+    font-size: 12px;
 }

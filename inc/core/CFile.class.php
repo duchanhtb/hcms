@@ -9,6 +9,49 @@ if (!defined('ALLOW_ACCESS'))
  */
 class CFile {
 
+    public static $file_type_allowed = array(
+        // document    
+        'pdf' => 'pdf.png',
+        'doc' => 'word.png',
+        'docx' => 'word.png',
+        'ppt' => 'powerpoint.png',
+        'pptx' => 'powerpoint.png',
+        'xls' => 'excel.png',
+        'xlsx' => 'excel.png',
+        // zip
+        'zip' => 'compressed.png',
+        '7zip' => 'compressed.png',
+        'gz' => 'compressed.png',
+        'tar' => 'compressed.png',
+        'rar' => 'compressed.png',
+        'iso' => 'compressed.png',
+        '7zip' => 'compressed.png',
+        // txt
+        'txt' => 'text.png',
+        'sql' => 'text.png',
+        // movie        
+        'flv' => 'video.png',
+        'mov' => 'video.png',
+        'mp3' => 'video.png',
+        'mp4' => 'video.png',
+        'mkv' => 'video.png',
+        'avi' => 'video.png',
+        'swf' => 'flash.png',
+        // images
+        'jpg' => 'image.png',
+        'jpeg' => 'image.png',
+        'gif' => 'image.png',
+        'png' => 'image.png',
+        'ico' => 'image.png',
+        // web text
+        'js' => 'html.png',
+        'xml' => 'html.png',
+        'html' => 'html.png',
+        'htm' => 'html.png',
+        'tpl' => 'html.png',
+        'ini' => 'developer.png'
+    );
+
     /**
      * 	Scope: Public
      * 	Level: Instance
@@ -127,7 +170,7 @@ class CFile {
 
     /**
      * 	Scope: Public
-     *  @example CFile::unzip('/var/www/html/abc/xxx')
+     *  @example CFile::makeDirFromString('/var/www/html/abc/xxx')
      */
     public static function makeDirFromString() {
         $iParNum = func_num_args();
@@ -145,6 +188,7 @@ class CFile {
             }
             $sNewPath .= "/";
         }
+        return true;
     }
 
     /**
@@ -281,6 +325,19 @@ class CFile {
         // return value
         return strtolower($str);
     }
+    
+    /**
+     * 	@desc get filetype icon     
+     * 	@param string $path path of file
+     */
+    public static function getFileIcon($path){
+        $fileType = self::$file_type_allowed;        
+        $path_info = pathinfo($path);
+        foreach($fileType as $ext=>$icon){
+            if($ext == $path_info['extension']) return $icon;
+        }
+        return 'fileicon.png';
+    }
 
     /**
      * @Desc get file name of string: example: the input is "/var/www/html/abc.txt" the output is abc.txt 
@@ -293,8 +350,6 @@ class CFile {
         $filename = $path_info['filename'];
         return $filename . '.' . $ext;
     }
-    
-    
 
     /**
      * @Desc function download file from url
@@ -331,5 +386,48 @@ class CFile {
 
         return true;
     }
+    
+    
+    /**
+     * @Desc function create folder to upload if not exists
+     * @param string $f: function
+     */
+    public static function createImageThumbnail($img_path){
+        global $imagesSize;
+        $file_info = pathinfo($img_path);
+        $dirname = $file_info['dirname'];
+        
+        foreach ($imagesSize as $folder => $wh) {
+            $thumb_width = $wh['width']; // width
+            $thumb_height = $wh['height']; // height 
+            $crop = (isset($wh['crop']) && $wh['crop'] == true) ? 'crop' : 'fit'; // crop
+            $thumb_dir = $dirname .'/'. $folder . '/';
+            
+            // create thumb folder
+            if (!is_dir($thumb_dir)) mkdir($thumb_dir, 0775, true);
+            
+            // create Thumb Images
+            $thumb_path = $thumb_dir . $file_info['basename'];
+            $image = new Image($img_path);
+            $image->createThumb($thumb_path, $thumb_width, $thumb_height, $crop);
+        }
+    }
+    
+    
+    public static function getPathUpload($f){
+        $f = ($f!= '') ? $f : 'media';
+        $upload_folder = 'uploads';
+        $path = ROOT_PATH.$upload_folder.'/'.$f.'/'.date('Y_m_d').'/';
+        if(!is_dir($path)) mkdir($path, 0775, true);
+        return $path;
+    }
+    
+    
+    public static function getRelativePath($full_path){
+        $relative_path =  str_replace(ROOT_PATH, '', $full_path);
+        return str_replace("\\", "/", $relative_path);
+    }
+            
+            
 
 }

@@ -52,22 +52,22 @@ $(document).ready(function () {
     })
 
 
-    $('.checkAll').click(function () {
-        var checked = $(this).attr('checked') ? true : false;
+    $('.checkAll').click(function () {        
+        var is_checked = $(this).prop('checked') ? true : false;
         $('.idItem').each(function () {
-            if (checked) {
+            if (is_checked) {
                 $(this).parent('td').parent('tr').css('background-color', '#fff6b9');
             } else {
                 $(this).parent('td').parent('tr').css('background-color', '');
             }
-            $(this).attr('checked', checked);
+            $(this).prop('checked', is_checked);
         });
     });
 
     $('.idItem').click(function () {
         var hasChecked = ($('.idItem:not(:checked)').length > 0) ? false : true;
-        $('#checkAll').attr('checked', hasChecked);
-        if ($(this).attr('checked')) {
+        $('#checkAll').prop('checked', hasChecked);
+        if ($(this).prop('checked')) {
             $(this).parent('td').parent('tr').css('background-color', '#fff6b9');
         } else {
             $(this).parent('td').parent('tr').css('background-color', '');
@@ -371,7 +371,7 @@ $(document).ready(function () {
                 var obj = $.parseJSON(response);
                 if (obj.status == 'sucsess') {
                     button.parent('td').find('input').val(obj.path);
-                    button.parent('td').find('em').html(obj.path);
+                    button.parent('td').find('em').html('<a href="' + obj.url + '" target="_blank">' + obj.filename + '</a>');
                     window.reload = true;
                 } else {
                     button.parent('td').find('input').val('');
@@ -389,7 +389,7 @@ $(document).ready(function () {
         var ul = $('#thumbnails');
         $('#drop a').click(function () {
             // Simulate a click on the file input button
-            // to show the file browser dialog
+            // to show the file browser dialog            
             $(this).parent().find('input').click();
         });
 
@@ -538,6 +538,21 @@ $(document).ready(function () {
         $(".wrap-media").click(function () {
             $(this).modal();
         })
+        
+        $(".ajax-modal").click(function (e) {            
+            e.preventDefault();
+            // load the contact form using ajax
+            var ajax_url = $(this).attr('href');
+            $.get(ajax_url, function(data){
+                    // create a modal dialog with the data
+                    $(data).modal({
+                        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                        position: ["15%","30%"],
+                        overlayId: 'contact-overlay',
+                        containerId: 'contact-container'
+                    });
+            });
+        })
 
         $(".model-close").click(function () {
             $("body").css("overflow", "visible");
@@ -545,8 +560,7 @@ $(document).ready(function () {
             history.pushState(null, "HCMS media!", "?f=media");
         })
         
-        $(".simplemodal-overlay").click(function(e){
-            model-close
+        $(".simplemodal-overlay").click(function(e){            
             $.modal.close();
         })
     }

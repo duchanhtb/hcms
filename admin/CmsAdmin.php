@@ -29,7 +29,7 @@ class CmsAdmin {
 
         /* main jquery
           ------------------------------------------------- */
-        admin_register_script('jquery', admin_url() . 'js/jquery-1.7.min.js');
+        admin_register_script('jquery', admin_url() . 'js/jquery-2.2.3.js');
 
         /* lazy load
           ------------------------------------------------- */

@@ -6,16 +6,16 @@ class GeneratorDemo
 {
     public static function foo()
     {
-        yield 1;
+        //yield 1;
     }
 
     public function baz()
     {
-        yield from bar();
+        //yield from bar();
     }
 }
 
 function bar()
 {
-    yield from GeneratorDemo::foo();
+    //yield from GeneratorDemo::foo();
 }

@@ -355,7 +355,6 @@ class cms {
         if(isset($_GET['page'])){
             return;
         }
-        
         $current_link = str_replace(base_url(), '', curPageURL());
         $current_link = preg_replace('/\?.*/', '', $current_link);
         
