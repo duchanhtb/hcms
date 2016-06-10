@@ -11,9 +11,6 @@ define('DS', DIRECTORY_SEPARATOR);
 define('ROOT_PATH', dirname(__FILE__) . DS);
 
 // define ROOT PATH
-define("USING_MEMCACHE", "0");
-
-// define ROOT PATH
 define("INC_PATH", ROOT_PATH . 'inc' . DS);
 
 // define skin folder

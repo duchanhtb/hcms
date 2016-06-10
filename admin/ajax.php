@@ -45,7 +45,8 @@ class ajax {
             case "of_ajax_post_action":
                 $this->of_ajax_post_action();
                 break;
-
+          
+            
             case "update_page_info":
                 $this->update_page_info();
                 break;
@@ -145,6 +146,9 @@ class ajax {
      */
     function of_ajax_post_action() {
         $type = Input::get('type', 'txt', 0);
+        $func = Input::get('f', 'txt', 'options');
+        include("include/$func.php");
+        
         switch ($type) {
             case 'save':
                 $data = Input::get('data', 'txt', '');
@@ -159,9 +163,7 @@ class ajax {
 
                 break;
 
-            case 'reset':
-                $func = Input::get('f', 'txt', 'options');
-                include("include/$func.php");
+            case 'reset':                
                 $data = array();
                 foreach ($of_options as $key => $value) {
                     if (isset($value['id']) && isset($value['std'])) {
@@ -171,8 +173,38 @@ class ajax {
                 update_multi_options($data);
                 echo '1';
                 break;
+                
+            case 'backup_options':
+                $miniOptions = new cmsOptions($of_options);
+                $smof_data = $miniOptions->getOptionData();
+                
+                $backup_data = base64_encode(serialize($smof_data));
+                update_option('hcms_of_backup', $backup_data);
+                update_option('hcms_of_backup_time', date('Y-m-d H:i:s', time()));
+                echo '1';
+                break;
+            
+            
+            case 'restore_options':
+                $backup_data = get_option('hcms_of_backup');
+                $smof_data = unserialize(base64_decode($backup_data));
+                update_multi_options($smof_data);
+                echo '1';
+                break;
+            
+            
+            case 'import_options':
+                $data = Input::get('data', 'txt', '');
+                $smof_data = unserialize(base64_decode($data));
+                update_multi_options($smof_data);
+                echo '1';
+                break;
+            
+          
         }
     }
+    
+   
 
     /**
      * @Desc delete media by list ID

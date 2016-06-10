@@ -806,7 +806,10 @@ label.radio, label.multicheck {
 
 #of_container #content .section-backup .instructions {
     margin: 0 0 10px;
-    color: #777;
+    background-color: #fefbed;
+    padding: 10px;
+    color: #9F6000;
+    border: 3px solid #f1e7bc;
 }
 #of_container #content .section-backup .button, #of_container #content .section-transfer .button {
     margin: 0 25px 0 0;

@@ -146,7 +146,7 @@ if ($_FILES['userfile']['name'] != 'none' && $_FILES['userfile']['name'] != '') 
         $arrResult = array(
             'status'    => 'success',
             'id'        => $id,
-            'path'      => $file_path,
+            'thumb'     => getThumbnail('thumb-150', $relative_path),
             'icon'      => admin_url() .'images/media/'.CFile::getFileIcon($relative_path),
             'filename'  => CFile::getFileName($relative_path),
             'src'       => $relative_path

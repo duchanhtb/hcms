@@ -219,14 +219,11 @@ function show_admin_content() {
             case 'home':
                 $html .= '
                 <style>
-                body{
-                    overflow: hidden;
-                }
                 #hcms_document{
                 	border: none;
                 }
                 </style>
-                <iframe id="hcms_document" width="100%" src="https://docs.google.com/document/d/1_4fMRIxQX9niPgbC-13jDJeDnqVF4oAiigb3HVTAk20/pub?embedded=true"></iframe>
+                <iframe id="hcms_document" width="100%" src="'.  admin_url().'guide/"></iframe>
                 <script type="text/javascript">
                     document.body.style.overflow = "hidden";
                     $("#hcms_document").attr("height", window.innerHeight - 50);

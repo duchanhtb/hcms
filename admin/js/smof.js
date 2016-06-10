@@ -57,24 +57,24 @@ $(function () {
     }
 
     // Display last current tab	
-    if ($.cookie("of_current_opt") === null) {
+    if ($.cookie("hcms_of_current_opt") === null) {
         $('.group:first').fadeIn('fast');
         $('#of-nav li:first').addClass('current');
     } else {
-        $('#of-option-' + $.cookie("of_current_opt")).fadeIn();
-        $('#of-nav li.' + $.cookie("of_current_opt")).addClass('current');
+        $('#of-option-' + $.cookie("hcms_of_current_opt")).fadeIn();
+        $('#of-nav li.' + $.cookie("hcms_of_current_opt")).addClass('current');
     }
 
     //Current Menu Class
     $('#of-nav li a').click(function (evt) {
-        // event.preventDefault();
+        evt.preventDefault();
 
         $('#of-nav li').removeClass('current');
         $(this).parent().addClass('current');
 
         var clicked_option = $(this).data('option');
 
-        $.cookie('of_current_opt', clicked_option, {expires: 7, path: '/'});
+        $.cookie('hcms_of_current_opt', clicked_option, {expires: 7, path: '/'});
 
         $('.group').hide();
 

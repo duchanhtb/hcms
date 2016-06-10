@@ -8,7 +8,8 @@ if (!defined('ALLOW_ACCESS'))
  * @copyright 2015
  */
 class CFile {
-
+    
+    /* file allow upload */
     public static $file_type_allowed = array(
         // document    
         'pdf' => 'pdf.png',
@@ -414,15 +415,27 @@ class CFile {
     }
     
     
+    /**
+     * @Desc get path upload by $f prarameter, create folder if not exists
+     * @param string $f: function
+     * @return string (Example: /var/www/html/cms/uploads/product/2015_10_28/)
+     */
     public static function getPathUpload($f){
         $f = ($f!= '') ? $f : 'media';
         $upload_folder = 'uploads';
+        
+        // Example: /var/www/html/cms/uploads/product/2015_10_28/
         $path = ROOT_PATH.$upload_folder.'/'.$f.'/'.date('Y_m_d').'/';
         if(!is_dir($path)) mkdir($path, 0775, true);
         return $path;
     }
     
     
+    /**
+     * @Desc get relative path
+     * @param string $full_path: full path example: /var/www/html/cms/uploads/product/2015_10_28/abc.jpg
+     * @return string (relative: uploads/product/2015_10_28/abc.jpg)
+     */
     public static function getRelativePath($full_path){
         $relative_path =  str_replace(ROOT_PATH, '', $full_path);
         return str_replace("\\", "/", $relative_path);

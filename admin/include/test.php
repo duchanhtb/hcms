@@ -8,9 +8,21 @@ if (!defined('ALLOW_ACCESS'))
  * @copyright 2015
  */
 $column = array(
+    "map" => array(
+        "title"         => "Bản đồ 1",
+        "type"          => "map",
+        "x"             => "21.03191538070277",
+        "y"             => "105.81503391265869",
+        "required"      => "Nhâp tệp tin",
+        "searchable"    => true,
+        "editlink"      => true,
+        "show_on_list"  => true
+    ),
     "file" => array(
-        "title"         => "Tệp tin",
-        "type"          => "input:file",
+        "title"         => "Bản đồ 1",
+        "type"          => "map",
+        "x"             => "21.03191538070277",
+        "y"             => "105.81503391265869",
         "required"      => "Nhâp tệp tin",
         "searchable"    => true,
         "editlink"      => true,

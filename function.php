@@ -255,12 +255,20 @@ function update_option($option_name, $option_value) {
 function update_multi_options($arrValue) {
     // clean all data in table
     $table = 'm_options';
-    DB::for_table($table)->raw_execute("TRUNCATE TABLE `$table`");
+    //DB::for_table($table)->raw_execute("TRUNCATE TABLE `$table`");
 
     foreach ($arrValue as $option_name => $option_value) {
-        $option = DB::for_table($table)->create();
-        $option->name = $option_name;
-        $option->value = $option_value;
+        $option = DB::for_table($table)
+                ->where_equal('name', $option_name)
+                ->find_one();
+        
+        if($option){
+            $option->value = $option_value;
+        }else{
+            $option = DB::for_table($table)->create();
+            $option->name = $option_name;
+            $option->value = $option_value;
+        }
         $option->save();
     }
 

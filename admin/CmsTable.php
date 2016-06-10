@@ -189,12 +189,14 @@ class CmsTable extends Base {
             $_SESSION[$this->table . "-page"]['order_dir'] = $order_dir;
         }
 
-        switch (strtoupper($order_dir)) {
+        switch (trim($order_dir)) {
             case "ASC":
+            case "asc":
                 $cmsTable = $cmsTable->order_by_asc(trim($order));
                 break;
 
             case "DESC":
+            case "desc":
                 $cmsTable = $cmsTable->order_by_desc(trim($order));
                 break;
         }
@@ -534,7 +536,7 @@ class CmsTable extends Base {
                                     }
                                     break;
 
-                                case "input:file":                                    
+                                case "input:file":
                                     if (isset($item->$key) && $item->$key != '') {
                                         $filename = CFile::getFileName($item->$key);
                                     } else {
@@ -574,8 +576,8 @@ class CmsTable extends Base {
                                         $size = 100;
                                         $width = "width:80px;";
                                         $currency = isset($value['currency']) ? $value['currency'] : '';
-                                        
-                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> <span class="currency">'.$currency.'</span>';
+
+                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> <span class="currency">' . $currency . '</span>';
                                     } else {
                                         if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
                                             $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . price($item->$key) . "</a>";
@@ -827,11 +829,11 @@ class CmsTable extends Base {
                     break;
 
                 case "input:file":
-                    admin_register_script('ajaxupload', admin_url(). 'js/ajaxupload.js', false, true);
-                    admin_register_script('simplemodal', admin_url(). 'js/jquery.simplemodal.js', false, true);
-                    admin_register_style('simplemodal', admin_url(). 'css/simple-modal.css', false, true);
-                    admin_register_style('custom-modal', admin_url(). 'css/custom-modal.css', false, true);
-                    
+                    admin_register_script('ajaxupload', admin_url() . 'js/ajaxupload.js', false, true);
+                    admin_register_script('simplemodal', admin_url() . 'js/jquery.simplemodal.js', false, true);
+                    admin_register_style('simplemodal', admin_url() . 'css/simple-modal.css', false, true);
+                    admin_register_style('custom-modal', admin_url() . 'css/custom-modal.css', false, true);
+
                     $input = '<input type="text" name="' . $key . '" class="' . $class . ' input-file" /> [<a href="#" class="browse ' . $key . '" id="btnUpload' . $key . '">' . trans('select_file') . '</a>]&nbsp;&nbsp;(<a href="ajax.php?cmd=modal_file_upload" class="ajax-modal" title="' . trans('msg_allow_filetype') . '">?</a>)<br/><em class="file"></em>';
                     break;
 
@@ -854,7 +856,7 @@ class CmsTable extends Base {
                 case "input:price":
                     $currency = isset($value['currency']) ? $value['currency'] : '';
                     $input = '<input type="hidden" id="' . $key . '" name="' . $key . '"  value="' . $default_val . '" >
-                              <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="0" /> '.$currency;
+                              <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="0" /> ' . $currency;
                     break;
 
                 case "input:attribute":
@@ -962,7 +964,8 @@ class CmsTable extends Base {
 
                     $relateData = DB::for_table($relateTable)
                             ->select($relateField)
-                            ->select($relateTitle);
+                            ->select($relateTitle)
+                            ->order_by_asc($relateTitle);
                     if ($suffix_query) {
                         $relateData = $relateData->raw_query($suffix_query);
                     }
@@ -977,12 +980,11 @@ class CmsTable extends Base {
                         for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
                             if (isset($relateData[$n])) {
                                 $relate = $relateData[$n];
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '<br>';
+                                $input .= '<p><input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</p>';
                             }
                         }
                         $input .= '</div>';
                     }
-                    $input .= '<p>&nbsp;</p>';
                     break;
 
                 case "checkbox:relate:table":
@@ -1021,12 +1023,11 @@ class CmsTable extends Base {
                         for ($n = $i * $recordBreak; $n < ($i + 1) * $recordBreak; $n++) {
                             if (isset($relateData[$n])) {
                                 $relateRow = $relateData[$n];
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '<br>';
+                                $input .= '<p><input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '</p>';
                             }
                         }
                         $input .= '</div>';
                     }
-                    $input .= '<p>&nbsp;</p>';
                     break;
 
                 case "datetime:current":
@@ -1037,7 +1038,17 @@ class CmsTable extends Base {
                     break;
 
                 case "map":
-                    $input = '<input type="hidden" name="' . $key . '" id="' . $key . '" /><a href="javascript:void(0);" class="maplink" rel="' . $key . '" x="' . $value['x'] . '" y="' . $value['y'] . '">' . trans('mark_map') . '</a>';
+                    admin_register_script('googlemap', 'http://maps.google.com/maps/api/js?sensor=false&libraries=places');
+                    admin_register_script('locationpicker', admin_url() . 'js/locationpicker.jquery.min.js');
+                    $x = isset($value['x']) ? $value['x'] : '';
+                    $y = isset($value['y']) ? $value['y'] : '';
+                    
+                    $input = '<input class="map-address" style="float: left; width: 60%;" type="text" name="address" value="" placeholder="Type address" />';
+                    $input .= '<a href="javascript:void(0)" onclick="setMapCurrentLocation(this)" style="float: left; margin-left: 10px;" title="Current location"><img src="images/icon-current-location.gif" width="20" alt="Current location"></a>';                  
+                    $input .= '<input type="hidden" name="'.$key.'x" class="map-latitude" value="' . $x . '" />';
+                    $input .= '<input type="hidden" name="'.$key.'y" class="map-longitude" value="' . $y . '" />';
+                    $input .= '<div class="map-content" style="width: 100%; height: 400px;"></div>';
+                    
                     break;
 
                 case "input:hidden":
@@ -1150,31 +1161,31 @@ class CmsTable extends Base {
                         $url = $row->$key;
                     }
                     $input = '<input type="text" class="' . $class . ' input-image" id="' . $key . '"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> 
-						 [<a href="#" class="' . $key . ' btnUpload" id="btnUpload' . $key . '">' . trans('select_images') . '</a>]
-						 <span>' . trans('or') . '</span>
-						 [<a href="javascript:void(0)" onclick="popitup(\'browser.php?view=grid&search-type=image&f=' . $f . '&inputId=' . $key . '\')" class="' . $key . '" id="btnUpload' . $key . '">' . trans('select_from_library') . '</a>] 
-						 <br/>
-						 <div class="wrap-images">
-							<img class="image_review" src="' . getThumbnail('thumb-150', $url) . '" width="100" />
-							<div class="rwmb-image-bar"><a onclick="deleteDefaultImages(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
-						 </div>
-						 <br/>
-						 <span  class="lblUpload" id="lblUpload' . $key . '"></span>';
+                                [<a href="#" class="' . $key . ' btnUpload" id="btnUpload' . $key . '">' . trans('select_images') . '</a>]
+                                <span>' . trans('or') . '</span>
+                                [<a href="javascript:void(0)" onclick="popitup(\'browser.php?view=grid&search-type=image&f=' . $f . '&inputId=' . $key . '\')" class="' . $key . '" id="btnUpload' . $key . '">' . trans('select_from_library') . '</a>] 
+                                <br/>
+                                <div class="wrap-images">
+                                       <img class="image_review" src="' . getThumbnail('thumb-150', $url) . '" width="100" />
+                                       <div class="rwmb-image-bar"><a onclick="deleteDefaultImages(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
+                                </div>
+                                <br/>
+                                <span  class="lblUpload" id="lblUpload' . $key . '"></span>';
                     break;
 
                 case "input:file":
                     // register script and style
                     admin_register_script('ajaxupload', 'js/ajaxupload.js', false, true);
-                    admin_register_script('simplemodal', admin_url(). 'js/jquery.simplemodal.js', false, true);
-                    admin_register_style('simplemodal', admin_url(). 'css/simple-modal.css', false, true);
-                    admin_register_style('custom-modal', admin_url(). 'css/custom-modal.css', false, true);
-                    
+                    admin_register_script('simplemodal', admin_url() . 'js/jquery.simplemodal.js', false, true);
+                    admin_register_style('simplemodal', admin_url() . 'css/simple-modal.css', false, true);
+                    admin_register_style('custom-modal', admin_url() . 'css/custom-modal.css', false, true);
+
                     if ($row->$key == "") {
                         $file = trans('no_file');
                     } else {
                         $file = htmlspecialchars(stripslashes($row->$key));
                     }
-                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> [<a href="javascript:void(0)" class="browse ' . $key . '" id="btnUpload' . $key . '">'. trans('select_file')  .'</a>]&nbsp;&nbsp;(<a href="ajax.php?cmd=modal_file_upload" class="ajax-modal" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file"><a target="_blank" href="'.  base_url().$file.'">' . CFile::getFileName($file) . '</a></em>';
+                    $input = '<input type="text" class="' . $class . ' input-file"  name="' . $key . '" value="' . htmlspecialchars(stripslashes($row->$key)) . '" /> [<a href="javascript:void(0)" class="browse ' . $key . '" id="btnUpload' . $key . '">' . trans('select_file') . '</a>]&nbsp;&nbsp;(<a href="ajax.php?cmd=modal_file_upload" class="ajax-modal" title="' . trans('msg_allow_filetype') . '">?</a>)</span><br/><em class="file"><a target="_blank" href="' . base_url() . $file . '">' . CFile::getFileName($file) . '</a></em>';
                     break;
 
                 case "input:multiimages":
@@ -1214,7 +1225,7 @@ class CmsTable extends Base {
                 case "input:price":
                     $currency = isset($value['currency']) ? $value['currency'] : '';
                     $input = '<input type="hidden" id="' . $key . '" name="' . $key . '" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '">
-						  <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '" /> '.$currency;
+                            <input type="text" name="' . $key . '_view" valto="' . $key . '" style="width:150px;" class="' . $class . ' price-input" value="' . htmlspecialchars(stripslashes(price($row->$key))) . '" rel="' . htmlspecialchars(stripslashes(price($row->$key))) . '" /> ' . $currency;
                     break;
 
                 case "input:attribute":
@@ -1229,24 +1240,24 @@ class CmsTable extends Base {
                     foreach ($attribute as $att_value) {
                         $attribute_html .=
                                 '<div class="attribute">
-							<div class="rwmb-image-bar"><a onclick="deleteAttribute(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
-							<div class="attr-name">    
-								<label>' . trans('name') . ':</label>
-								<input type="text" name="' . $key . '_name[]" value="' . $att_value['name'] . '" placeholder="' . trans('placeholder_att_name') . '" />
-							</div>
-							<div class="attr-value">
-								<label>' . trans('value') . ':</label>
-								<textarea name="' . $key . '_value[]" placeholder="' . trans('placeholder_att_value') . '">' . $att_value['value'] . '</textarea>
-							</div>
-							<div class="clear"></div>
-						  </div>';
+                                        <div class="rwmb-image-bar"><a onclick="deleteAttribute(this)" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>
+                                        <div class="attr-name">    
+                                            <label>' . trans('name') . ':</label>
+                                            <input type="text" name="' . $key . '_name[]" value="' . $att_value['name'] . '" placeholder="' . trans('placeholder_att_name') . '" />
+                                        </div>
+                                        <div class="attr-value">
+                                            <label>' . trans('value') . ':</label>
+                                            <textarea name="' . $key . '_value[]" placeholder="' . trans('placeholder_att_value') . '">' . $att_value['value'] . '</textarea>
+                                        </div>
+                                        <div class="clear"></div>
+                                  </div>';
                     }
 
                     $input = '<div class="wrap-attribute">
-							  ' . $attribute_html . '
-						 </div>
-						 <button type="button" class="attr-button" onclick="addAttribute()">' . trans('add') . '</button>
-						 <div class="clear"></div>';
+                                    ' . $attribute_html . '
+                           </div>
+                           <button type="button" class="attr-button" onclick="addAttribute()">' . trans('add') . '</button>
+                           <div class="clear"></div>';
                     break;
 
                 case "input:int10":
@@ -1263,8 +1274,7 @@ class CmsTable extends Base {
                         $rows = (int) $value['row'];
                     }
                     $input = '<textarea name="' . $key . '" class="' . $class . ' txa" rows="' . $rows . '" cols="60">' . htmlspecialchars(stripslashes(stripslashes(stripslashes(stripslashes($row->$key))))) . '</textarea>';
-                    $input .= '
-				<script type="text/javascript">
+                    $input .= '<script type="text/javascript">
 					//<![CDATA[
 					var editor = CKEDITOR.replace("' . $key . '");
 					 CKFinder.SetupCKEditor( editor, { 
@@ -1346,7 +1356,8 @@ class CmsTable extends Base {
 
                     $relateData = DB::for_table($relateTable)
                             ->select($relateField)
-                            ->select($relateTitle);
+                            ->select($relateTitle)
+                            ->order_by_asc($relateTitle);
 
                     if ($suffix_query) {
                         $relateData = $relateData->raw_query($suffix_query);
@@ -1368,12 +1379,11 @@ class CmsTable extends Base {
                                 } else {
                                     $check = "";
                                 }
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '<br>';
+                                $input .= '<p><input type="checkbox" name="' . $key . '[]" value="' . $relate->$relateField . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relate->$relateTitle)) . '</p>';
                             }
                         }
                         $input .= '</div>';
                     }
-                    $input .= '<p>&nbsp;</p>';
                     break;
 
 
@@ -1424,7 +1434,7 @@ class CmsTable extends Base {
                                 } else {
                                     $check = "";
                                 }
-                                $input .= '<input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '<br>';
+                                $input .= '<p><input type="checkbox" name="' . $key . '[]" value="' . $relateRow->$field_value . '" ' . $check . ' />' . htmlspecialchars(stripslashes($relateRow->$field_title)) . '</p>';
                             }
                         }
                         $input .= '</div>';
@@ -1452,7 +1462,15 @@ class CmsTable extends Base {
                             $y = 105.81503391265869;
                         }
                     }
-                    $input = '<input type="hidden" name="' . $key . '" id="' . $key . '" value="' . $row->$key . '" /><a href="javascript:void(0);" class="maplink" rel="' . $key . '" x="' . $x . '" y="' . $y . '">' . trans('marked') . ' <span style="color: #777;">(' . $x . ',' . $y . ')</span></a>';
+                    //$input = '<input type="hidden" name="' . $key . '" id="' . $key . '" value="' . $row->$key . '" /><a href="javascript:void(0);" class="maplink" rel="' . $key . '" x="' . $x . '" y="' . $y . '">' . trans('marked') . ' <span style="color: #777;">(' . $x . ',' . $y . ')</span></a>';
+                    admin_register_script('googlemap', 'http://maps.google.com/maps/api/js?sensor=false&libraries=places');
+                    admin_register_script('locationpicker', admin_url() . 'js/locationpicker.jquery.min.js');
+                    
+                    $input = '<input class="map-address" style="float: left; width: 60%;" type="text" name="address" value="" placeholder="Type address" />';
+                    $input .= '<a href="javascript:void(0)" onclick="setMapCurrentLocation(this)" style="float: left; margin-left: 10px;" title="Current location"><img src="images/icon-current-location.gif" width="20" alt="Current location"></a>';                  
+                    $input .= '<input type="hidden" name="'.$key.'x" class="map-latitude" value="' . $x . '" />';
+                    $input .= '<input type="hidden" name="'.$key.'y" class="map-longitude" value="' . $y . '" />';
+                    $input .= '<div class="map-content" style="width: 100%; height: 400px;"></div>';
                     break;
 
                 case "input:hidden":
@@ -1536,6 +1554,8 @@ class CmsTable extends Base {
                 }
             } else if ($value['type'] == 'textarea' && get_option('download-external-images')) {
                 $data_item = downloadImagesFromHTML($_POST[$key]);
+            } else if ($value['type'] == 'map') {
+                $data_item = $_POST[$key.'x'] . ":" . $_POST[$key.'y'];
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : '';
             }
@@ -1670,6 +1690,8 @@ class CmsTable extends Base {
                 }
             } else if ($value['type'] == 'textarea' && get_option('download-external-images')) {
                 $data_item = downloadImagesFromHTML($_POST[$key]);
+            } else if ($value['type'] == 'map') {
+                $data_item = $_POST[$key.'x'] . ":" . $_POST[$key.'y'];
             } else {
                 $data_item = isset($_POST[$key]) ? $_POST[$key] : "";
             }
@@ -1928,7 +1950,6 @@ class CmsTable extends Base {
         }
     }
 
-// end function
 }
 
 // end class

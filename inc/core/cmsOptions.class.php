@@ -682,14 +682,12 @@ class cmsOptions extends Base {
                     case 'backup':
 
                         $instructions = $value['desc'];
-                        $backup = get_option('BACKUPS');
-                        $init = get_option('smof_init');
-
-
-                        if (!isset($backup['backup_log'])) {
+                        $backup = get_option('hcms_of_backup_time');
+                        
+                        if (!isset($backup) || $backup == '') {
                             $log = 'No backups yet';
                         } else {
-                            $log = $backup['backup_log'];
+                            $log = $backup;
                         }
 
                         $output .= '<div class="backup-box">';

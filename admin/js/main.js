@@ -54,6 +54,7 @@ $(document).ready(function () {
 
     $('.checkAll').click(function () {        
         var is_checked = $(this).prop('checked') ? true : false;
+        $('.checkAll').prop('checked', is_checked);
         $('.idItem').each(function () {
             if (is_checked) {
                 $(this).parent('td').parent('tr').css('background-color', '#fff6b9');
@@ -66,7 +67,7 @@ $(document).ready(function () {
 
     $('.idItem').click(function () {
         var hasChecked = ($('.idItem:not(:checked)').length > 0) ? false : true;
-        $('#checkAll').prop('checked', hasChecked);
+        $('.checkAll').prop('checked', hasChecked);
         if ($(this).prop('checked')) {
             $(this).parent('td').parent('tr').css('background-color', '#fff6b9');
         } else {
@@ -439,7 +440,7 @@ $(document).ready(function () {
                 window.reload = true;
                 var obj = $.parseJSON(data.jqXHR.responseText);
                 var imgObj = data.context.find('img');
-                imgObj.attr('src', base_url + obj.src);
+                imgObj.attr('src', obj.thumb);
                 data.context.find('.wrap-process').parent().attr('id', 'media-' + obj.id);
                 data.context.find('.wrap-process').remove();
                 $('<div class="rwmb-image-bar"><a onclick="deleteFileUpload(' + obj.id + ',\'' + type + '\')" class="rwmb-delete-file" href="javascript:void(0)">×</a></div>').insertAfter(imgObj);
@@ -588,6 +589,33 @@ $(document).ready(function () {
                 html: true
             });
         });
+    }
+    
+    /* ------------------------------------------------------------------ */
+    /* Gmap
+     /* ------------------------------------------------------------------ */
+    if ($('.map-content').length > 0 && $().locationpicker) {
+        
+        $('.map-content').each(function(){
+            var map_latitude = $(this).siblings('.map-latitude').val();
+            var map_longitude = $(this).siblings('.map-longitude').val();
+            
+            $(this).locationpicker({
+                location: {
+                    latitude: map_latitude,
+                    longitude: map_longitude
+                },
+                radius: 0,
+                inputBinding: {
+                    latitudeInput: $(this).siblings('.map-latitude'),
+                    longitudeInput: $(this).siblings('.map-longitude'),
+                    radiusInput: $(this).siblings('.map-radius'),
+                    locationNameInput: $(this).siblings('.map-address')
+                },
+                enableAutocomplete: true
+            });
+
+        })
     }
 
 
@@ -986,4 +1014,17 @@ function addOrUpdateUrlParam(name, value) {
     else
       window.location.href = href + "?" + name + "=" + value;
   }
+}
+
+// set map to current location
+function setMapCurrentLocation(obj){
+    var map = $(obj).siblings('.map-content');
+    navigator.geolocation.watchPosition(function(position) {
+      
+        map.locationpicker('location', {
+            latitude: parseFloat(position.coords.latitude),
+            longitude: parseFloat(position.coords.longitude)/*,
+            [optional] radius: number*/
+        });
+    });
 }

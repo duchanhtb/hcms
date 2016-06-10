@@ -327,10 +327,12 @@ class cms {
             $this->layout = $pageInfo->layout;
         }
 
+        $pathinfo = pathinfo($this->layout);
+        
         // get layout
-        $file_skin_htm = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout;
-        $file_skin_html = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $this->layout;
-
+        $file_skin_htm = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $pathinfo['filename'].'.htm';
+        $file_skin_html = ROOT_PATH . SKIN_FOLDER . "/" . $this->skin . "/layout/" . $pathinfo['filename'].'.html';
+        
 
         if (file_exists($file_skin_htm) && is_readable($file_skin_htm)) {
             $html = file_get_contents($file_skin_htm);
