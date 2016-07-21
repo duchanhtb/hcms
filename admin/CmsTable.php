@@ -290,8 +290,11 @@ class CmsTable extends Base {
 
         // table
         $html.= '<div class="table-list">';
-
-        $html.= "<table><tr id=\"navigation\"><th class='check-cols'>&nbsp;</th>";
+        
+        // add sticky table header
+        $html .= $this->addStickyTable();
+        
+        $html.= "<table class=\"main-table\"><tr id=\"navigation\"><th class='check-cols'>&nbsp;</th>";
 
         if (($_SESSION[$this->table . "-page"]['order'] == $this->idField) && ($_SESSION[$this->table . "-page"]['order_dir'] == "ASC")) {
             $dir = "DESC";
@@ -1948,6 +1951,45 @@ class CmsTable extends Base {
                 $tableRow->save();
             }
         }
+    }
+    
+    
+    /**
+     * @desc add sticky table
+     * @return html
+     */
+    function addStickyTable(){
+        $html = '<table class="sticky-table" style="display:none; z-index: 99999"><tr>';
+        $html .= '<th class="check-cols">&nbsp;</th>';
+            
+        foreach ($this->column as $key => $value) {
+            $image = "";
+            if (isset($value['show_on_list']) && $value['show_on_list'] == true) {
+                if (($_SESSION[$this->table . "-page"]['order'] == $key) && (isset($_SESSION[$this->table . "-page"]['order_dir']) && $_SESSION[$this->table . "-page"]['order_dir'] == "ASC")) {
+                    $dir = "DESC";
+                    $image = "<img align='absmiddle' src='images/arrow-up.gif' />";
+                } else {
+                    if ($_SESSION[$this->table . "-page"]['order'] == $key) {
+                        $image = "<img align='absmiddle' src='images/arrow-down.gif' />";
+                        $dir = "ASC";
+                    } else {
+                        $dir = "DESC";
+                    }
+                }
+                if (isset($value['editable']) && ($value['editable'] == true) && ($value['type'] != "checkbox") && ($this->mylevel > 1)) {
+                    $save_icon = '&nbsp; &nbsp;<a href="javascript:save();" class="save-field" rel="' . $key . '"><img title="' . trans('update') . ' ' . $value['title'] . '" src="images/save_icon.gif" align="absmiddle" />';
+                } else {
+                    $save_icon = "";
+                }
+                if ($value['type'] == 'input:function') {
+                    $html.= "<th><a href='javascript:void(0);'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
+                } else {
+                    $html.= "<th><a href='javascript:order(\"" . $key . "\",\"" . $dir . "\");'>" . $value['title'] . "</b> " . $image . "</a>" . $save_icon . "</th>";
+                }
+            }
+        }
+        $html .= '</tr></table>';
+        return $html;
     }
 
 }

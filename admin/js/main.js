@@ -39,11 +39,26 @@ $(document).ready(function () {
     })
 
 
-    $("#search-google-input").keyup(function (e) {
-        if (e.keyCode == 13) {
-            searchGoogleImages();
-        }
-    });
+    // sticky table
+    if($(".sticky-table").length > 0 ){
+        var table_offset_top = $(".main-table").offset().top;
+        $(".sticky-table").css("width", $(".main-table").width());
+        $(".main-table #navigation th").each(function(){
+            var th_index = $(this).index();
+            var th_width = $(this).width();
+            $(".sticky-table th").eq(th_index).css("width", th_width);
+        })
+        $(window).bind("scroll", function () {        
+            if ($(this).scrollTop() > table_offset_top) {
+                $('.sticky-table').css({"position": "fixed", "top": "0px", "display": "table"});
+            } else {
+                $('.sticky-table').css({"display": "none"});            
+            }
+        });
+    }
+    
+    
+    
 
     // when click media thumbnail
     $(".media-thumbnail").click(function () {
@@ -51,7 +66,8 @@ $(document).ready(function () {
         $(this).parent().addClass('active');
     })
 
-
+    
+    // check/uncheck all checkbox
     $('.checkAll').click(function () {        
         var is_checked = $(this).prop('checked') ? true : false;
         $('.checkAll').prop('checked', is_checked);

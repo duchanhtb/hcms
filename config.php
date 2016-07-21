@@ -107,6 +107,21 @@ if (strpos(strtolower($sitePath), "hcms.com") > 0) {
 }
 
 
+/* Config for web
+  ---------------------------------------------------- */
+if (strpos(strtolower($sitePath), "nguyenduchanh.com/cms") > 0) {
+    // config duong dan cua site
+    $base_url = "http://nguyenduchanh.com/cms/";
+    // database
+    $dbinfo['dbHost'] = "localhost";
+    $dbinfo['dbUser'] = "thanhtru_cms";
+    $dbinfo['dbPass'] = "Xc3JRBVZ92pGCRVT";
+    $dbinfo['dbName'] = "thanhtru_cms";
+    $dbinfo['dbSesName'] = "";
+    $dbinfo['dbHostRead'] = "localhost";
+}
+
+
 
 /* Setting DB connection class
   ---------------------------------------------------- */
