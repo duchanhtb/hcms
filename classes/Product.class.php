@@ -135,8 +135,8 @@ class Product extends Base {
      */
     function getProductCartInfo($cart_info = false) {
         if (!$cart_info) {
-            $miniCast = new Cart();
-            $cart = $miniCast->getCartInfo();
+            $miniCart = new Cart();
+            $cart = $miniCart->getCartInfo();
         }
 
         if (!$cart)

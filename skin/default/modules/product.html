@@ -1,43 +1,9 @@
 <!-- BEGIN: main -->
-<style>
-    .path{
-        width: 60%;
-        padding: 0;
-        margin: 0;   
-        margin-bottom: 20px;
-        display: inline-block;
-    }
-    .path li{
-        list-style: none;
-        display: inline-block;
-        margin-left: 12px;
-    }
-
-    #nav-cart{
-        line-height: 24px;
-        height: 24px;
-        display: block;
-        border: 2px solid #fff;
-        padding: 0 10px;
-        border-radius: 2px;
-        background: #fff;
-        margin-top: 3px;
-        margin-right: 3px;
-        width: 35%;
-        float: none;
-        display: inline-block;
-        text-align: right;
-    }
-</style>
 <div class="container">
-    {path}
-
-    <div class="fr shopping-cart" id="nav-cart">
-        <a href="http://tana101.com/cart.html">
-            <img src="http://tana101.com/skin/default/images/icon-cart.png" align="middle">
-            <span>Giỏ hàng</span>
-            <span id="nav-cart-num">1</span>
-        </a>
+    <div class="product-nav">
+        {path}  
+        {cart_header}
+        <div class="clearfix"></div>
     </div>
     <div class="clearfix"></div>
     <ul id="list-product">

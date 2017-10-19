@@ -1,0 +1,66 @@
+<!-- BEGIN: main --> 
+<style>
+    #table-cart tr td{
+        padding: 12px;
+    }
+    #table-cart tr td img{
+        float: left;
+        margin-right: 20px;
+        max-width: 150px;
+        max-height: 150px;
+    }
+
+    #table-cart .price{
+        font-weight: bold;
+        font-size: 21px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    #table-cart .center{
+        text-align: center;
+    }
+    #table-cart .delete a{
+        color: red;
+    }
+
+</style>
+<div class="container">
+    <div class="product-nav">
+        {path}  
+        {cart_header}
+        <div class="clearfix"></div>
+    </div>
+    <div>GIỎ HÀNG (6 sản phẩm)</div>
+    <table cellspacing="1" cellpadding="0" border="0" width="100%" id="table-cart">
+        <tbody>          
+            <tr>
+                <td>
+                    <a href="http://tana101.com/san-pham/2211-vay-nhay-khieu-vu-latin-hs1066.html" target="_blank">
+                        <img src="http://tana101.com//uploads/images/product/2017/09/06/IMG_7605.jpg">
+                        <div>Váy Nhảy Khiêu Vũ Latin HS1066</div>
+                    </a>
+                    <div class="delete"><a href="">[xóa]</a></div>
+                </td>
+                <td><div class="price">2.999.000&nbsp;₫</div></td>
+                <td>
+                    <div class="quantity-col1">
+                        <div class="input-group bootstrap-touchspin">
+                            <input type="hidden" class="product-id" value="2211">
+                            <span class="input-group-btn"><button class="btn btn-default bootstrap-touchspin-down bootstrap-cart-down" type="button">-</button></span>
+                            <span class="input-group-btn"><input class="qty" type="tel" name="num[]" value="1"></span>
+                            <span class="input-group-btn"><button class="btn btn-default bootstrap-touchspin-up bootstrap-cart-up" type="button">+</button></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr bgcolor="#f7eeda">                            
+                <td align="right" colspan="2">
+                    <strong>Tổng tiền:&nbsp;&nbsp;&nbsp;</strong>                                
+                    <strong>2.999.000&nbsp;VND&nbsp;&nbsp;&nbsp;</strong>
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<!-- END: main --> 

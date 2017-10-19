@@ -162,8 +162,23 @@ class ajax {
         global $_SESSION;
         $id = Input::get('pid', 'int', 0);
         $num = Input::get('num', 'int', 1);
-        $Product = new Product();
-        $a = $Product->addProductToCart($id);
+        $miniCart = new Cart();
+        $miniCart->addProductToCart($id, $num);
+        
+        $cart = $miniCart->getCartInfo();
+        $total = 0;
+        if(count($cart) > 0 ){
+            foreach($cart as $pid => $num){
+                $total += $num;
+            }
+        }
+        $result = array(
+            'status' => 200,
+            'msg' => 'Thành công',
+            'total_product' => $total
+        );
+
+        echo json_encode($result);
     }
 
     

@@ -198,6 +198,9 @@ header{
     width: 900px;
     margin: 0 auto;
 }
+
+
+/** news **/
 ul#list-news{
     list-style: none;        
     margin: 0;
@@ -225,6 +228,12 @@ ul#list-news li a:hover{
     float: right;
 }
 
+
+
+
+
+
+/** product **/
 ul#list-product{
     list-style: none;        
     margin: 0;
@@ -282,6 +291,223 @@ ul#list-product li a{
 ul#list-product li a:hover{
     text-decoration: underline;
 }
+
+.product-nav{
+    margin-bottom: 40px;
+    height: 30px;
+    line-height: 30px;
+}
+.path{
+    width: 760px;
+    padding: 0;
+    margin: 0;   
+    display: inline-block;
+}
+.path li{
+    list-style: none;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+#nav-cart{
+    line-height: 24px;
+    height: 24px;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    padding: 5px 10px;
+    background: #fff;
+    float: right;
+    width: 115px;
+}
+#nav-cart:hover{
+    background: #eee;
+}
+
+
+#nav-cart span{
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+    color: #000;
+    font-family: sans-serif;
+    margin-right: 4px;
+}
+#nav-cart span img{
+    margin-bottom: 10px;
+}
+#nav-cart span#nav-cart-num{
+    color: #4a4a4a;
+    background: #fdd835;
+    height: 20px;
+    border-radius: 2px;
+    display: inline-block;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    padding: 0 6px;
+    font-weight: bold;
+    margin-right: 0px;
+}
+.p-info{
+    margin-bottom: 50px;
+}
+.p-left-image{
+    display: inline-block;
+    width: 55%;
+    float: left;
+}
+.p-right-info{
+    display: inline-block;
+    width: 45%;
+}
+.list-thumb{
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+}
+.list-thumb li{
+    list-style: none;
+    border: 1px solid #eee;
+    padding: 3px;
+    margin-bottom: 10px;
+    border-radius: 2px;
+}
+.list-thumb li img{
+    max-width: 50px;
+}
+.large{
+    display: inline-block;
+}
+.large img{
+    max-width: 360px;
+}
+.p-name{
+    text-transform: none;
+    font-size: 26px;
+}
+.p-price{
+    font-weight: bold;
+    font-size: 21px;
+}
+
+.p-attribute{
+    margin-bottom: 50px;
+}
+.p-attribute h3{
+    margin-bottom: 10px;
+}
+
+.p-attribute table>tbody>tr>td:first-child{
+    background: #efefef;
+    border: 1px solid #d5d5d5;
+    width: 250px;
+}
+
+.p-description h3{
+    margin-bottom: 10px;
+}
+.p-description .detail{
+    border: 1px solid #ddd;
+    padding: 20px;
+}
+
+.quantity-box{
+    z-index: 99999;
+}
+.quantity-col1{
+    clear: both;
+    margin: 10px 0px;
+}
+.quantity-label{
+    line-height: 6px;
+    font-size: 11px;
+    margin-bottom: 6px;
+    color: #7b7b7b;
+}
+.tiki-number-input{
+    margin: 0;
+}
+.input-group {
+    border-collapse: separate;
+}
+.input-group-btn{
+    position: relative;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+}
+.bootstrap-touchspin .input-group-btn>.btn {
+    display: block;
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    line-height: 15px;
+    font-size: 14px;
+    font-weight: 300;
+    height: 28px;       
+    width: 28px;
+    position: relative;
+}
+
+.bootstrap-touchspin .input-group-btn>.btn:hover {
+    background: #e2e2e2!important;
+}
+
+.bootstrap-touchspin .input-group-btn .bootstrap-touchspin-up {
+    border-radius: 0 4px 4px 0;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    padding: 0 10px;
+    margin-left: -7px;
+    padding-right: 18px;
+}
+.bootstrap-touchspin .input-group-btn .bootstrap-touchspin-down {
+    border-radius: 4px 0px 0px 4px;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    padding: 0 10px;
+}
+
+.qty{
+    display: inline-block;
+    width: 28px;
+    height: 26px;
+    margin: 0px 0px 0px -3px;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+button.add-to-cart{
+    width: 225px;
+    height: 40px;
+    border: none;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    vertical-align: top;
+    font-size: 13px;
+    padding: 0 0 0 40px;
+    line-height: 40px;
+    border-radius: 5px;
+    background: url(../images/ic-cart@2x.png) 23px center no-repeat #ff8209;
+    font-weight: 400;
+    letter-spacing: .5px;
+    background-size: 26px;
+    display: inline-block;
+    text-align: center;
+}
+button.add-to-cart:hover{
+    background-color: #ffa73d !important;
+}
+
+
+
+
 
 /** footer **/
 footer{

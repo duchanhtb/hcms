@@ -52,7 +52,7 @@ class product_list extends Module {
                 
         }else{
             $path .= '<li>&rsaquo;</li>
-                      <li><a href="'.  base_url().'tat-ca-san-pham.html"></a>Sản phẩm</li>';
+                      <li><a href="'.  base_url().'tat-ca-san-pham.html">Sản phẩm</a></li>';
         }
         $path .= '</ul>';
         // create path
@@ -98,6 +98,10 @@ class product_list extends Module {
             $this->xtpl->parse('main.product');
         }
         
+        
+        // load module cart
+        $cart_header = loadModule('cart_header');
+        $this->xtpl->assign('cart_header', $cart_header);
         
         
         $this->xtpl->parse('main');

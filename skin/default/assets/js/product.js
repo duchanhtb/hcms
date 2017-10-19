@@ -104,3 +104,48 @@ $(function () {
 })
 
 
+
+function lagerView(id) {
+    ajaxLoading = base_url + 'images/ajax-loader.gif';
+    $("#largeImageView img").attr('src', ajaxLoading);
+    link = $('#lager_' + id).attr('href');
+    link1 = $("#largeImageView img").attr('src', link);
+    link2 = $("#largeImageView").attr('href', link);
+}
+
+function addToCart(_pid, _num) {
+    $.ajax({
+        url: base_url + "ajax.php?cmd=add_to_cart",
+        type: "POST",
+        data: {
+            pid: _pid,
+            num: _num
+        },
+        beforeSend: function (xhr) {
+        },
+        timeout: 10000,
+        success: function (response, status) {
+            var resultResponse = jQuery.parseJSON(response);
+            if (resultResponse.status == 200) {
+                $('#nav-cart-num').delay(1800).html(resultResponse.total_product)
+            }
+        }
+    });
+}
+
+
+function delOrder(_pid) {
+    $.ajax({
+        url: base_url + "ajax.php?cmd=delete_product_cart",
+        type: "POST",
+        data: {
+            pid: _pid,
+        },
+        beforeSend: function (xhr) {
+        },
+        timeout: 10000,
+        success: function (response, status) {
+            history.go(0);
+        }
+    });
+}
