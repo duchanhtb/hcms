@@ -456,7 +456,7 @@ $(function () {
     });
 
     /** AJAX Save Options */
-    $('#of_save').on('click', function () {
+    $('.of_save').on('click', function () {
 
         var nonce = $('#security').val();
 

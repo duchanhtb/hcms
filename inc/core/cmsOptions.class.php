@@ -106,7 +106,7 @@ class cmsOptions extends Base {
         <div id="info_bar">
             <a><div id="expand_options" class="expand">Expand</div></a> 
             <img style="display:none" src="' . OPTIONS_IMAGES . 'loading-bottom.gif" class="ajax-loading-img ajax-loading-img-bottom" alt="Working...">
-            <button type="button" id="of_save" class="button-primary">' . trans('save_all_change') . '</button>
+            <button type="button" id="of_save" class="of_save button-primary">' . trans('save_all_change') . '</button>
         </div>';
 
         return $html;
@@ -121,7 +121,7 @@ class cmsOptions extends Base {
         $html = '
         <div class="save_bar">
             <img style="display:none" src="' . OPTIONS_IMAGES . 'loading-bottom.gif" class="ajax-loading-img ajax-loading-img-bottom" alt="Working...">
-            <button type="button" id="of_save" class="button-primary">' . trans('save_all_change') . '</button>
+            <button type="button" id="of_save" class="of_save button-primary">' . trans('save_all_change') . '</button>
             <button type="button" id="of_reset" class="button submit-button reset-button">' . trans('options_reset') . '</button>
             <img style="display:none; float:left; margin: 5px;" src="' . OPTIONS_IMAGES . 'loading-bottom.gif" class="ajax-reset-loading-img ajax-loading-img-bottom alt="Working...">
         </div>

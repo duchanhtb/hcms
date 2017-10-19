@@ -727,7 +727,7 @@ function createLink($page, $param = false, $rewrite = true) {
     }
     $link .= $page;
     if (isset($param['subpage']) && $param['subpage'] != '') {
-        $link .= '/' . $page['subpage'];
+        $link .= '/' . $param['subpage'];
     }
     if ($param && $param['id'] > 0 && $param['title'] != '') {
         $id_endcode = alphaID($param['id'], false);

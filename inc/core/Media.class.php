@@ -39,6 +39,9 @@ class Media extends Base{
     /* Total record in the table */
     var $totalRow = 0;
     
+    /* Total size (bytes) of all file in the table */
+    var $totalFilesSize = 0;
+    
     /* Display type: gird or list, the default is grid */
     var $view;
     
@@ -263,6 +266,24 @@ class Media extends Base{
             $this->deleteMedia();
         }
 
+        
+        /* count total file size */
+        $totalFileSize = 0;
+        $listFileInfo = DB::for_table($this->table)
+                ->select('other_info')
+                ->find_many();
+        
+        foreach($listFileInfo as $fileInfo){
+            $fileSize = json_decode($fileInfo->other_info);
+            if($fileSize->size){
+                $totalFileSize += $fileSize->size;
+            }
+        }
+        $this->totalFilesSize = $totalFileSize;
+        
+        
+        
+        /* query for show list */
         $arrMedia = DB::for_table($this->table);
         $q = Input::get('q', 'txt', '');
         // search query
@@ -370,7 +391,8 @@ class Media extends Base{
         }
         $html .= '<div class="table-stat">';
         $html .= '<span class="broad-title">' . mb_strtoupper($this->name, 'utf8') . ':</span>';
-        $html .= trans('number_of_records') . ': <h1 class="broad-num">' . formatPrice($this->totalRow) . '</h1>';
+        $html .= trans('number_of_files') . ': <h1 class="broad-num">' . formatPrice($this->totalRow) . '</h1>,  ';        
+        $html .= trans('total_files_size') . ': <h1 class="broad-num">' . bytesToSize($this->totalFilesSize) . '</h1>';
         $html .= '<span style="float:right">' . trans('page') . ' <strong style="font-size:120%;">' . $_SESSION["media-info"]['page'] . '</strong> ' . trans('of_page') . ' <strong style="font-size:120%;">' . formatPrice($this->totalPage) . '</strong> ' . trans('page') . '</span>';
         $html .= '</div>';
         $html .= '<form name="frm" id="frm" action="" method="POST" class="media-frorm">';
@@ -506,7 +528,9 @@ class Media extends Base{
                 $html_tooltip .= '<p>'.trans('ext').':&nbsp;&nbsp;&nbsp;<strong>' . strtoupper($media_info['ext']) . '</strong></p>';
                 $html_tooltip .= '<p>'.trans('file_size').':&nbsp;&nbsp;&nbsp;<strong>' . bytesToSize($media_info['size']) . '</strong></p>';
                 if(isset($media_info['wh']) && $media_info['wh'] != ''){
-                    $html_tooltip .= '<p>'.trans('size').':&nbsp;&nbsp;&nbsp;<strong>' . str_replace('x', ' x ', $media_info['wh']) . '</strong></p>';
+                    list($w, $h) = explode('x', $media_info['wh']);
+                    $txt_wh = $w.'px X '.$h.'px';
+                    $html_tooltip .= '<p>'.trans('size').':&nbsp;&nbsp;&nbsp;<strong>' . $txt_wh . '</strong></p>';
                 }
                 $html_tooltip .= '<p>'.trans('uploaded').':&nbsp;&nbsp;&nbsp;<strong>' . $value['date'] . '</strong></p>';
                 if (isset($media_info['desc']) && $media_info['desc'] != '') {
@@ -590,7 +614,8 @@ class Media extends Base{
                 $link_detail = curPageURL() . '&id=' . $value->id;
                 $media_info = json_decode($value->other_info, true);
                 if (isset($media_info['wh'])) {
-                    $text_wh = ' / ' . str_replace('x', ' x ', $media_info['wh']);
+                    list($w, $h) = explode('x', $media_info['wh']);
+                    $text_wh = ' / ' .  $w.'px X '.$h.'px';
                 } else {
                     $text_wh = '';
                 }
@@ -658,6 +683,7 @@ class Media extends Base{
             }
         }
 
+        $next_modal = false; 
         if (count($arrMedia) > 1) {
             if ($key == 0) {
                 $prev_media = '<button disabled="" class="model-prev disable" title="' . trans('previous') . '">' . $img_prev . '</button>';
@@ -665,18 +691,26 @@ class Media extends Base{
 
                 $html_prev_modal = '<a href="#" class="arrow-prev-modal bg-none"></a>';
                 $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]->id . ')"></a>';
+                
+                $next_modal = $arrMedia[$key + 1]->id;
+                
             } elseif ($key == (count($arrMedia) - 1)) {
                 $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]->id . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
                 $next_media = '<button disabled="" class="model-next disable" title="Sau">' . $img_next . '</button>';
 
                 $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]->id . ')"></a>';
                 $html_next_modal = '<a href="#" class="arrow-next-modal bg-none"></a>';
+                
+                $next_modal = $arrMedia[$key - 1]->id;
+                
             } else {
                 $prev_media = '<button onclick="showModel(' . $arrMedia[$key - 1]->id . ')" class="model-prev" title="' . trans('previous') . '">' . $img_prev . '</button>';
                 $next_media = '<button onclick="showModel(' . $arrMedia[$key + 1]->id . ')" class="model-next" title="' . trans('next') . '">' . $img_next . '</button>';
 
                 $html_prev_modal = '<a href="#" class="arrow-prev-modal"  onclick="showModel(' . $arrMedia[$key - 1]->id . ')"></a>';
                 $html_next_modal = '<a href="#" class="arrow-next-modal" onclick="showModel(' . $arrMedia[$key + 1]->id . ')"></a>';
+                
+                $next_modal = $arrMedia[$key + 1]->id;
             }
         } else {
             $prev_media = '<button disabled="" class="model-prev disable" title="' . trans('previous') . '">' . $img_prev . '</button>';
@@ -690,7 +724,9 @@ class Media extends Base{
         $html_alt = '';
         if (isset($other_info['wh']) && $other_info['wh'] != '') {
             $alt = isset($other_info['alt']) ? $other_info['alt'] : "";
-            $html_wh = '<div class="media-solution"><strong>' . trans('size') . ': </strong>' . $other_info['wh'] . '</div>';
+            list($w, $h) = explode('x', $other_info['wh']);
+            $txt_wh = $w.'px X '.$h.'px';
+            $html_wh = '<div class="media-solution"><strong>' . trans('size') . ': </strong>' . $txt_wh . '</div>';
             $html_alt = '<div class="add-info">
                                 <label>' . trans('alt_tag') . '</label>
                                 <input type="text" name="alt" value="' . $alt . '" />
@@ -721,7 +757,12 @@ class Media extends Base{
                                 <div class="media-solution"><strong>' . trans('file_size') . ': </strong>' . bytesToSize($other_info['size']) . '</div>
                                 ' . $html_wh;
         if ((int) @$_SESSION['admin']['level'] >= 3) :
-            $html .= '<a href="#" onclick="deleteMedia(' . $id . ')" class="media-delete">' . trans('remove_permanently') . '</a>';
+            if($next_modal){
+                $html .= '<a href="#" onclick="deleteMedia(' . $id . '); showModel('.$next_modal.')" class="media-delete">' . trans('remove_permanently') . '</a>';
+            }else{
+                $html .= '<a href="#" onclick="deleteMedia(' . $id . ');" class="media-delete">' . trans('remove_permanently') . '</a>';
+            }
+            
         endif;
         $html .= $img_loading . '
                             </div>

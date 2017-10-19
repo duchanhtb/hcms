@@ -58,7 +58,7 @@ class CFile {
      * 	Level: Instance
      * 	Constructor
      */
-    function CFile() {
+    function __construct() {
         
     }
 

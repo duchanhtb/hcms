@@ -75,6 +75,26 @@ class CmsTable extends Base {
     public $hasParrent = false;
     public $headBackground = "#009bdc";
     public $suffix_sql = '';
+    
+    public $attributes = array(
+        'title',
+        'required',
+        'editlink',
+        'searchable',
+        'label',
+        'unlabel',
+        'relate',
+        'editable',
+        'show_on_list',
+        'separator',
+        'sufix_title',
+        'suffix_query',
+        'rows',
+        'data',
+        'function',
+        'table',
+        'std'
+    );
 
     /**
      * @desc constuct function
@@ -162,7 +182,7 @@ class CmsTable extends Base {
             }
         }
         if ($this->suffix_sql) {
-            $cmsTable = $cmsTable->raw_query($this->suffix_sql);
+            $cmsTable = $cmsTable->where_raw($this->suffix_sql);
         }
 
         if (isset($_POST['orderby']) && $_POST['orderby'] != "") {
@@ -580,7 +600,7 @@ class CmsTable extends Base {
                                         $width = "width:80px;";
                                         $currency = isset($value['currency']) ? $value['currency'] : '';
 
-                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> <span class="currency">' . $currency . '</span>';
+                                        $title = '<input type="text" name="' . $key . '[]" style="' . $width . '" class="' . $key . ' ' . $class . '"  maxlength="' . $size . '"  value="' . price($item->$key) . '" /> <span>' . $currency . '</span>';
                                     } else {
                                         if (isset($value['editlink']) && ($value['editlink'] == true) && ($this->mylevel > 1)) {
                                             $title = '<a href="javascript:edit(\'' . $item->$idField . '\');">' . price($item->$key) . "</a>";
@@ -769,6 +789,12 @@ class CmsTable extends Base {
         $html.= "<input type='hidden' name='action' value='cnew' />";
         $html.= "<div class='table-list table-form'><table>";
         foreach ($this->column as $key => $value) {
+            
+            // set default attr
+            foreach($this->attributes as $attr){
+                if(!isset($value[$attr])) $value[$attr] = false;
+            }
+            
             if (isset($value['separator']) && $value['separator'] != "") {
                 $html.= "<tr><td colspan=2><div class='add-bar'><span>" . $value['separator'] . "</span></div></td></tr>";
             }
@@ -934,7 +960,7 @@ class CmsTable extends Base {
 
                     $arrRelate = DB::for_table($relateTable);
                     if ($suffix_query) {
-                        $arrRelate = $relateTable->raw_query($suffix_query);
+                        $arrRelate = $relateTable->where_raw($suffix_query);
                     }
                     $arrRelate = $arrRelate->find_many();
                     foreach ($arrRelate as $relate) {
@@ -952,7 +978,12 @@ class CmsTable extends Base {
                     }
                     $input = '<select name="' . $key . '" class="' . $class . '" >';
                     foreach ($value['data'] as $k => $v) {
-                        $input .= '<option value="' . $k . '">' . htmlspecialchars(stripslashes($v)) . '</option>';
+                        if ($value['std'] == $k) {
+                            $check = "selected class='optSelected'";
+                        } else {
+                            $check = "";
+                        }
+                        $input .= '<option value="' . $k . '" ' . $check . '>' . htmlspecialchars(stripslashes($v)) . '</option>';
                     }
                     $input .= "</select>";
                     break;
@@ -970,7 +1001,7 @@ class CmsTable extends Base {
                             ->select($relateTitle)
                             ->order_by_asc($relateTitle);
                     if ($suffix_query) {
-                        $relateData = $relateData->raw_query($suffix_query);
+                        $relateData = $relateData->where_raw($suffix_query);
                     }
 
                     $relateData = $relateData->find_many();
@@ -1010,7 +1041,7 @@ class CmsTable extends Base {
                             ->select($field_title);
 
                     if ($suffix_query) {
-                        $relateData = $relateData->raw_query($suffix_query);
+                        $relateData = $relateData->where_raw($suffix_query);
                     }
 
                     $relateData = $relateData
@@ -1111,6 +1142,11 @@ class CmsTable extends Base {
         $html.= "<div class='table-list table-form'><table>";
         foreach ($this->column as $key => $value) {
 
+            // set default attr
+            foreach($this->attributes as $attr){
+                if(!isset($value[$attr])) $value[$attr] = false;
+            }
+            
             //validate
             if (isset($value['required']) && $value['required'] != "") {
                 $class = "{required:true,messages:{required:'" . addslashes($value['required']) . "'}}";
@@ -1317,7 +1353,7 @@ class CmsTable extends Base {
 
                     $relateData = DB::for_table($relateTable);
                     if ($suffix_query) {
-                        $relateData = $relateData->raw_query($suffix_query);
+                        $relateData = $relateData->where_raw($suffix_query);
                     }
                     $relateData = $relateData->find_many();
                     foreach ($relateData as $relate) {
@@ -1363,7 +1399,7 @@ class CmsTable extends Base {
                             ->order_by_asc($relateTitle);
 
                     if ($suffix_query) {
-                        $relateData = $relateData->raw_query($suffix_query);
+                        $relateData = $relateData->where_raw($suffix_query);
                     }
                     $relateData = $relateData->find_many();
 
@@ -1411,7 +1447,7 @@ class CmsTable extends Base {
                             ->select($field_title);
 
                     if ($suffix_query) {
-                        $relateData = $relateData->raw_query($suffix_query);
+                        $relateData = $relateData->where_raw($suffix_query);
                     }
 
                     $relateData = $relateData
@@ -1940,10 +1976,10 @@ class CmsTable extends Base {
 
 
         if ($id && is_array($_POST[$key]) && count($_POST[$key])) { // update
-            // delete old data
-            $tableRow = DB::for_table($relateTable)->where_equal($field1, $id);
-            $tableRow->delete();
-
+            // delete old data            
+            $tableRow = DB::for_table($relateTable)->where_equal($field1, $id)
+                    ->delete_many();
+           
             foreach ($_POST[$key] as $postValue) {
                 $tableRow = DB::for_table($relateTable)->create();
                 $tableRow->$field1 = $id;

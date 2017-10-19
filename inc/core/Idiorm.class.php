@@ -387,9 +387,9 @@ class ORM implements ArrayAccess {
             $statement->bindParam(is_int($key) ? ++$key : $key, $param, $type);
         }
 
-        $q = $statement->execute();
+        $q = $statement->execute();        
         self::_log_query($query, $parameters, $connection_name, (microtime(true) - $time));
-
+      
         return $q;
     }
 

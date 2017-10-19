@@ -25,7 +25,7 @@ class cms {
      * @Desc construct function
      * @return 
      */
-    function cms() {
+    function __construct() {
         global $skin, $layout;
         $this->skin = $skin;
         $this->layout = $layout;
@@ -168,7 +168,6 @@ class cms {
             border: 1px solid #FFCC66;
             color: #000000;
             opacity: 0.9;
-            padding: 2px;
             text-align:center;
             text-transform:uppercase;
             font-family: arial, sans-serif;

@@ -14,7 +14,7 @@ class Input {
     /**
      * @Desc construct function
      */
-    function Input() {}
+    function __construct() {}
 
     
     /**

@@ -40,25 +40,25 @@ $(document).ready(function () {
 
 
     // sticky table
-    if($(".sticky-table").length > 0 ){
+    if ($(".sticky-table").length > 0) {
         var table_offset_top = $(".main-table").offset().top;
         $(".sticky-table").css("width", $(".main-table").width());
-        $(".main-table #navigation th").each(function(){
+        $(".main-table #navigation th").each(function () {
             var th_index = $(this).index();
             var th_width = $(this).width();
             $(".sticky-table th").eq(th_index).css("width", th_width);
         })
-        $(window).bind("scroll", function () {        
+        $(window).bind("scroll", function () {
             if ($(this).scrollTop() > table_offset_top) {
                 $('.sticky-table').css({"position": "fixed", "top": "0px", "display": "table"});
             } else {
-                $('.sticky-table').css({"display": "none"});            
+                $('.sticky-table').css({"display": "none"});
             }
         });
     }
-    
-    
-    
+
+
+
 
     // when click media thumbnail
     $(".media-thumbnail").click(function () {
@@ -66,9 +66,9 @@ $(document).ready(function () {
         $(this).parent().addClass('active');
     })
 
-    
+
     // check/uncheck all checkbox
-    $('.checkAll').click(function () {        
+    $('.checkAll').click(function () {
         var is_checked = $(this).prop('checked') ? true : false;
         $('.checkAll').prop('checked', is_checked);
         $('.idItem').each(function () {
@@ -131,11 +131,11 @@ $(document).ready(function () {
 
     // next and prevous keypress
     $(document).keyup(function (e) {
-        if(e.keyCode == 39){
+        if (e.keyCode == 39) {
             $(".wrap-model:visible").find('.arrow-next-modal').click();
         }
-        
-        if(e.keyCode == 37){
+
+        if (e.keyCode == 37) {
             $(".wrap-model:visible").find('.arrow-prev-modal').click();
         }
     });
@@ -297,7 +297,7 @@ $(document).ready(function () {
             } else {
                 var image_url = $(this).val();
                 var http_prefix = image_url.substring(0, 4);
-                if(http_prefix != 'http'){
+                if (http_prefix != 'http') {
                     image_url = base_url + image_url;
                 }
                 $(this).parent('td').find('.image_review').attr('src', image_url);
@@ -496,18 +496,18 @@ $(document).ready(function () {
     /* DatePicker
      /* ------------------------------------------------------------------ */
     if ($().datetimepicker) {
-        switch(current_lang){
+        switch (current_lang) {
             case "en":
-                    month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                    day_names_short = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-                    day_names_min = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                day_names_short = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+                day_names_min = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
                 break;
-            
+
             case "vi":
             default:
-                    month_names = ['Tháng 01', 'Tháng 02', 'Tháng 03', 'Tháng 04', 'Tháng 05', 'Tháng 06', 'Tháng 07', 'Tháng 08', 'Tháng 09', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-                    day_names_short = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-                    day_names_min = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                month_names = ['Tháng 01', 'Tháng 02', 'Tháng 03', 'Tháng 04', 'Tháng 05', 'Tháng 06', 'Tháng 07', 'Tháng 08', 'Tháng 09', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+                day_names_short = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                day_names_min = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
                 break;
         }
         $('.inputdate').each(function () {
@@ -542,7 +542,7 @@ $(document).ready(function () {
         //    effect: "fadeIn"
         //});
     }
-    
+
     /* ------------------------------------------------------------------ */
     /* Modal popup
      /* ------------------------------------------------------------------ */
@@ -555,19 +555,19 @@ $(document).ready(function () {
         $(".wrap-media").click(function () {
             $(this).modal();
         })
-        
-        $(".ajax-modal").click(function (e) {            
+
+        $(".ajax-modal").click(function (e) {
             e.preventDefault();
             // load the contact form using ajax
             var ajax_url = $(this).attr('href');
-            $.get(ajax_url, function(data){
-                    // create a modal dialog with the data
-                    $(data).modal({
-                        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
-                        position: ["15%","30%"],
-                        overlayId: 'contact-overlay',
-                        containerId: 'contact-container'
-                    });
+            $.get(ajax_url, function (data) {
+                // create a modal dialog with the data
+                $(data).modal({
+                    closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                    position: ["15%", "30%"],
+                    overlayId: 'contact-overlay',
+                    containerId: 'contact-container'
+                });
             });
         })
 
@@ -576,8 +576,8 @@ $(document).ready(function () {
             $.modal.close();
             history.pushState(null, "HCMS media!", "?f=media");
         })
-        
-        $(".simplemodal-overlay").click(function(e){            
+
+        $(".simplemodal-overlay").click(function (e) {
             $.modal.close();
         })
     }
@@ -606,16 +606,16 @@ $(document).ready(function () {
             });
         });
     }
-    
+
     /* ------------------------------------------------------------------ */
     /* Gmap
      /* ------------------------------------------------------------------ */
     if ($('.map-content').length > 0 && $().locationpicker) {
-        
-        $('.map-content').each(function(){
+
+        $('.map-content').each(function () {
             var map_latitude = $(this).siblings('.map-latitude').val();
             var map_longitude = $(this).siblings('.map-longitude').val();
-            
+
             $(this).locationpicker({
                 location: {
                     latitude: map_latitude,
@@ -849,6 +849,7 @@ function deleteMedia(_id) {
                 }
             },
             success: function (response) {
+                window.reload = true;
             },
             error: function () {
                 $("#media-" + _id).show();
@@ -1018,29 +1019,29 @@ function saveImage(obj) {
 
 // add or update url param
 function addOrUpdateUrlParam(name, value) {
-  var href = window.location.href;
-  var regex = new RegExp("[&\\?]" + name + "=");
-  if(regex.test(href)) {
-    regex = new RegExp("([&\\?])" + name + "=\\d+");
-    window.location.href = href.replace(regex, "$1" + name + "=" + value);
-  }
-  else {
-    if(href.indexOf("?") > -1)
-      window.location.href = href + "&" + name + "=" + value;
-    else
-      window.location.href = href + "?" + name + "=" + value;
-  }
+    var href = window.location.href;
+    var regex = new RegExp("[&\\?]" + name + "=");
+    if (regex.test(href)) {
+        regex = new RegExp("([&\\?])" + name + "=\\d+");
+        window.location.href = href.replace(regex, "$1" + name + "=" + value);
+    }
+    else {
+        if (href.indexOf("?") > -1)
+            window.location.href = href + "&" + name + "=" + value;
+        else
+            window.location.href = href + "?" + name + "=" + value;
+    }
 }
 
 // set map to current location
-function setMapCurrentLocation(obj){
+function setMapCurrentLocation(obj) {
     var map = $(obj).siblings('.map-content');
-    navigator.geolocation.watchPosition(function(position) {
-      
+    navigator.geolocation.watchPosition(function (position) {
+
         map.locationpicker('location', {
             latitude: parseFloat(position.coords.latitude),
             longitude: parseFloat(position.coords.longitude)/*,
-            [optional] radius: number*/
+             [optional] radius: number*/
         });
     });
 }

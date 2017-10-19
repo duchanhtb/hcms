@@ -430,13 +430,18 @@ td.number {
     padding: 8px 3px;
     text-align: left;
 }
-
+.sticky-table th{
+    background-color: rgba(52, 56, 56, 0.8) !important;
+}
+.sticky-table th a{
+    color: #fff;
+}
 .table-list table td {
     border-bottom: 1px solid #EBEFF9;
     padding: 0.5em;
     font-size: 12px;
-    padding-left: 0px;
-    padding-right: 30px;
+    padding-left: 3px;
+    padding-right: 10px;
     color: #141823;
 }
 .table-form table td {
@@ -450,6 +455,8 @@ td.number {
     /*border: 1px #EBEFF9 inset;*/
     padding: 2px 5px;
 }
+
+
 
 @font-face {
     font-family: 'dashicons';
@@ -508,7 +515,7 @@ td.check {
 .bottom_bar {
     background-color: #EBEFF9;
     position: relative;
-    padding: 3px 0px;
+    padding: 3px;
     display: block;
     height: 25px;
 }
@@ -711,8 +718,8 @@ img.image_review {
     font-weight: bold;
     background: #000;
     position: absolute;
-    top: 5px;
-    right: 6px;
+    top: 3px;
+    right: 1px;
     padding: 0 5px;
     display: none;
     text-align: center;
@@ -1221,6 +1228,9 @@ input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:f
     width: 35px;
     height: 35px;
     background: url("../images/icon-search.png") center center no-repeat;
+}
+.price{
+    text-align: right;
 }
 
 ul#search-google-content li{

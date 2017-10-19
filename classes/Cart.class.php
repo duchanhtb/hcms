@@ -14,6 +14,7 @@ class Cart extends Base {
         "fullname",
         "phone",
         "email",
+        "address",
         "note",
         "payment_type",
         "status",

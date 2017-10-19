@@ -18,6 +18,7 @@ $column = array(
         "searchable"    => true,
         "editlink"      => true,
         "sufix_title"   => "Ví dụ: Sản phẩm mới",
+        "required"      => "Nhập tên nào",
         "show_on_list"  => true
     ),
     "desc" => array(

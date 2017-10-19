@@ -154,7 +154,7 @@ ul.module li:hover{
     background: #eee;
 }
 .cms-module-left .module{
-    margin: 10px 20px 5px 20px;
+    margin: 10px 10px 5px 10px;
 }
 .cms-module-left .module li{
     border-right: 1px solid #eee;
@@ -164,11 +164,11 @@ ul.module li:hover{
 }
 .cms-module-left .module li h4{
     margin: 0;
-    padding: 5px 10px;
-    height: 25px;
-    line-height: 25px;
+    padding: 10px;
     color: #555;
     background: #fafafa !important;    
+    font-weight: normal;
+    word-wrap: break-word;
 }
 .cms-module-left .module li h4:hover{
     background: #dfdfdf;

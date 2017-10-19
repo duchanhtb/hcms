@@ -77,7 +77,7 @@ $position = json_decode($miniPage->position, true);
                                     if (isset($position['pos_' . $pos])) {
                                         $arrPostModule = $position['pos_' . $pos];
                                         foreach ($arrPostModule as $md) {
-                                            echo '<li data-module="' . $md . '" class="module-name pos_' . $page . '-' . $md . '"><h4>' . $md . '<a href="#" onclick="deleteModule(this)">' . trans('delete') . '?</a></h4></li>';
+                                            echo '<li data-module="' . $md . '" class="module-name pos_' . $page . '-' . $md . '"><h4>' . $md . '<a href="#" onclick="deleteModule(this)">[ ' . trans('delete') . ' ]</a></h4></li>';
                                         }
                                     }
                                     ?>

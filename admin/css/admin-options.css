@@ -479,7 +479,7 @@ label.radio, label.multicheck {
 }
 #of_container .of-save-popup {
     position:absolute;
-    background: #000000;
+    background: rgba(0, 0, 0, 0.8);
     color:#fff;
     font-size:24px !important;
     text-align:center;

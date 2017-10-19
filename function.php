@@ -307,12 +307,16 @@ function getThumbnail($folder, $path_or_id) {
     $with = $size_info['width'];
     $height = $size_info['height'];
     $crop = $size_info['crop'];
-
-    if ($path) {
+    $absolutePath = ROOT_PATH.$path;
+    if ($path && @is_array(getimagesize($absolutePath))) {
         $thumb = base_url() . createThumbnail($folder, $path, $with, $height, $crop);
         return $thumb;
+    }else if($path && !@is_array(getimagesize($absolutePath))){
+        return admin_url() .'images/media/'.CFile::getFileIcon($path);
+    }else{
+        return base_url() . createThumbnail($folder, $no_image, $with, $height, $crop);
     }
-    return base_url() . createThumbnail($folder, $no_image, $with, $height, $crop);
+    
 }
 
 /**

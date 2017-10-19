@@ -28,14 +28,11 @@ $column = array(
     ),
     "layout" => array(
         "title"         => "Layout",
-        "type"          => "input:text",
-        "editable"      => false,
-        "required"      => "Bạn chưa nhập layout",
-        "sufix_title"   => "",
+        "type"          => "combobox",
+        "data"          => getPageLayout(),
+        "sufix_title"   => "Chọn layout",
         "std"           => 'home.html',
         "show_on_list"  => true,
-        "editable"      => false,
-        "editlink"      => false
     ),
     "meta_title" => array(
         "title"         => "Tiêu đề",
@@ -116,4 +113,22 @@ function pageLink($page_id, $act = 'list') {
             
     }
     
+}
+
+
+/**
+ * @Desc get all file from layout folder
+ * @param
+ * @return array
+ */
+function getPageLayout(){
+    global $skin;
+    $result = array();
+    $dir = ROOT_PATH.SKIN_FOLDER.DS.$skin.DS.'layout';
+    $arrFile = CFile::getFileDir($dir);
+    foreach($arrFile as $file){
+        $result[$file] = $file;
+    }
+    
+    return $result;
 }

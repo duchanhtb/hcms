@@ -22,7 +22,7 @@ class Module extends Base {
      * @Desc construct function that replace special xTemplate variable
      * @return
      */
-    function module() {
+    function __construct() {
         global $skin;
         
         // template path

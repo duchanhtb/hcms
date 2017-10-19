@@ -8,11 +8,11 @@ if (!defined('ALLOW_ACCESS'))
  * @copyright 2015
  * @desc module list html of introduction
  */
-class new_detail extends Module {
+class news_detail extends Module {
 
     function __construct() {
         $this->tpl = 'new_detail.html';
-        parent::module();
+        parent::__construct();
     }
 
     
