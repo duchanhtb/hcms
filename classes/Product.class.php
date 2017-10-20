@@ -28,6 +28,9 @@ class Product extends Base {
     var $table_product_images = "t_product_images";
     var $table_product_relationship = 't_product_relationship';
     var $cookie_prefix = 'hcms_';
+    
+    
+    var $total_price;
 
     /**
      * @Desc get product by list Id
@@ -37,14 +40,11 @@ class Product extends Base {
      * @param int $page: 
      * @return array
      */
-    function getProductByListId($arrListId = array(), $sort = false, $order = false, $page = 1) {
+    function getProductByListId($arrListId = array(), $sort = false, $order = false) {
         $result = false;
-        $page = ($page > 1 ) ? abs($page) : 1; // minimum page value is "1"
         $sort = ($sort != false) ? $sort : $this->pk;  // sort field defaul is primary key
         $order = ($order != false) ? $order : 'DESC';
-        $limit = $this->num_per_page;
-        $offset = ($page - 1) * ($this->num_per_page); // start record in sql statement
-
+        
         $arrProduct = DB::for_table($this->table);
         // filter by list ID
         if (count($arrListId) > 0) {
@@ -56,12 +56,8 @@ class Product extends Base {
             $arrProduct = (strtoupper($order) == 'ASC') ? $arrProduct->order_by_asc($sort) : $arrProduct->order_by_desc($sort);
         }
 
-        // pagging
-        if ($limit && $offset) {
-            $arrProduct = $arrProduct->limit($limit)->offset($offset);
-        }
-
         $result = $arrProduct->find_many();
+        
 
         // get images
         foreach ($result as &$product) {
@@ -136,7 +132,7 @@ class Product extends Base {
     function getProductCartInfo($cart_info = false) {
         if (!$cart_info) {
             $miniCart = new Cart();
-            $cart = $miniCart->getCartInfo();
+            $cart = $miniCart->getCartInfo();            
         }
 
         if (!$cart)
@@ -148,7 +144,7 @@ class Product extends Base {
         // get product
         if ($arrId) {
             $arrProduct = $this->getProductByListId($arrId, 'id', 'DESC');
-        }
+        }        
 
         // calculate price
         $total_cart_price = 0;

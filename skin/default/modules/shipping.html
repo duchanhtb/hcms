@@ -1,0 +1,70 @@
+<!-- BEGIN: main -->
+<style>
+    table#checkout{
+        width: 600px;
+        margin: 0 auto;
+        background: #eee;
+    }
+    table#checkout  tr td,
+    table#checkout tr th{
+        padding: 10px 20px;
+        border-bottom: 1px solid #dedede;
+    }
+    table#checkout tr th{
+        width: 150px;
+    }
+    table#checkout input,
+    table#checkout textarea{
+        width: 100%;
+    }
+   
+</style>
+
+<div class="container">
+<!-- BEGIN: msg -->
+<h3 style="text-align: center; font-size: 20px; margin: 100px 0px 500px 0px; color: green;">Cảm quý khách, chúng tôi sẽ sớm liên hệ với quý khách</h3>
+<!-- END: msg -->
+
+
+<!-- BEGIN: checkout -->
+<p style="text-align: center; font-size: 16px; margin-top: 30px;">Hãy để lại thông tin để chúng tôi liên hệ với quý khách</p>
+<form method="POST" action="" name="cart_order">
+    <table cellspacing="0" cellpadding="5" border="0" width="100%" id="checkout">
+        <tbody><tr>
+                <th align="right">Họ và tên<font color="#ff0000">(*)</font> : </th>
+                <td>
+                    <input type="text" maxlength="255" value="" name="fullname" id="fullname" />
+                    <div class="error">{error_fullname}</div>
+                </td>
+            </tr>
+            <tr>
+                <th align="right">Email <font color="#ff0000">(*)</font> : </th>
+                <td>
+                    <input type="text" maxlength="255" value="" name="email" id="email" />
+                    <div class="error">{error_email}</div>
+                </td>
+            </tr>
+            <tr>
+                <th align="right">Số điện thoại<font color="#ff0000">(*)</font> :</th>
+                <td>
+                    <input type="text" maxlength="255" value="" name="phone" id="phone" />
+                    <div class="error">{error_phone}</div>
+                </td>
+            </tr>
+            <tr>
+                <th align="right" valign="top">Điạ chỉ :</th>
+                <td>
+                    <textarea style="height: 100px;" name="address"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <th align="right" valign="top">Ghi chú :</th>
+                <td><textarea style="height: 100px;" name="content"></textarea></td>
+            </tr>
+        </tbody>
+    </table>
+    <div><input type="submit" class="themes-button" value="Đặt hàng" onclick="checkInfo()" /></div>
+</form>
+<!-- END: checkout -->
+</div>
+<!-- END: main -->

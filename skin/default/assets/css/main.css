@@ -419,6 +419,7 @@ ul#list-product li a:hover{
 .quantity-col1{
     clear: both;
     margin: 10px 0px;
+    display: inline-block;
 }
 .quantity-label{
     line-height: 6px;
@@ -505,7 +506,52 @@ button.add-to-cart:hover{
     background-color: #ffa73d !important;
 }
 
+#table-cart{
+    background: #eee;
+}
+#table-cart tr td,
+#table-cart tr th{
+    padding: 12px;
+    border-color: #fff;
+}
+#table-cart tr td img{
+    float: left;
+    margin-right: 20px;
+    max-width: 150px;
+    max-height: 150px;
+}
 
+#table-cart .price{
+    font-weight: bold;
+    font-size: 21px;
+    margin-bottom: 10px;
+}
+#table-cart .center{
+    text-align: center;
+}
+#table-cart .delete a{
+    color: red;
+}
+#table-cart .total-price{
+    text-align: right;
+    background-color: #076735;
+    color: #fff;
+}
+.btn-shipping{
+    text-align: right;
+}
+.btn-shipping a{
+    background: #076735;
+    padding: 10px 20px;
+    border-radius: 30px;
+    color: #fff;
+    font-weight: bold;
+}
+.btn-shipping a:hover{
+    color: #076735;
+    background: #fff;
+    border: 1px solid #076735;
+}
 
 
 

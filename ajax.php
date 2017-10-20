@@ -37,7 +37,7 @@ class ajax {
                 $this->delAllCart();
                 break;
 
-            case "del_cart":
+            case "te_product_cart":
                 $this->delCart();
                 break;
 
@@ -159,19 +159,11 @@ class ajax {
      * @param num $number number want to add for this product
      */
     function addtoCart() {
-        global $_SESSION;
         $id = Input::get('pid', 'int', 0);
         $num = Input::get('num', 'int', 1);
         $miniCart = new Cart();
         $miniCart->addProductToCart($id, $num);
-        
-        $cart = $miniCart->getCartInfo();
-        $total = 0;
-        if(count($cart) > 0 ){
-            foreach($cart as $pid => $num){
-                $total += $num;
-            }
-        }
+        $total = $miniCart->countTotalProduct();
         $result = array(
             'status' => 200,
             'msg' => 'Thành công',
@@ -192,7 +184,8 @@ class ajax {
         $arr_id = $_REQUEST['pid'];
         $arr_num = $_REQUEST['num'];
         foreach ($arr_id as $key => $pid) {
-            $_SESSION['cart'][$pid] = $arr_num[$key];
+            $miniCart = new Cart();
+            $miniCart->addProductToCart($pid, $arr_num[$key]);
         }
         $link_redirect = createLink('cart');
         redirect($link_redirect);
@@ -204,8 +197,8 @@ class ajax {
      * @param nothing
      */
     function delAllCart() {
-        global $_SESSION;
-        unset($_SESSION['cart']);
+        $miniCart = new Cart();
+        $miniCart->delProductCart();
         echo 'SS';
     }
 
@@ -214,9 +207,10 @@ class ajax {
      * @param int $pid product id
      */
     function delCart() {
-        global $_SESSION;
         $pid = Input::get('pid', 'int', 0);
         if ($pid) {
+            $miniCart = new Cart();
+            $miniCart->delProductCart();
             unset($_SESSION['cart'][$pid]);
             echo 'SS';
         }

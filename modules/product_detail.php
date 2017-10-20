@@ -35,6 +35,7 @@ class product_detail extends Module {
             $product->save();
 
             // assign prouduct detail infomation
+            $this->xtpl->assign('id', $product->id);
             $this->xtpl->assign('name', $product->name);
             $this->xtpl->assign('img', base_url() . $product->default_img);
             $this->xtpl->assign('price', formatPrice($product->price));
@@ -65,8 +66,6 @@ class product_detail extends Module {
             }
 
             addTitle($product->name);
-
-
 
 
             // set path

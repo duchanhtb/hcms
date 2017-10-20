@@ -31,23 +31,33 @@ class Cart extends Base {
      */
     function addProductToCart($pid, $amount = 1) {
         $key = $this->key;
-
         $cart = isset($_SESSION[$key]) ? $_SESSION[$key] : false;
-        if (count($cart) > 0 && isset($cart[$pid])) {
-            $_SESSION[$key][$pid] += $amount;
-        } else {
-            $_SESSION[$key][$pid] = $amount;
-        }
-
-        return $_SESSION[$key];
+        $cart[$pid] = $amount;
+        $_SESSION[$key] = $cart;
+        return $cart;
     }
 
     /**
-     * @Desc get product infomation from SESSION
+     * @Desc get total product from secssion
      * @return array
      */
     function getCartInfo() {
         return $_SESSION[$this->key];
+    }
+
+    /**
+     * @Desc count total product from session
+     * @return int
+     */
+    function countTotalProduct() {
+        $cart = $_SESSION[$this->key];
+        $total = 0;
+        if (count($cart) > 0) {
+            foreach ($cart as $pid => $num) {
+                $total += $num;
+            }
+        }
+        return $total;
     }
 
     /**
@@ -76,7 +86,7 @@ class Cart extends Base {
      * @return none
      */
     function sendMailCart() {
-        $xtpl = new XTemplate(ROOT_PATH.'skin/default/layout/html_sendmail_cart.html');
+        $xtpl = new XTemplate(ROOT_PATH . 'skin/default/layout/html_sendmail_cart.html');
 
         $arrayInput = array(
             "fullname",

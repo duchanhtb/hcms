@@ -20,14 +20,7 @@ class cart_header extends Module {
     function draw(){
         
         $miniCart = new Cart();
-        $cart = $miniCart->getCartInfo();
-        $total = 0;
-        if(count($cart) > 0 ){
-            foreach($cart as $pid => $num){
-                $total += $num;
-            }
-        }
-        
+        $total = $miniCart->countTotalProduct();
         $this->xtpl->assign('total', $total);
         
         $this->xtpl->parse('main');

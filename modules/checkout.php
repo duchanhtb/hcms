@@ -18,6 +18,9 @@ class checkout extends Module {
     
     
     function draw(){
+        // register script
+        register_script('jquery-3-2-1', 'https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');              
+        register_script('product', $this->skin_path . 'assets/js/product.js');
         
         // load module cart
         $cart_header = loadModule('cart_header');
@@ -35,6 +38,28 @@ class checkout extends Module {
         $path .= '</ul>';
         // create path
         $this->xtpl->assign('path', $path);
+        
+        $miniCart = new Cart();
+        $total = $miniCart->countTotalProduct();
+        $this->xtpl->assign('total', $total);
+        
+        $productObj = new Product();
+        $productCart = $productObj->getProductCartInfo();
+        if($productCart){
+            foreach($productCart as $product){
+                $this->xtpl->assign('id', $product->id);
+                $this->xtpl->assign('name', $product->name);
+                $this->xtpl->assign('number', $product->number);
+                $this->xtpl->assign('img', base_url() . $product->default_img);
+                $this->xtpl->assign('price', formatPrice($product->price));
+                $this->xtpl->assign('total_price', formatPrice($product->total_price));
+                $this->xtpl->assign('description', $product->description);
+                $this->xtpl->assign('link', createLink('san-pham', array('id' => $product->id, 'title' => $product->name)));
+                $this->xtpl->parse('main.product');
+            }
+            
+            $this->xtpl->assign('total_price', formatPrice($productObj->total_price));
+        }
         
         $this->xtpl->parse('main');
         return $this->xtpl->out('main');
