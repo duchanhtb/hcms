@@ -86,7 +86,7 @@ function createMd5Password($password) {
  */
 function checkValidEmail($email) {
     $result = true;
-    if (!@eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$", $email)) {
+    if (!@preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/", $email)) {
         $result = false;
     }
     return $result;
@@ -154,7 +154,7 @@ function sendMail($to, $reply = false, $subject, $content) {
     if (!$reply) {
         $reply = $form;
     }
-
+    
     $mail = new PHPMailer(); // create a new object
     $mail->IsSMTP(); // enable SMTP
     $mail->SMTPDebug = false; // debugging: 1 = errors and messages, 2 = messages only

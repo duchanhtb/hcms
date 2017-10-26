@@ -76,8 +76,8 @@ $arrMenu[] = array("name" => trans('product'),
     "desc" => 'Quản trị sản phẩm, các thông tin liên quan tới sản phẩm như tên, giá cả, mã sản phẩm...'
 );
 $arrMenu[] = array("name" => trans('product_order'),
-    "id" => 'order',
-    "table" => $tbl_prefix . 'cart:id',
+    "id" => 'product_order',
+    "table" => $tbl_prefix . 'product_orders:id',
     "desc" => 'Quản lý order'
 );
 $arrMenu[] = array("name" => trans('news'),

@@ -19,8 +19,8 @@ class cart_header extends Module {
     
     function draw(){
         
-        $miniCart = new Cart();
-        $total = $miniCart->countTotalProduct();
+        $ProductOrder = new ProductOrder();
+        $total = $ProductOrder->countTotalProduct();
         $this->xtpl->assign('total', $total);
         
         $this->xtpl->parse('main');

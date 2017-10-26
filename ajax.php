@@ -9,7 +9,7 @@ include("config.php");
 
 class ajax {
 
-    function ajax() {
+    function __construct() {
         $cmd = Input::get('cmd', 'txt', '');
 
         switch ($cmd) {
@@ -161,12 +161,12 @@ class ajax {
     function addtoCart() {
         $id = Input::get('pid', 'int', 0);
         $num = Input::get('num', 'int', 1);
-        $miniCart = new Cart();
-        $miniCart->addProductToCart($id, $num);
-        $total = $miniCart->countTotalProduct();
+        $ProductOrder = new ProductOrder();
+        $ProductOrder->addProductToCart($id, $num);
+        $total = $ProductOrder->countTotalProduct();
         $result = array(
             'status' => 200,
-            'msg' => 'Thành công',
+            'msg' => 'success',
             'total_product' => $total
         );
 
@@ -184,8 +184,8 @@ class ajax {
         $arr_id = $_REQUEST['pid'];
         $arr_num = $_REQUEST['num'];
         foreach ($arr_id as $key => $pid) {
-            $miniCart = new Cart();
-            $miniCart->addProductToCart($pid, $arr_num[$key]);
+            $ProductOrder = new ProductOrder();
+            $ProductOrder->addProductToCart($pid, $arr_num[$key]);
         }
         $link_redirect = createLink('cart');
         redirect($link_redirect);
@@ -197,9 +197,9 @@ class ajax {
      * @param nothing
      */
     function delAllCart() {
-        $miniCart = new Cart();
-        $miniCart->delProductCart();
-        echo 'SS';
+        $ProductOrder = new ProductOrder();
+        $ProductOrder->flushCart();
+        
     }
 
     /**     
@@ -209,10 +209,13 @@ class ajax {
     function delCart() {
         $pid = Input::get('pid', 'int', 0);
         if ($pid) {
-            $miniCart = new Cart();
-            $miniCart->delProductCart();
-            unset($_SESSION['cart'][$pid]);
-            echo 'SS';
+            $ProductOrder = new ProductOrder();
+            $ProductOrder->delProductCart($pid);
+            $result = [
+                'status' => 200,
+                'msg'   => 'sucsess'
+            ];
+            echo json_encode($result);
         }
     }
 
@@ -226,7 +229,12 @@ class ajax {
         $pid = Input::get('pid', 'int', 0);
         $num = Input::get('num', 'int', 1);
         $_SESSION['cart'][$pid] = $num;
-        echo 'ss';
+        
+        $result = [
+            'status' => 200,
+            'msg'   => 'sucsess'
+        ];
+        echo json_encode($result);
     }
 
 }

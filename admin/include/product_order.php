@@ -72,10 +72,10 @@ function order($id, $act = 'list') {
             return "Không cần nhập mục này";
             break;
         default:
-            $miniCart = new Cart();
+            $ProductOrder = new ProductOrder();
 
-            $miniCart->read($id);
-            $list_id_json = $miniCart->list_product;
+            $ProductOrder->read($id);
+            $list_id_json = $ProductOrder->list_product;
             $arrListId = json_decode($list_id_json, true);
             if (count($arrListId) <= 0) {
                 return '';
@@ -108,10 +108,10 @@ function orderInfo($id, $act = 'list') {
             return "Không cần nhập mục này";
             break;
         default:
-            $miniCart = new Cart();
+            $ProductOrder = new ProductOrder();
 
-            $miniCart->read($id);
-            $list_id_json = $miniCart->list_product;
+            $ProductOrder->read($id);
+            $list_id_json = $ProductOrder->list_product;
             $arrListId = json_decode($list_id_json, true);
             if (count($arrListId) <= 0) {
                 return '';
@@ -119,39 +119,39 @@ function orderInfo($id, $act = 'list') {
             $html = '<table><tbody>';
 
             // fullname
-            if ($miniCart->fullname) {
+            if ($ProductOrder->fullname) {
                 $html .= '<tr>';
-                $html .= '<td>Tên KH:</td><td>' . $miniCart->fullname . '</td>';
+                $html .= '<td>Tên KH:</td><td>' . $ProductOrder->fullname . '</td>';
                 $html .= '</tr>';
             }
             // fullname
-            if($miniCart->phone){
+            if($ProductOrder->phone){
                 $html .= '<tr>';
-                $html .= '<td>Điện thoại:</td><td>' . $miniCart->phone . '</td>';
+                $html .= '<td>Điện thoại:</td><td>' . $ProductOrder->phone . '</td>';
                 $html .= '</tr>';
             }
             // email
-            if($miniCart->email){
+            if($ProductOrder->email){
                 $html .= '<tr>';
-                $html .= '<td>Email:</td><td>' . $miniCart->email . '</td>';
+                $html .= '<td>Email:</td><td>' . $ProductOrder->email . '</td>';
                 $html .= '</tr>';
             }
             // address
-            if($miniCart->address){
+            if($ProductOrder->address){
                 $html .= '<tr>';
-                $html .= '<td>Địa chỉ:</td><td>' . $miniCart->address . '</td>';
+                $html .= '<td>Địa chỉ:</td><td>' . $ProductOrder->address . '</td>';
                 $html .= '</tr>';
             }
             // note
-            if($miniCart->note){
+            if($ProductOrder->note){
                 $html .= '<tr>';
-                $html .= '<td>Ghi chú:</td><td>' . $miniCart->note . '</td>';
+                $html .= '<td>Ghi chú:</td><td>' . $ProductOrder->note . '</td>';
                 $html .= '</tr>';
             }
             // date created
-            if($miniCart->date_created){
+            if($ProductOrder->date_created){
                 $html .= '<tr>';
-                $html .= '<td>Ngày tạo:</td><td>' . $miniCart->date_created . '</td>';
+                $html .= '<td>Ngày tạo:</td><td>' . $ProductOrder->date_created . '</td>';
                 $html .= '</tr>';
             }
             

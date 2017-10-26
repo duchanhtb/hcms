@@ -34,19 +34,19 @@ class checkout extends Module {
         $path .=    '<li>&rsaquo;</li>
                      <li><a href="'.  base_url().'tat-ca-san-pham.html">Sản phẩm</a></li>
                      <li>&rsaquo;</li>
-                     <li><a href="'.  base_url().'checkout.html"></a>Giỏ hàng</li>';
+                     <li>Giỏ hàng</li>';
         $path .= '</ul>';
         // create path
         $this->xtpl->assign('path', $path);
         
-        $miniCart = new Cart();
-        $total = $miniCart->countTotalProduct();
+        $ProductOrder = new ProductOrder();
+        $total = $ProductOrder->countTotalProduct();
         $this->xtpl->assign('total', $total);
         
         $productObj = new Product();
-        $productCart = $productObj->getProductCartInfo();
-        if($productCart){
-            foreach($productCart as $product){
+        $productCartInfo = $productObj->getProductCartInfo();
+        if($productCartInfo){
+            foreach($productCartInfo as $product){
                 $this->xtpl->assign('id', $product->id);
                 $this->xtpl->assign('name', $product->name);
                 $this->xtpl->assign('number', $product->number);
@@ -55,10 +55,13 @@ class checkout extends Module {
                 $this->xtpl->assign('total_price', formatPrice($product->total_price));
                 $this->xtpl->assign('description', $product->description);
                 $this->xtpl->assign('link', createLink('san-pham', array('id' => $product->id, 'title' => $product->name)));
-                $this->xtpl->parse('main.product');
+                $this->xtpl->parse('main.cart.product');
             }
             
             $this->xtpl->assign('total_price', formatPrice($productObj->total_price));
+            $this->xtpl->parse('main.cart');
+        }else{
+            $this->xtpl->parse('main.cart_empty');
         }
         
         $this->xtpl->parse('main');

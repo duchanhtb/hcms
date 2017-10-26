@@ -15,7 +15,7 @@ class ajax {
     /**
      * @Desc function construct
      */
-    function ajax() {
+    function __construct() {
         $cmd = Input::get('cmd', 'txt', '');
         switch ($cmd) {
             case "delete_default_images":

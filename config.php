@@ -56,7 +56,7 @@ add_image_size('thumb-480-crop', 480, 480, true); // $folder, $width, $height, $
 ini_set('error_log', ROOT_PATH.'error.log');
 if (CMS_DEBUG) {    
     ini_set("display_error", "on");
-    ini_set('error_reporting', E_ALL);
+    ini_set('error_reporting', E_ALL & ~E_NOTICE & ~ E_WARNING);
 } else {
     ini_set("display_error", "off");
     ini_set('error_reporting', 0);

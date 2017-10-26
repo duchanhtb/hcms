@@ -4,6 +4,7 @@
         width: 600px;
         margin: 0 auto;
         background: #eee;
+        margin-bottom: 20px;
     }
     table#checkout  tr td,
     table#checkout tr th{
@@ -11,60 +12,104 @@
         border-bottom: 1px solid #dedede;
     }
     table#checkout tr th{
-        width: 150px;
+        width: 120px;
+        font-weight: normal;
     }
     table#checkout input,
     table#checkout textarea{
         width: 100%;
+        border: 1px solid #ddd;
+        padding: 5px;
     }
-   
+    .ss-msg{
+        text-align: center; 
+        font-size: 20px; 
+        margin: 100px 0px 500px 0px; 
+        color: #076735;
+    }
+    .info-msg{
+        text-align: center; 
+        font-size: 18px; 
+        margin-top: 50px;
+        margin-bottom: 20px;
+        color: #076735;
+    }
+    .btn-submit{
+        text-align: center;
+    }
+    .btn-submit input{
+        background: #076735;
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: #fff;
+        font-weight: bold;
+        border: 1px solid #ddd;
+    }
+    .btn-submit input:hover{
+        background: #fff;
+        border: 1px solid #076735;
+        color: #000;
+    }
+    table#checkout .error{
+        font-size: 14px;
+        color: red;
+        margin-top: 2px;
+    }
 </style>
 
 <div class="container">
-<!-- BEGIN: msg -->
-<h3 style="text-align: center; font-size: 20px; margin: 100px 0px 500px 0px; color: green;">Cảm quý khách, chúng tôi sẽ sớm liên hệ với quý khách</h3>
-<!-- END: msg -->
+    <div class="product-nav">
+        {path}  
+        {cart_header}
+        <div class="clearfix"></div>
+    </div>
+    
+    <!-- BEGIN: msg -->
+    <h3 class="ss-msg">Cảm quý khách, chúng tôi sẽ sớm liên hệ với quý khách</h3>
+    <!-- END: msg -->
 
-
-<!-- BEGIN: checkout -->
-<p style="text-align: center; font-size: 16px; margin-top: 30px;">Hãy để lại thông tin để chúng tôi liên hệ với quý khách</p>
-<form method="POST" action="" name="cart_order">
-    <table cellspacing="0" cellpadding="5" border="0" width="100%" id="checkout">
-        <tbody><tr>
-                <th align="right">Họ và tên<font color="#ff0000">(*)</font> : </th>
-                <td>
-                    <input type="text" maxlength="255" value="" name="fullname" id="fullname" />
-                    <div class="error">{error_fullname}</div>
-                </td>
-            </tr>
-            <tr>
-                <th align="right">Email <font color="#ff0000">(*)</font> : </th>
-                <td>
-                    <input type="text" maxlength="255" value="" name="email" id="email" />
-                    <div class="error">{error_email}</div>
-                </td>
-            </tr>
-            <tr>
-                <th align="right">Số điện thoại<font color="#ff0000">(*)</font> :</th>
-                <td>
-                    <input type="text" maxlength="255" value="" name="phone" id="phone" />
-                    <div class="error">{error_phone}</div>
-                </td>
-            </tr>
-            <tr>
-                <th align="right" valign="top">Điạ chỉ :</th>
-                <td>
-                    <textarea style="height: 100px;" name="address"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <th align="right" valign="top">Ghi chú :</th>
-                <td><textarea style="height: 100px;" name="content"></textarea></td>
-            </tr>
-        </tbody>
-    </table>
-    <div><input type="submit" class="themes-button" value="Đặt hàng" onclick="checkInfo()" /></div>
-</form>
-<!-- END: checkout -->
+    <!-- BEGIN: checkout -->
+    <p class="info-msg">Hãy để lại thông tin để chúng tôi liên hệ với quý khách</p>
+    <form method="POST" action="" name="cart_order">
+        <table cellspacing="0" cellpadding="5" border="0" width="100%" id="checkout">
+            <tbody>
+                <tr>
+                    <th align="right">Họ và tên: </th>
+                    <td>
+                        <input type="text" maxlength="255" value="{fullname}" name="fullname" id="fullname" />
+                        <div class="error">{error_fullname}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th align="right">Email: </th>
+                    <td>
+                        <input type="text" maxlength="255" value="{email}" name="email" id="email" />
+                        <div class="error">{error_email}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th align="right">Số điện thoại:</th>
+                    <td>
+                        <input type="text" maxlength="255" value="{phone}" name="phone" id="phone" />
+                        <div class="error">{error_phone}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th align="right" valign="top">Điạ chỉ :</th>
+                    <td>
+                        <textarea style="height: 100px;" name="address">{address}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th align="right" valign="top">Ghi chú :</th>
+                    <td><textarea style="height: 100px;" name="content">{content}</textarea></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="btn-submit">
+            <input type="submit" class="themes-button" value="Đặt hàng" />
+        </div>
+    </form>
+    <!-- END: checkout -->
 </div>
 <!-- END: main -->

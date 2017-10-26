@@ -30,7 +30,7 @@ class Product extends Base {
     var $cookie_prefix = 'hcms_';
     
     
-    var $total_price;
+    var $total_price = 0;
 
     /**
      * @Desc get product by list Id
@@ -131,8 +131,8 @@ class Product extends Base {
      */
     function getProductCartInfo($cart_info = false) {
         if (!$cart_info) {
-            $miniCart = new Cart();
-            $cart = $miniCart->getCartInfo();            
+            $ProductOrder = new ProductOrder();
+            $cart = $ProductOrder->getCartInfo();            
         }
 
         if (!$cart)

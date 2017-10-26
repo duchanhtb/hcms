@@ -7,7 +7,7 @@ if (!defined('ALLOW_ACCESS'))
  * @author duchanh
  * @copyright 2015
  */
-class Cart extends Base {
+class ProductOrder extends Base {
 
     var $fields = array(
         "list_product",
@@ -20,8 +20,8 @@ class Cart extends Base {
         "status",
         "date_created"
     ); //fields in table (excluding Primary Key)
-    var $table = "t_cart";
-    var $key = 'hcms_cart';
+    var $table = "t_product_orders";
+    var $key = 'hcms_cart_order';
 
     /**
      * @Desc Add product to cart 
