@@ -1,62 +1,4 @@
 <!-- BEGIN: main -->
-<style>
-    table#checkout{
-        width: 600px;
-        margin: 0 auto;
-        background: #eee;
-        margin-bottom: 20px;
-    }
-    table#checkout  tr td,
-    table#checkout tr th{
-        padding: 10px 20px;
-        border-bottom: 1px solid #dedede;
-    }
-    table#checkout tr th{
-        width: 120px;
-        font-weight: normal;
-    }
-    table#checkout input,
-    table#checkout textarea{
-        width: 100%;
-        border: 1px solid #ddd;
-        padding: 5px;
-    }
-    .ss-msg{
-        text-align: center; 
-        font-size: 20px; 
-        margin: 100px 0px 500px 0px; 
-        color: #076735;
-    }
-    .info-msg{
-        text-align: center; 
-        font-size: 18px; 
-        margin-top: 50px;
-        margin-bottom: 20px;
-        color: #076735;
-    }
-    .btn-submit{
-        text-align: center;
-    }
-    .btn-submit input{
-        background: #076735;
-        padding: 10px 20px;
-        border-radius: 30px;
-        color: #fff;
-        font-weight: bold;
-        border: 1px solid #ddd;
-    }
-    .btn-submit input:hover{
-        background: #fff;
-        border: 1px solid #076735;
-        color: #000;
-    }
-    table#checkout .error{
-        font-size: 14px;
-        color: red;
-        margin-top: 2px;
-    }
-</style>
-
 <div class="container">
     <div class="product-nav">
         {path}  
@@ -64,6 +6,29 @@
         <div class="clearfix"></div>
     </div>
     
+    <!-- BEGIN: bar -->
+    <div class="progress">
+        <div class="third">
+            <span>1</span>
+            <div class="process-name">Chọn sản phẩm</div>
+            <div class="process-bar-right">&nbsp;</div>
+        </div>
+        <div class="third">
+            <div class="process-name">Giỏ Hàng</div>
+            <div class="process-bar-left">&nbsp;</div>
+            <div class="process-bar-right">&nbsp;</div>
+            <span>2</span>
+        </div>
+        <div class="third">
+            <div class="process-name">Giao Hàng</div>
+            <div class="process-bar-left">&nbsp;</div>
+            <span>3</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- END: bar -->
+
+
     <!-- BEGIN: msg -->
     <h3 class="ss-msg">Cảm quý khách, chúng tôi sẽ sớm liên hệ với quý khách</h3>
     <!-- END: msg -->

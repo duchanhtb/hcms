@@ -66,6 +66,7 @@ class product_detail extends Module {
             }
 
             addTitle($product->name);
+            addDescription(_substr(strip_tags($product->description),100));
 
 
             // set path

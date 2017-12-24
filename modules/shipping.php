@@ -17,6 +17,8 @@ class shipping extends Module {
 
     function draw() {
         
+        addTitle('Giao Hàng');
+        
         // register script
         register_script('jquery-3-2-1', 'https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');              
         register_script('product', $this->skin_path . 'assets/js/product.js');
@@ -162,11 +164,13 @@ class shipping extends Module {
                 return $this->xtpl->out('main');
             } else {
                 $this->xtpl->parse('main.checkout');
+                $this->xtpl->parse('main.bar');
                 $this->xtpl->parse('main');
                 return $this->xtpl->out('main');
             }
         } else {
             $this->xtpl->parse('main.checkout');
+            $this->xtpl->parse('main.bar');
             $this->xtpl->parse('main');
             return $this->xtpl->out('main');
         }

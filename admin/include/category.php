@@ -109,10 +109,10 @@ function countProduct($id, $act = 'list'){
             return 0;
             break;
         case "edit":
-            return '<center>'.Db::for_table($table)->where_in('category_id', $arrIn)->count().'</center>';
+            return Db::for_table($table)->where_in('category_id', $arrIn)->count();
             break;
         default:
-            return '<center>'.Db::for_table($table)->where_in('category_id', $arrIn)->count().'</center>';          
+            return '<center>( '.Db::for_table($table)->where_in('category_id', $arrIn)->count().' )</center>';          
             break;
     }
     return $html;

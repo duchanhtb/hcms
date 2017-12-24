@@ -26,7 +26,7 @@ class header extends Module {
         }else{
             $this->xtpl->assign('active_sp', 'active');
         }
-        register_style('main-css', $this->skin_path.'assets/css/main.css');
+        register_style('main-css', $this->skin_path.'assets/css/main.css?='.rand());
         $this->xtpl->parse('main');
         return $this->xtpl->out('main');
     }

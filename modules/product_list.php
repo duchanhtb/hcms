@@ -20,7 +20,7 @@ class product_list extends Module {
      */
     function draw() {
         addTitle('Danh sách sản phẩm');
-        addDescription('Hệ thống quản trị nội dung HCMS');
+        addDescription('Danh sách sản phẩm tất cả danh mục');
 
         $table_name = 't_product';
         $listProduct = DB::for_table($table_name);
@@ -49,6 +49,9 @@ class product_list extends Module {
                     <li><a href="'.  base_url().'tat-ca-san-pham.html">Sản phẩm</a></li>
                     <li>&rsaquo;</li>
                     <li>' . $category->name . '</li>';
+            
+            addTitle($category->name);
+            addDescription($category->description);
                 
         }else{
             $path .= '<li>&rsaquo;</li>
