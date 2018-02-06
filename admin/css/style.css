@@ -414,12 +414,15 @@ td.number {
     width: 100%;
 }
 
+.table-list table.main-table tr:nth-child(odd){
+    background-color: #f8f8f8; 
+}
 .table-list tr:hover{
-    background-color: #eee;
+    background-color: #eee !important;
 }
 
 .table-form tr:hover{
-    background: none;
+    background: none !important;
 }
 .table-form select{
     min-width: 160px;
@@ -439,7 +442,7 @@ td.number {
 .table-list table td {
     border-bottom: 1px solid #EBEFF9;
     padding: 0.5em;
-    font-size: 12px;
+    font-size: 13px;
     padding-left: 3px;
     padding-right: 10px;
     color: #141823;
@@ -454,6 +457,7 @@ td.number {
 .table-list input[type="text"], .table-list input[type="password"]{
     /*border: 1px #EBEFF9 inset;*/
     padding: 2px 5px;
+    font-size: 13px;
 }
 
 
@@ -499,7 +503,7 @@ input[type=checkbox]:checked:before {
 
 .table-list textarea{
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     padding: 5px;
     border: 1px solid #ccc;
 }

@@ -1,7 +1,8 @@
 <?php
 
-if (!defined('ALLOW_ACCESS'))
-    exit('No direct script access allowed');
+if (!defined('ALLOW_ACCESS')) {
+	exit('No direct script access allowed');
+}
 
 /**
  * @author duchanh
@@ -10,89 +11,84 @@ if (!defined('ALLOW_ACCESS'))
  */
 class shipping extends Module {
 
-    function __construct() {
-        $this->tpl = 'shipping.html';
-        parent::__construct();
-    }
+	function __construct() {
+		$this->tpl = 'shipping.html';
+		parent::__construct();
+	}
 
-    function draw() {
-        
-        addTitle('Giao Hàng');
-        
-        // register script
-        register_script('jquery-3-2-1', 'https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');              
-        register_script('product', $this->skin_path . 'assets/js/product.js');
-        
-        // load module cart
-        $cart_header = loadModule('cart_header');
-        $this->xtpl->assign('cart_header', $cart_header);
-        
-        
-        $path = '<ul class="path">
-                    <li><a href="'.  base_url().'">Trang chủ</a></li>';
+	function draw() {
 
-        // filter by category
-        $path .=    '<li>&rsaquo;</li>
-                     <li><a href="'.  base_url().'tat-ca-san-pham.html">Sản phẩm</a></li>
+		addTitle('Giao Hàng');
+
+		// register script
+		register_script('jquery-3-2-1', 'https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js');
+		register_script('product', $this->skin_path . 'assets/js/product.js');
+
+		// load module cart
+		$cart_header = loadModule('cart_header');
+		$this->xtpl->assign('cart_header', $cart_header);
+
+		$path = '<ul class="path">
+                    <li><a href="' . base_url() . '">Trang chủ</a></li>';
+
+		// filter by category
+		$path .= '<li>&rsaquo;</li>
+                     <li><a href="' . base_url() . 'tat-ca-san-pham.html">Sản phẩm</a></li>
                      <li>&rsaquo;</li>
-                     <li><a href="'.  base_url().'checkout.html">Giỏ hàng</a></li>
+                     <li><a href="' . base_url() . 'checkout.html">Giỏ hàng</a></li>
                      <li>&rsaquo;</li>
-                     <li><a href="'.  base_url().'shipping.html"></a>Đặt hàng</li>';
-        $path .= '</ul>';
-        // create path
-        $this->xtpl->assign('path', $path);
+                     <li><a href="' . base_url() . 'shipping.html"></a>Đặt hàng</li>';
+		$path .= '</ul>';
+		// create path
+		$this->xtpl->assign('path', $path);
 
-        if ($_POST) {
-            $error = false;
-            $fullname = $_POST['fullname'];
-            if (!$fullname) {
-                $this->xtpl->assign('error_fullname', 'Xin hãy cho biết tên bạn');
-                $error = true;
-            }else{
-                $this->xtpl->assign('fullname', $fullname);
-            }
-            
-            
-            $email = $_POST['email'];
-            if (!$email) {
-                $this->xtpl->assign('error_email', 'Xin hãy cho biết email');
-                $error = true;
-            }else if(!checkValidEmail($email)){
-                $this->xtpl->assign('error_email', 'Xin hãy nhập đúng email');
-                $error = true;
-            }else{
-                $this->xtpl->assign('email', $email);
-            }
-            
-            
-            
-            $phone = $_POST['phone'];
-            if (!$phone) {
-                $this->xtpl->assign('error_phone', 'Xin hãy cho biết số điện thoại');
-                $error = true;
-            }else{
-                $this->xtpl->assign('phone', $phone);
-            }
-            
+		if ($_POST) {
+			$error = false;
+			$fullname = $_POST['fullname'];
+			if (!$fullname) {
+				$this->xtpl->assign('error_fullname', 'Xin hãy cho biết tên bạn');
+				$error = true;
+			} else {
+				$this->xtpl->assign('fullname', $fullname);
+			}
 
-            $address = $_POST['address'];
-            $this->xtpl->assign('address', $address);
-            $this->xtpl->assign('address', $address);
-            
-            $content = $_POST['content'];
-            $this->xtpl->assign('content', $content);
-            $this->xtpl->assign('content', $content);
-            
-            if (!$error) {
-                $miniProduct = new Product();
-                $cart = $miniProduct->getProductCartInfo();
-                if ($cart && count($cart) > 0) {
+			$email = $_POST['email'];
+			if (!$email) {
+				$this->xtpl->assign('error_email', 'Xin hãy cho biết email');
+				$error = true;
+			} else if (!checkValidEmail($email)) {
+				$this->xtpl->assign('error_email', 'Xin hãy nhập đúng email');
+				$error = true;
+			} else {
+				$this->xtpl->assign('email', $email);
+			}
 
-                    $html_sendmail = '               
+			$phone = $_POST['phone'];
+			if (!$phone) {
+				$this->xtpl->assign('error_phone', 'Xin hãy cho biết số điện thoại');
+				$error = true;
+			} else {
+				$this->xtpl->assign('phone', $phone);
+			}
+
+			$address = $_POST['address'];
+			$this->xtpl->assign('address', $address);
+			$this->xtpl->assign('address', $address);
+
+			$content = $_POST['content'];
+			$this->xtpl->assign('content', $content);
+			$this->xtpl->assign('content', $content);
+
+			if (!$error) {
+				$miniProduct = new Product();
+				$cart = $miniProduct->getProductCartInfo();
+				if ($cart && count($cart) > 0) {
+
+					$html_sendmail = '
                     <div>
                     <h3>Cảm ơn ' . $fullname . '!</h3>
-                    <h3>Bạn vừa đặt hàng thành công trên website '.$_SERVER['SERVER_NAME'].', dưới đây là thông tin đặt hàng của bạn.</h3>
-                    <h3>Chúng tôi sẽ liên hệ và báo giá vận chuyển cụ thể với bạn trong thời gian sớm nhất.</h3>
+                    <h3>Bạn vừa đặt hàng thành công trên website ' . $_SERVER['SERVER_NAME'] . ', dưới đây là thông tin đặt hàng của bạn.</h3>
+                    <strong>Nếu có bất kỳ vấn đề nào về đơn hàng này xin liên hệ số hotline 0987898875 để được hỗ trợ</strong>
                     <table width="800" style="font-family: Arial, sans-serif; text-align: center; width: 800px; border-collapse: collapse; border: 1px solid #dfdfdf;">
                         <tbody>
                         <tr style="background-color: #076735;">
@@ -102,20 +98,20 @@ class shipping extends Module {
                             <th style="padding: 15px; border: 1px solid #dfdfdf; color: #fff;">Tổng</th>
                         </tr>';
 
-                    $i = 1;
-                    foreach ($cart as $key => $value) {
-                        
-                        if ($key % 2 != 0) {
-                            $bg = 'style="background-color:#f2f2f2"';
-                        } else {
-                            $bg = '';
-                        }
+					$i = 1;
+					foreach ($cart as $key => $value) {
 
-                        if ($value['price']) {
-                            $price_html = '<div>Giá: <strong>' . formatPrice($value['price']) . '</strong> VNĐ</div>';
-                        }
-                        $thumb = base_url() . $value['default_img'];
-                        $html_sendmail .= '
+						if ($key % 2 != 0) {
+							$bg = 'style="background-color:#f2f2f2"';
+						} else {
+							$bg = '';
+						}
+
+						if ($value['price']) {
+							$price_html = '<div>Giá: <strong>' . formatPrice($value['price']) . '</strong> VNĐ</div>';
+						}
+						$thumb = base_url() . $value['default_img'];
+						$html_sendmail .= '
                             <tr ' . $bg . '>
                                 <td style="padding: 15px; border: 1px solid #dfdfdf;">' . ($key + 1) . '</td>
                                 <td style="padding: 15px; border: 1px solid #dfdfdf; text-align: left;">
@@ -126,55 +122,68 @@ class shipping extends Module {
                                 <td style="padding: 15px; border: 1px solid #dfdfdf;"><strong>' . $value['number'] . '</strong></td>
                                 <td style="padding: 15px; border: 1px solid #dfdfdf;"><strong>' . formatPrice($value['total_price']) . '</strong>  ₫</td>
                             </tr>';
-                        $i++;
-                    }
-                    $html_sendmail .= '<tr style="background-color: #076735;">
-                                        <td colspan="4" align="right" style="padding: 15px; color: #fff;">Tổng tiền: 
+						$i++;
+					}
+					$html_sendmail .= '<tr style="background-color: #076735;">
+                                        <td colspan="4" align="right" style="padding: 15px; color: #fff;">Tổng tiền:
                                         <strong>' . formatPrice($miniProduct->getTotalCartPrice()) . '</strong>  ₫</td>
                                       </tr>';
-                    $html_sendmail .= '</tbody></table></div>';
-                    
-                    $to = array(
-                        'email' => $email,
-                        'name' => $fullname
-                    );
+					$html_sendmail .= '</tbody></table></div>';
 
-                    $subject = 'Thông tin đặt hàng tại '.$_SERVER['SERVER_NAME'];
-                    $ok = sendMail($to, false, $subject, $html_sendmail);
-                }
-                
-               
-                $ProductOrder = new ProductOrder();
-                $cart = $ProductOrder->getCartInfo();
-                
-                if($cart){
-                    $ProductOrder->list_product = json_encode($cart);
-                    $ProductOrder->fullname = $fullname;
-                    $ProductOrder->phone = $phone;
-                    $ProductOrder->email = $email;
-                    $ProductOrder->address = $address;
-                    $ProductOrder->note = $content;
-                    $ProductOrder->date_created = date('Y-m-d H:i:s');
-                    $ProductOrder->insert();
-                    $ProductOrder->flushCart();
-                }
-                
-                $this->xtpl->parse('main.msg');
-                $this->xtpl->parse('main');
-                return $this->xtpl->out('main');
-            } else {
-                $this->xtpl->parse('main.checkout');
-                $this->xtpl->parse('main.bar');
-                $this->xtpl->parse('main');
-                return $this->xtpl->out('main');
-            }
-        } else {
-            $this->xtpl->parse('main.checkout');
-            $this->xtpl->parse('main.bar');
-            $this->xtpl->parse('main');
-            return $this->xtpl->out('main');
-        }
-       
-    }
+					$to = array(
+						'email' => $email,
+						'name' => $fullname,
+					);
+
+					$subject = 'Thông tin đặt hàng tại ' . $_SERVER['SERVER_NAME'];
+					$ok = sendMail($to, false, $subject, $html_sendmail);
+				}
+
+				$ProductOrder = new ProductOrder();
+				$cart = $ProductOrder->getCartInfo();
+
+				if ($cart) {
+					$miniProduct = new Product();
+					$arrProduct = $miniProduct->getProductCartInfo();
+
+					$ProductOrder->list_product = json_encode($cart);
+					$ProductOrder->product_info = json_encode($arrProduct);
+					$ProductOrder->fullname = $fullname;
+					$ProductOrder->phone = $phone;
+					$ProductOrder->email = $email;
+					$ProductOrder->address = $address;
+					$ProductOrder->note = $content;
+					$ProductOrder->date_created = date('Y-m-d H:i:s');
+					$insert_id = $ProductOrder->insert();
+					// flush cart session
+					$ProductOrder->flushCart();
+
+					// update order_code
+					$rowUpdate = DB::for_table($ProductOrder->table)
+						->where_equal('id', $insert_id)
+						->find_one();
+
+					$rowUpdate->order_code = 'HCMS00' . $insert_id;
+					$rowUpdate->save();
+
+				}
+
+				$this->xtpl->parse('main.msg');
+				$this->xtpl->parse('main');
+				return $this->xtpl->out('main');
+			} else {
+				$this->xtpl->parse('main.checkout');
+				$this->xtpl->parse('main.bar');
+				$this->xtpl->parse('main');
+				return $this->xtpl->out('main');
+			}
+		} else {
+			$this->xtpl->parse('main.checkout');
+			$this->xtpl->parse('main.bar');
+			$this->xtpl->parse('main');
+			return $this->xtpl->out('main');
+		}
+
+	}
 
 }

@@ -1,3 +1,13 @@
+jQuery.browser = {};
+(function () {
+    jQuery.browser.msie = false;
+    jQuery.browser.version = 0;
+    if (navigator.userAgent.match(/MSIE ([0-9]+)\./)) {
+        jQuery.browser.msie = true;
+        jQuery.browser.version = RegExp.$1;
+    }
+})();
+
 $(function () {
     $("button.bootstrap-touchspin-up").click(function () {
         var _val = $("#qty").val();
@@ -101,6 +111,10 @@ $(function () {
         var _pid = $("#product_id_for_wishlist").val();
         addToCart(_pid, _num);
     });
+
+
+    // simple modal
+    $("#modal-content-776").modal();
 })
 
 
@@ -149,3 +163,5 @@ function delOrder(_pid) {
         }
     });
 }
+
+
