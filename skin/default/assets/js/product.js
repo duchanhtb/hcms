@@ -1,13 +1,3 @@
-jQuery.browser = {};
-(function () {
-    jQuery.browser.msie = false;
-    jQuery.browser.version = 0;
-    if (navigator.userAgent.match(/MSIE ([0-9]+)\./)) {
-        jQuery.browser.msie = true;
-        jQuery.browser.version = RegExp.$1;
-    }
-})();
-
 $(function () {
     $("button.bootstrap-touchspin-up").click(function () {
         var _val = $("#qty").val();
@@ -113,8 +103,28 @@ $(function () {
     });
 
 
-    // simple modal
-    $("#modal-content-776").modal();
+    // simple modal for product detail page
+    $(".modal-pic-thumb").click(function(){
+        var _full = $(this).find('span').data('img-full');
+        $("#modal-img-full").css('background-image', 'url(' + _full + ')');
+        $(".modal-pic-thumb").removeClass('selected');
+        $(this).addClass('selected');
+    })
+
+    // view larger
+    $(".imageviewbig").click(function(){
+        var _large_img = $(this).find('a').data('large-img');
+        var _id = $(this).data('id');
+
+        $("#main_large_img").attr('src', _large_img);
+        $("#modal-img-full").css('background-image', 'url(' + _large_img + ')');
+
+        $(".imageviewbig").removeClass('selected');
+        $(this).addClass('selected');
+
+        $(".modal-pic-thumb").removeClass('selected');
+        $("#modal-"+_id).addClass('selected');
+    })
 })
 
 

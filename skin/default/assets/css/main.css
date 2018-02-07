@@ -400,6 +400,12 @@ ul#list-product li a:hover{
     margin-bottom: 10px;
     border-radius: 2px;
 }
+.list-thumb li:hover{
+    border: 1px solid #004B91;
+}
+.list-thumb li.selected{
+    border: 1px solid #FF8F00;
+}
 .list-thumb li img{
     max-width: 50px;
 }

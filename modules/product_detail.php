@@ -27,8 +27,8 @@ class product_detail extends Module {
 		register_script('product', $this->skin_path . 'assets/js/product.js');
 
 		/* simple modal */
-		register_style('css-simplemodal', $this->skin_path . 'assets/css/simple-modal.css'); // simple modal
-		register_script('jquery-simplemodal', $this->skin_path . 'assets/js/jquery.simplemodal.js'); // simple modal
+		register_style('css-simplemodal1', $this->skin_path . 'assets/css/remodal.css'); // simple modal
+		register_script('jquery-simplemodal', $this->skin_path . 'assets/js/remodal.js'); // simple modal
 
 		$id = Input::get('id', 'int', 0);
 		if ($id) {
@@ -43,6 +43,7 @@ class product_detail extends Module {
 			$this->xtpl->assign('id', $product->id);
 			$this->xtpl->assign('name', $product->name);
 			$this->xtpl->assign('img', base_url() . $product->default_img);
+			$this->xtpl->assign('img_thumb', getThumbnail('thumb-150', $product->default_img));
 			$this->xtpl->assign('price', formatPrice($product->price));
 			$this->xtpl->assign('description', $product->description);
 			$this->xtpl->assign('link', createLink('san-pham', array('id' => $product->id, 'title' => $product->name)));
@@ -64,10 +65,14 @@ class product_detail extends Module {
 				->order_by_desc('ordering')
 				->find_many();
 
+			$i = 1;
 			foreach ($productImages as $images) {
+				$this->xtpl->assign('i', $i);
 				$this->xtpl->assign('full', base_url() . $images->url);
 				$this->xtpl->assign('thumb', getThumbnail('thumb-150', $images->url));
 				$this->xtpl->parse('main.small');
+				$this->xtpl->parse('main.modal');
+				$i++;
 			}
 
 			addTitle($product->name);
